@@ -16,6 +16,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
     <color name="icon_color">#6B7280</color>
+    <color name="profile_card_bg">#F8F5FF</color>
+    <color name="color_logout">#DC2626</color>
 
     <!-- Order Status Colors -->
     <color name="status_delivered">#16A34A</color>

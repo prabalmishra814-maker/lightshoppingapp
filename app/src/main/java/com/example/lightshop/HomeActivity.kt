@@ -66,6 +66,10 @@ class HomeActivity : AppCompatActivity() {
                     startActivity(android.content.Intent(this, MyOrdersActivity::class.java))
                     false
                 }
+                R.id.nav_profile -> {
+                    startActivity(android.content.Intent(this, ProfileActivity::class.java))
+                    false
+                }
                 else -> false
             }
         }
