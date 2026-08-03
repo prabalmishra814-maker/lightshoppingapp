@@ -1,0 +1,34 @@
+package com.example.lightshop.api;
+
+import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class SupabaseClient {
+    // IMPORTANT: Replace with your actual Supabase project details
+    public static final String SUPABASE_URL = "https://tubsvmxzmhjtexpxqfbj.supabase.co/";
+    public static final String SUPABASE_ANON_KEY = "sb_secret_CCd7SiosQiaYA8hkKsywQw_fIj9MjeL";
+
+    private static SupabaseAuthService authService;
+
+    public static SupabaseAuthService getAuthService() {
+        if (authService == null) {
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .addInterceptor(logging)
+                    .build();
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(SUPABASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .client(client)
+                    .build();
+
+            authService = retrofit.create(SupabaseAuthService.class);
+        }
+        return authService;
+    }
+}

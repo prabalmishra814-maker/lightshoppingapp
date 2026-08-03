@@ -17,8 +17,10 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -27,7 +29,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.lightshop.api.SupabaseClient;
+import com.example.lightshop.models.AuthModels;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class AuthActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvSubtitle;
     private LinearLayout loginContainer, registerContainer;
@@ -35,6 +44,10 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvFooterLogin, tvFooterRegister;
     private CheckBox cbTerms;
     private View btnLogin, btnRegister;
+
+    // Input fields
+    private EditText etLoginEmail, etLoginPassword;
+    private EditText etRegName, etRegEmail, etRegPassword, etRegConfirm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,15 +79,97 @@ public class MainActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btn_login);
         btnRegister = findViewById(R.id.btn_register);
 
-        btnLogin.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, HomeActivity.class));
-            finish();
-        });
+        // Initialize Input fields
+        etLoginEmail = findViewById(R.id.et_login_email);
+        etLoginPassword = findViewById(R.id.et_login_password);
+        etRegName = findViewById(R.id.et_reg_name);
+        etRegEmail = findViewById(R.id.et_reg_email);
+        etRegPassword = findViewById(R.id.et_reg_password);
+        etRegConfirm = findViewById(R.id.et_reg_confirm);
 
-        btnRegister.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, HomeActivity.class));
-            finish();
-        });
+        btnLogin.setOnClickListener(v -> handleLogin());
+
+        btnRegister.setOnClickListener(v -> handleRegister());
+    }
+
+    private void handleLogin() {
+        String email = etLoginEmail.getText().toString().trim();
+        String password = etLoginPassword.getText().toString().trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnLogin.setEnabled(false);
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        AuthModels.LoginRequest request = new AuthModels.LoginRequest(email, password);
+        SupabaseClient.getAuthService().login(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
+                .enqueue(new Callback<AuthModels.AuthResponse>() {
+                    @Override
+                    public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
+                        btnLogin.setEnabled(true);
+                        if (response.isSuccessful() && response.body() != null) {
+                            startActivity(new Intent(AuthActivity.this, HomeActivity.class));
+                            finish();
+                        } else {
+                            String errorMsg = parseError(response);
+                            Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
+                        btnLogin.setEnabled(true);
+                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void handleRegister() {
+        String name = etRegName.getText().toString().trim();
+        String email = etRegEmail.getText().toString().trim();
+        String password = etRegPassword.getText().toString().trim();
+        String confirm = etRegConfirm.getText().toString().trim();
+
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!password.equals(confirm)) {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (!cbTerms.isChecked()) {
+            Toast.makeText(this, "Please agree to the terms", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnRegister.setEnabled(false);
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        AuthModels.SignUpRequest request = new AuthModels.SignUpRequest(email, password, name);
+        SupabaseClient.getAuthService().signUp(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
+                .enqueue(new Callback<AuthModels.AuthResponse>() {
+                    @Override
+                    public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
+                        btnRegister.setEnabled(true);
+                        if (response.isSuccessful()) {
+                            Toast.makeText(AuthActivity.this, "Registration successful!", Toast.LENGTH_LONG).show();
+                            showLogin();
+                        } else {
+                            String errorMsg = parseError(response);
+                            Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
+                        btnRegister.setEnabled(true);
+                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void setupSpannables() {
@@ -158,5 +253,25 @@ public class MainActivity extends AppCompatActivity {
         transition.addTransition(new Slide(gravity));
         transition.setDuration(250);
         TransitionManager.beginDelayedTransition((ViewGroup) rootLayout.getChildAt(0), transition);
+    }
+
+    private String parseError(Response<AuthModels.AuthResponse> response) {
+        try {
+            if (response.errorBody() != null) {
+                String errorJson = response.errorBody().string();
+                android.util.Log.e("SupabaseError", "Error Body: " + errorJson);
+                AuthModels.AuthResponse errorResponse = new com.google.gson.Gson().fromJson(errorJson, AuthModels.AuthResponse.class);
+                if (errorResponse != null) {
+                    if (errorResponse.errorDescription != null && !errorResponse.errorDescription.isEmpty()) 
+                        return errorResponse.errorDescription;
+                    if (errorResponse.error != null && !errorResponse.error.isEmpty()) 
+                        return errorResponse.error;
+                }
+                return "Error " + response.code() + ": " + errorJson;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "Error " + response.code() + ". Please try again.";
     }
 }
