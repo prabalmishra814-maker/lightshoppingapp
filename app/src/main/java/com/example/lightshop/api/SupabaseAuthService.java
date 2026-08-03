@@ -22,4 +22,11 @@ public interface SupabaseAuthService {
         @Header("Authorization") String authHeader,
         @Body AuthModels.LoginRequest request
     );
+
+    @POST("auth/v1/token?grant_type=id_token")
+    Call<AuthModels.AuthResponse> loginWithIdToken(
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @Body AuthModels.IdTokenRequest request
+    );
 }

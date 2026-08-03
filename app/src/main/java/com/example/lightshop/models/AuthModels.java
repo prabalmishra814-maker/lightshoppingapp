@@ -35,6 +35,16 @@ public class AuthModels {
         }
     }
 
+    public static class IdTokenRequest {
+        public String provider = "google";
+        @SerializedName("id_token")
+        public String idToken;
+
+        public IdTokenRequest(String idToken) {
+            this.idToken = idToken;
+        }
+    }
+
     public static class AuthResponse {
         @SerializedName("access_token")
         public String accessToken;

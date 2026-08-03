@@ -25,13 +25,21 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.AuthModels;
-
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,7 +51,9 @@ public class AuthActivity extends AppCompatActivity {
     private ViewGroup rootLayout;
     private TextView tvFooterLogin, tvFooterRegister;
     private CheckBox cbTerms;
-    private View btnLogin, btnRegister;
+    private View btnLogin, btnRegister, btnGoogle;
+
+    private static final String GOOGLE_WEB_CLIENT_ID = "1046922122069-ivupev8q7ufu7ndg7ge7tkv340e4om1d.apps.googleusercontent.com";
 
     // Input fields
     private EditText etLoginEmail, etLoginPassword;
@@ -78,6 +88,7 @@ public class AuthActivity extends AppCompatActivity {
         cbTerms = findViewById(R.id.cb_terms);
         btnLogin = findViewById(R.id.btn_login);
         btnRegister = findViewById(R.id.btn_register);
+        btnGoogle = findViewById(R.id.btn_google);
 
         // Initialize Input fields
         etLoginEmail = findViewById(R.id.et_login_email);
@@ -90,6 +101,73 @@ public class AuthActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> handleLogin());
 
         btnRegister.setOnClickListener(v -> handleRegister());
+
+        btnGoogle.setOnClickListener(v -> handleGoogleLogin());
+    }
+
+    private void handleGoogleLogin() {
+        CredentialManager credentialManager = CredentialManager.create(this);
+
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(GOOGLE_WEB_CLIENT_ID)
+                .setAutoSelectEnabled(true)
+                .build();
+
+        GetCredentialRequest request = new GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build();
+
+        credentialManager.getCredentialAsync(this, request, null, ContextCompat.getMainExecutor(this),
+                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(GetCredentialResponse result) {
+                        if (result.getCredential() instanceof CustomCredential) {
+                            CustomCredential custom = (CustomCredential) result.getCredential();
+                            if (custom.getType().equals(GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)) {
+                                try {
+                                    GoogleIdTokenCredential googleIdTokenCredential = GoogleIdTokenCredential.createFrom(custom.getData());
+                                    String idToken = googleIdTokenCredential.getIdToken();
+                                    signInWithSupabaseGoogle(idToken);
+                                } catch (Exception e) {
+                                    Toast.makeText(AuthActivity.this, "Google ID Token parsing failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull GetCredentialException e) {
+                        Toast.makeText(AuthActivity.this, "Google Sign-In Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void signInWithSupabaseGoogle(String idToken) {
+        btnGoogle.setEnabled(false);
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        AuthModels.IdTokenRequest request = new AuthModels.IdTokenRequest(idToken);
+
+        SupabaseClient.getAuthService().loginWithIdToken(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
+                .enqueue(new Callback<AuthModels.AuthResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Response<AuthModels.AuthResponse> response) {
+                        btnGoogle.setEnabled(true);
+                        if (response.isSuccessful() && response.body() != null) {
+                            startActivity(new Intent(AuthActivity.this, HomeActivity.class));
+                            finish();
+                        } else {
+                            String errorMsg = parseError(response);
+                            Toast.makeText(AuthActivity.this, "Supabase Google Login failed: " + errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Throwable t) {
+                        btnGoogle.setEnabled(true);
+                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void handleLogin() {
