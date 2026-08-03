@@ -37,7 +37,8 @@ class CategoryActivity : AppCompatActivity() {
         )
 
         sidebarAdapter = SidebarAdapter(sidebarItems) { position ->
-            // Handle sidebar selection if needed
+            // Update main categories based on sidebar selection
+            // For now, we'll just show different counts or filter if needed
         }
 
         binding.rvSidebar.layoutManager = LinearLayoutManager(this)
@@ -67,7 +68,11 @@ class CategoryActivity : AppCompatActivity() {
         binding.bottomNavigation.selectedItemId = R.id.nav_category
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.nav_home -> { /* Navigate to Home */ true }
+                R.id.nav_home -> {
+                    startActivity(android.content.Intent(this, HomeActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_category -> true
                 R.id.nav_orders -> { /* Navigate to Orders */ true }
                 R.id.nav_profile -> { /* Navigate to Profile */ true }
