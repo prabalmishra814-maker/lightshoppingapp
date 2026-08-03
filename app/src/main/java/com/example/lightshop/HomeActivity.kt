@@ -60,7 +60,11 @@ class HomeActivity : AppCompatActivity() {
                 R.id.nav_home -> true
                 R.id.nav_category -> {
                     startActivity(android.content.Intent(this, CategoryActivity::class.java))
-                    false // Don't highlight yet if we are just starting activity, or true if we want it highlighted
+                    false
+                }
+                R.id.nav_orders -> {
+                    startActivity(android.content.Intent(this, MyOrdersActivity::class.java))
+                    false
                 }
                 else -> false
             }

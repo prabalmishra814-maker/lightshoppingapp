@@ -74,7 +74,11 @@ class CategoryActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_category -> true
-                R.id.nav_orders -> { /* Navigate to Orders */ true }
+                R.id.nav_orders -> {
+                    startActivity(android.content.Intent(this, MyOrdersActivity::class.java))
+                    finish()
+                    true
+                }
                 R.id.nav_profile -> { /* Navigate to Profile */ true }
                 else -> false
             }

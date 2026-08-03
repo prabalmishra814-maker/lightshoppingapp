@@ -17,6 +17,12 @@
     <color name="black">#FF000000</color>
     <color name="icon_color">#6B7280</color>
 
+    <!-- Order Status Colors -->
+    <color name="status_delivered">#16A34A</color>
+    <color name="status_processing">#F59E0B</color>
+    <color name="status_shipped">#2563EB</color>
+    <color name="status_cancelled">#DC2626</color>
+
     <!-- Banner Gradients -->
     <color name="banner_start">#7C3AED</color>
     <color name="banner_end">#9F67FF</color>
