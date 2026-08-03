@@ -1,0 +1,13 @@
+- [ ] Update `colors.xml` with specific hex values
+- [ ] Refine `bg_edittext.xml` with new border colors
+- [ ] Create high-quality vector icons
+    - [ ] `ic_person_24.xml`
+    - [ ] `ic_email_24.xml`
+    - [ ] `ic_visibility_24.xml`
+    - [ ] `ic_visibility_off_24.xml`
+- [ ] Sharpen `illustration_auth.xml` and increase quality
+- [ ] Update `activity_auth.xml` for visual improvements
+    - [ ] Increase illustration size by 30%
+    - [ ] Update input field colors and icon opacity
+    - [ ] Apply new label and hint colors
+- [ ] Verify UI quality on high-density preview

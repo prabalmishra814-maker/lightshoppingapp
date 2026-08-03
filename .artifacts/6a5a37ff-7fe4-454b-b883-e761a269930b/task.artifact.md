@@ -1,0 +1,29 @@
+- [x] Update `colors.xml` with required colors
+- [x] Create Vector Drawables
+    - [x] `ic_all_categories.xml`
+    - [x] `ic_men.xml` (T-shirt)
+    - [x] `ic_women.xml` (Dress)
+    - [x] `ic_kids.xml` (Child)
+    - [x] `ic_headphones.xml` (Electronics)
+    - [x] `ic_home.xml` (Chair)
+    - [x] `ic_beauty.xml` (Lipstick)
+    - [x] `ic_sports.xml` (Football)
+    - [x] `ic_car.xml` (Automotive)
+    - [x] `ic_book.xml` (Books)
+    - [x] `ic_grocery.xml` (Shopping Cart)
+    - [x] `ic_search.xml`
+    - [x] `ic_chevron_right.xml`
+    - [x] `ic_home_bottom.xml`
+    - [x] `ic_category_bottom.xml`
+    - [x] `ic_orders_bottom.xml`
+    - [x] `ic_profile_bottom.xml`
+- [x] Create Category Data Model
+- [x] Create Layouts
+    - [x] `item_sidebar.xml`
+    - [x] `item_category_row.xml`
+    - [x] `activity_category.xml`
+- [x] Create Adapters
+    - [x] `SidebarAdapter.kt`
+    - [x] `CategoryAdapter.kt`
+- [x] Implement `CategoryActivity.kt`
+- [x] Final Verification

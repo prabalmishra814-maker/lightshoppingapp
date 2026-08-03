@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Backpack Body -->
+    <path
+        android:fillColor="#1A237E"
+        android:pathData="M30,30 C30,20 90,20 90,30 L95,100 L25,100 Z" />
+    <!-- Pocket -->
+    <path
+        android:fillColor="#0D47A1"
+        android:pathData="M40,70 L80,70 L85,95 L35,95 Z" />
+</vector>

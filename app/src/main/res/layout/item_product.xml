@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="160dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/tv_discount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_discount_badge"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:text="-40%"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/iv_product"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_category"
+            app:layout_constraintTop_toBottomOf="@id/tv_discount" />
+
+        <TextView
+            android:id="@+id/tv_product_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Product Name"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/iv_product" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/tv_product_name">
+
+            <TextView
+                android:id="@+id/tv_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="₹599"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_old_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="₹999"
+                android:textColor="@color/text_subtitle"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

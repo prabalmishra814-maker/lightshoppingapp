@@ -1,0 +1,22 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Watch Band -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M45,10 L75,10 L75,110 L45,110 Z" />
+    <!-- Watch Face Body -->
+    <path
+        android:fillColor="#1A1A1A"
+        android:pathData="M60,60 m-35,0 a35,35 0 1,0 70,0 a35,35 0 1,0 -70,0"
+        android:strokeColor="#C5A059"
+        android:strokeWidth="3"/>
+    <!-- Hands -->
+    <path
+        android:strokeColor="#C5A059"
+        android:strokeWidth="2"
+        android:pathData="M60,60 L60,40 M60,60 L80,60"
+        android:strokeLineCap="round"/>
+</vector>

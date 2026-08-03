@@ -1,0 +1,36 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="300dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Bag Body -->
+    <path
+        android:pathData="M60,80 L140,80 L150,160 L50,160 Z"
+        android:fillColor="#7C3AED"
+        android:fillAlpha="0.2"/>
+    <path
+        android:pathData="M70,90 L130,90 L138,150 L62,150 Z"
+        android:fillColor="#7C3AED"/>
+    <!-- Handles -->
+    <path
+        android:pathData="M80,80 C80,60 120,60 120,80"
+        android:strokeColor="#5B21B6"
+        android:strokeWidth="5"
+        android:fillColor="#00000000"
+        android:strokeLineCap="round"/>
+    <!-- Details on bag -->
+    <path
+        android:pathData="M75,100 L125,100"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeAlpha="0.3"/>
+    <!-- Leaves/Shapes in background -->
+    <path
+        android:pathData="M160,140 C180,120 190,160 170,180 Z"
+        android:fillColor="#7C3AED"
+        android:fillAlpha="0.4"/>
+    <path
+        android:pathData="M30,150 C10,130 0,170 20,190 Z"
+        android:fillColor="#7C3AED"
+        android:fillAlpha="0.4"/>
+</vector>

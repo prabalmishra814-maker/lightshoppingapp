@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/sidebar_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingVertical="16dp">
+
+    <ImageView
+        android:id="@+id/sidebar_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_all_categories"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/sidebar_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Category"
+        android:textColor="@color/text_subtitle"
+        android:textSize="12sp" />
+
+</LinearLayout>

@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Shoe Body -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M20,80 L40,60 L90,60 L110,80 L110,95 L20,95 Z" />
+    <!-- Sole -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M20,95 L110,95 L110,105 L20,105 Z" />
+</vector>

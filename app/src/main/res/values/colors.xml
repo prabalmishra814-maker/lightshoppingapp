@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#7C3AED</color>
+    <color name="secondary">#A855F7</color>
+    <color name="background">#FFFFFF</color>
+    <color name="sidebar_bg">#FAFAFC</color>
+    <color name="selected_bg">#F3E8FF</color>
+    <color name="text_primary">#111827</color>
+    <color name="text_hint">#9CA3AF</color>
+    <color name="text_label">#111827</color>
+    <color name="text_subtitle">#6B7280</color>
+    <color name="divider_color">#E5E7EB</color>
+    <color name="border_color">#E5E7EB</color>
+    <color name="stroke_color">#E5E7EB</color>
+    <color name="card_bg">#FFFFFF</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="icon_color">#6B7280</color>
+
+    <!-- Banner Gradients -->
+    <color name="banner_start">#7C3AED</color>
+    <color name="banner_end">#9F67FF</color>
+
+    <!-- Category Circle Backgrounds (Pastel) -->
+    <color name="cat_men_bg">#E8F5E9</color>
+    <color name="cat_women_bg">#FCE4EC</color>
+    <color name="cat_electronics_bg">#E3F2FD</color>
+    <color name="cat_home_bg">#FFF3E0</color>
+    <color name="cat_beauty_bg">#F3E5F5</color>
+</resources>
