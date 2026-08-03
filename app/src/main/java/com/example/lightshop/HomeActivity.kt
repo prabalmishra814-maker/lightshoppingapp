@@ -19,6 +19,13 @@ class HomeActivity : AppCompatActivity() {
         setupCategories()
         setupTopDeals()
         setupBottomNavigation()
+        setupClickListeners()
+    }
+
+    private fun setupClickListeners() {
+        findViewById<View>(R.id.tv_cat_view_all).setOnClickListener {
+            startActivity(android.content.Intent(this, CategoryActivity::class.java))
+        }
     }
 
     private fun setupCategories() {
@@ -46,7 +53,22 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNavigation() {
-        // Implementation for navigation item selection can be added here
+        val bottomNav = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.bottom_nav)
+        bottomNav.selectedItemId = R.id.nav_home
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.nav_home -> true
+                R.id.nav_category -> {
+                    startActivity(android.content.Intent(this, CategoryActivity::class.java))
+                    false
+                }
+                R.id.nav_orders -> {
+                    startActivity(android.content.Intent(this, MyOrdersActivity::class.java))
+                    false
+                }
+                else -> false
+            }
+        }
     }
 
     // --- Data Models ---
