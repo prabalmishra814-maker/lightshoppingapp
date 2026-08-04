@@ -1,14 +1,16 @@
 package com.example.lightshop.api;
 
+import com.example.lightshop.BuildConfig;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SupabaseClient {
-    // IMPORTANT: Replace with your actual Supabase project details
-    public static final String SUPABASE_URL = "https://tubsvmxzmhjtexpxqfbj.supabase.co/";
-    public static final String SUPABASE_ANON_KEY = "sb_secret_CCd7SiosQiaYA8hkKsywQw_fIj9MjeL";
+    // IMPORTANT: Secrets are now loaded from BuildConfig (local.properties)
+    public static final String SUPABASE_URL = BuildConfig.SUPABASE_URL;
+    public static final String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
 
     private static SupabaseAuthService authService;
 
