@@ -79,7 +79,11 @@ class CategoryActivity : AppCompatActivity() {
                     finish()
                     true
                 }
-                R.id.nav_profile -> { /* Navigate to Profile */ true }
+                R.id.nav_profile -> {
+                    startActivity(android.content.Intent(this, ProfileActivity::class.java))
+                    finish()
+                    true
+                }
                 else -> false
             }
         }
