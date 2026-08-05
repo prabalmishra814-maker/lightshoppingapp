@@ -15,7 +15,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -48,7 +47,6 @@ public class AuthActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvSubtitle;
     private LinearLayout loginContainer, registerContainer;
-    private ViewGroup rootLayout;
     private TextView tvFooterLogin, tvFooterRegister;
     private CheckBox cbTerms;
     private View btnLogin, btnRegister, btnGoogle;
@@ -64,11 +62,8 @@ public class AuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_auth);
-        
-        rootLayout = findViewById(android.R.id.content);
-        View root = rootLayout.getChildAt(0);
 
-        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -330,7 +325,7 @@ public class AuthActivity extends AppCompatActivity {
         transition.addTransition(new Fade());
         transition.addTransition(new Slide(gravity));
         transition.setDuration(250);
-        TransitionManager.beginDelayedTransition((ViewGroup) rootLayout.getChildAt(0), transition);
+        TransitionManager.beginDelayedTransition(findViewById(android.R.id.content), transition);
     }
 
     private String parseError(Response<AuthModels.AuthResponse> response) {

@@ -7,8 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -20,7 +24,14 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         setupCategories();
         setupTopDeals();
@@ -69,20 +80,10 @@ public class HomeActivity extends AppCompatActivity {
                 startActivity(new Intent(HomeActivity.this, CategoryActivity.class));
                 return false;
             } else if (itemId == R.id.nav_orders) {
-                // MyOrdersActivity is missing in project but referenced in Kotlin
-                try {
-                    startActivity(new Intent(HomeActivity.this, Class.forName("com.example.lightshop.MyOrdersActivity")));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+                startActivity(new Intent(HomeActivity.this, MyOrdersActivity.class));
                 return false;
             } else if (itemId == R.id.nav_profile) {
-                // ProfileActivity is missing in project but referenced in Kotlin
-                try {
-                    startActivity(new Intent(HomeActivity.this, Class.forName("com.example.lightshop.ProfileActivity")));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+                startActivity(new Intent(HomeActivity.this, ProfileActivity.class));
                 return false;
             }
             return false;
@@ -151,7 +152,9 @@ public class HomeActivity extends AppCompatActivity {
             HomeCategory item = items.get(position);
             holder.name.setText(item.name);
             holder.icon.setImageResource(item.iconRes);
-            holder.bg.getBackground().setTint(holder.itemView.getContext().getColor(item.bgRes));
+            if (holder.bg != null && holder.bg.getBackground() != null) {
+                holder.bg.getBackground().setTint(holder.itemView.getContext().getColor(item.bgRes));
+            }
         }
 
         @Override

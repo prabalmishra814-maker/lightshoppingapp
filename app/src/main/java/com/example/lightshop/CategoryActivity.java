@@ -2,7 +2,12 @@ package com.example.lightshop;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.lightshop.databinding.ActivityCategoryBinding;
 import java.util.ArrayList;
@@ -17,8 +22,15 @@ public class CategoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
         binding = ActivityCategoryBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         setupSidebar();
         setupCategories();
@@ -77,15 +89,11 @@ public class CategoryActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_category) {
                 return true;
             } else if (itemId == R.id.nav_orders) {
-                // MyOrdersActivity is missing
+                startActivity(new Intent(CategoryActivity.this, MyOrdersActivity.class));
+                finish();
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                // ProfileActivity is missing
-                try {
-                    startActivity(new Intent(CategoryActivity.this, Class.forName("com.example.lightshop.ProfileActivity")));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
+                startActivity(new Intent(CategoryActivity.this, ProfileActivity.class));
                 finish();
                 return true;
             }

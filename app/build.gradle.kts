@@ -27,8 +27,11 @@ android {
             localProperties.load(localPropertiesFile.inputStream())
         }
 
-        buildConfigField("String", "SUPABASE_URL", "\"${localProperties.getProperty("SUPABASE_URL")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProperties.getProperty("SUPABASE_ANON_KEY")}\"")
+        val supabaseUrl = localProperties.getProperty("SUPABASE_URL") ?: "https://your-project.supabase.co"
+        val supabaseAnonKey = localProperties.getProperty("SUPABASE_ANON_KEY") ?: "your-anon-key"
+
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
     }
 
     buildTypes {
@@ -50,7 +53,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.activity.ktx)
+    implementation(libs.activity)
     implementation(libs.appcompat)
     implementation(libs.constraintlayout)
     implementation(libs.material)
