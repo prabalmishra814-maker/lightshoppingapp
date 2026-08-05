@@ -1,0 +1,5 @@
+- [x] Refine `activity_category.xml` layout
+- [x] Refine `item_sidebar.xml` and `item_category_row.xml`
+- [x] Update `CategoryActivity.kt` with full dummy data
+- [x] Implement navigation from `HomeActivity` to `CategoryActivity`
+- [x] Verify UI and navigation

@@ -1,0 +1,6 @@
+- `[x]` Implement professional status bar in `AuthActivity`
+- `[x]` Implement professional status bar in `HomeActivity`
+- `[x]` Implement professional status bar in `ProfileActivity`
+- `[x]` Implement professional status bar in `CategoryActivity`
+- `[x]` Implement professional status bar in `MyOrdersActivity`
+- `[x]` Final verification and build

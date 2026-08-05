@@ -1,0 +1,7 @@
+- [x] Fix `activity_auth.xml` build errors (remove broken `btn_back` references)
+- [x] Implement field validations in `AuthActivity.java` (Name, Email, Password, Terms)
+- [x] Implement loading state for Register button
+- [x] Implement Supabase `signUp` integration in `AuthActivity.java`
+- [x] Handle navigation between Login and Register containers in Java
+- [x] Handle system back button to return to Login from Register
+- [x] Verify Login screen has no back button

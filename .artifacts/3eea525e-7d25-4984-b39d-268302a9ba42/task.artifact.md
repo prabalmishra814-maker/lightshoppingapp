@@ -1,0 +1,21 @@
+# Task List - Fix User App Crash (Java Only)
+
+- [x] **Phase 1: Configuration & Manifest**
+    - [x] Add `INTERNET` permission to `AndroidManifest.xml`
+    - [x] Update Launcher activity to `AuthActivity` in `AndroidManifest.xml`
+    - [x] Remove `MainActivity` reference from `AndroidManifest.xml`
+- [x] **Phase 2: Kotlin to Java Conversion**
+    - [x] Create `OrderModel.java`
+    - [x] Create `ProfileMenuModel.java`
+    - [x] Create `OrdersAdapter.java`
+    - [x] Create `ProfileAdapter.java`
+    - [x] Create `MyOrdersActivity.java`
+    - [x] Create `ProfileActivity.java`
+    - [x] Delete all `.kt` files
+- [x] **Phase 3: Code Refactoring & Stability**
+    - [x] Fix navigation in `HomeActivity.java` (remove `Class.forName`)
+    - [x] Fix navigation in `CategoryActivity.java` (remove `Class.forName`)
+    - [x] Add null checks for `getBackground().setTint()` in `HomeActivity.java`
+- [x] **Phase 4: Verification**
+    - [x] Gradle Sync
+    - [x] Assemble Debug Build

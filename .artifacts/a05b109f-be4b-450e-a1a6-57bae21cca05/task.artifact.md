@@ -1,0 +1,8 @@
+- `[x]` Add colors to `colors.xml`
+- `[x]` Create vector drawables (icons)
+- `[x]` Create `ProfileMenuModel.kt`
+- `[x]` Create `item_profile_menu.xml`
+- `[x]` Create `ProfileAdapter.kt`
+- `[x]` Create `activity_profile.xml`
+- `[x]` Create `ProfileActivity.kt`
+- `[x]` Setup Bottom Navigation in `ProfileActivity`

@@ -13,6 +13,7 @@ import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.TransitionManager;
 import android.transition.TransitionSet;
+import android.util.Patterns;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.CheckBox;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.credentials.CredentialManager;
@@ -39,6 +41,8 @@ import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.AuthModels;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+import com.google.android.material.button.MaterialButton;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -71,6 +75,7 @@ public class AuthActivity extends AppCompatActivity {
 
         initViews();
         setupSpannables();
+        setupBackNavigation();
     }
 
     private void initViews() {
@@ -94,10 +99,22 @@ public class AuthActivity extends AppCompatActivity {
         etRegConfirm = findViewById(R.id.et_reg_confirm);
 
         btnLogin.setOnClickListener(v -> handleLogin());
-
         btnRegister.setOnClickListener(v -> handleRegister());
-
         btnGoogle.setOnClickListener(v -> handleGoogleLogin());
+    }
+
+    private void setupBackNavigation() {
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (registerContainer.getVisibility() == View.VISIBLE) {
+                    showLogin();
+                } else {
+                    setEnabled(false);
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     private void handleGoogleLogin() {
@@ -169,19 +186,26 @@ public class AuthActivity extends AppCompatActivity {
         String email = etLoginEmail.getText().toString().trim();
         String password = etLoginPassword.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        if (email.isEmpty()) {
+            etLoginEmail.setError("Email is required");
+            etLoginEmail.requestFocus();
             return;
         }
 
-        btnLogin.setEnabled(false);
+        if (password.isEmpty()) {
+            etLoginPassword.setError("Password is required");
+            etLoginPassword.requestFocus();
+            return;
+        }
+
+        setLoadingState(btnLogin, true, "Logging in...");
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
         AuthModels.LoginRequest request = new AuthModels.LoginRequest(email, password);
         SupabaseClient.getAuthService().login(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
                 .enqueue(new Callback<AuthModels.AuthResponse>() {
                     @Override
                     public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
-                        btnLogin.setEnabled(true);
+                        setLoadingState(btnLogin, false, "Login");
                         if (response.isSuccessful() && response.body() != null) {
                             startActivity(new Intent(AuthActivity.this, HomeActivity.class));
                             finish();
@@ -193,7 +217,7 @@ public class AuthActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
-                        btnLogin.setEnabled(true);
+                        setLoadingState(btnLogin, false, "Login");
                         Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -205,31 +229,51 @@ public class AuthActivity extends AppCompatActivity {
         String password = etRegPassword.getText().toString().trim();
         String confirm = etRegConfirm.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty()) {
+            etRegName.setError("Full name is required");
+            etRegName.requestFocus();
+            return;
+        }
+
+        if (email.isEmpty()) {
+            etRegEmail.setError("Email is required");
+            etRegEmail.requestFocus();
+            return;
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            etRegEmail.setError("Please enter a valid email");
+            etRegEmail.requestFocus();
+            return;
+        }
+
+        if (password.length() < 6) {
+            etRegPassword.setError("Password must be at least 6 characters");
+            etRegPassword.requestFocus();
             return;
         }
 
         if (!password.equals(confirm)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            etRegConfirm.setError("Passwords do not match");
+            etRegConfirm.requestFocus();
             return;
         }
 
         if (!cbTerms.isChecked()) {
-            Toast.makeText(this, "Please agree to the terms", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please agree to the terms & conditions", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        btnRegister.setEnabled(false);
+        setLoadingState(btnRegister, true, "Creating account...");
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
         AuthModels.SignUpRequest request = new AuthModels.SignUpRequest(email, password, name);
         SupabaseClient.getAuthService().signUp(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
                 .enqueue(new Callback<AuthModels.AuthResponse>() {
                     @Override
                     public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
-                        btnRegister.setEnabled(true);
+                        setLoadingState(btnRegister, false, "Register");
                         if (response.isSuccessful()) {
-                            Toast.makeText(AuthActivity.this, "Registration successful!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(AuthActivity.this, "Registration successful! Please login.", Toast.LENGTH_LONG).show();
                             showLogin();
                         } else {
                             String errorMsg = parseError(response);
@@ -239,10 +283,17 @@ public class AuthActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
-                        btnRegister.setEnabled(true);
+                        setLoadingState(btnRegister, false, "Register");
                         Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void setLoadingState(View button, boolean isLoading, String text) {
+        button.setEnabled(!isLoading);
+        if (button instanceof MaterialButton) {
+            ((MaterialButton) button).setText(text);
+        }
     }
 
     private void setupSpannables() {

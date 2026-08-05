@@ -1,0 +1,9 @@
+- [x] Add colors to `colors.xml`
+- [x] Create drawables (`bg_status_dot.xml`, `ic_orders_bag.xml`)
+- [x] Create `OrderModel.kt`
+- [x] Create `item_order.xml`
+- [x] Create `OrdersAdapter.kt`
+- [x] Create `activity_my_orders.xml`
+- [x] Create `MyOrdersActivity.kt`
+- [x] Register `MyOrdersActivity` in `AndroidManifest.xml`
+- [x] Verify UI and functionality
