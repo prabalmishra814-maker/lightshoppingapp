@@ -13,24 +13,34 @@ public class SupabaseClient {
     public static final String SUPABASE_ANON_KEY = BuildConfig.SUPABASE_ANON_KEY;
 
     private static SupabaseAuthService authService;
+    private static SupabaseApiService apiService;
 
     public static SupabaseAuthService getAuthService() {
         if (authService == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-            OkHttpClient client = new OkHttpClient.Builder()
-                    .addInterceptor(logging)
-                    .build();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(SUPABASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(client)
-                    .build();
-
-            authService = retrofit.create(SupabaseAuthService.class);
+            authService = getRetrofit().create(SupabaseAuthService.class);
         }
         return authService;
+    }
+
+    public static SupabaseApiService getApiService() {
+        if (apiService == null) {
+            apiService = getRetrofit().create(SupabaseApiService.class);
+        }
+        return apiService;
+    }
+
+    private static Retrofit getRetrofit() {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
+
+        return new Retrofit.Builder()
+                .baseUrl(SUPABASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
     }
 }

@@ -2,86 +2,31 @@ package com.example.lightshop;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
-import androidx.activity.EdgeToEdge;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import com.example.lightshop.databinding.ActivityProfileBinding;
-import java.util.ArrayList;
-import java.util.List;
+import com.example.lightshop.api.SessionManager;
 
 public class ProfileActivity extends AppCompatActivity {
-
-    private ActivityProfileBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        binding = ActivityProfileBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        setContentView(R.layout.activity_profile);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        SessionManager sessionManager = new SessionManager(this);
 
-        setupMyAccountRecyclerView();
-        setupMoreRecyclerView();
-        setupBottomNavigation();
-    }
+        TextView tvName = findViewById(R.id.tv_profile_name);
+        TextView tvEmail = findViewById(R.id.tv_profile_email);
 
-    private void setupMyAccountRecyclerView() {
-        List<ProfileMenuModel> myAccountItems = new ArrayList<>();
-        myAccountItems.add(new ProfileMenuModel(1, "Personal Information", R.drawable.ic_person_24));
-        myAccountItems.add(new ProfileMenuModel(2, "Address Book", R.drawable.ic_location));
-        myAccountItems.add(new ProfileMenuModel(3, "Payment Methods", R.drawable.ic_credit_card));
-        myAccountItems.add(new ProfileMenuModel(4, "Notifications", R.drawable.ic_notification));
-        myAccountItems.add(new ProfileMenuModel(5, "Help & Support", R.drawable.ic_help));
+        tvName.setText(sessionManager.getUserName());
+        tvEmail.setText(sessionManager.getUserEmail());
 
-        binding.rvMyAccount.setLayoutManager(new LinearLayoutManager(this));
-        binding.rvMyAccount.setAdapter(new ProfileAdapter(myAccountItems, item -> {
-            Toast.makeText(ProfileActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
-        }));
-    }
-
-    private void setupMoreRecyclerView() {
-        List<ProfileMenuModel> moreItems = new ArrayList<>();
-        moreItems.add(new ProfileMenuModel(6, "About Us", R.drawable.ic_info));
-        moreItems.add(new ProfileMenuModel(7, "Privacy Policy", R.drawable.ic_privacy));
-        moreItems.add(new ProfileMenuModel(8, "Terms & Conditions", R.drawable.ic_description));
-        moreItems.add(new ProfileMenuModel(9, "Logout", R.drawable.ic_logout, R.color.color_logout, R.color.color_logout));
-
-        binding.rvMore.setLayoutManager(new LinearLayoutManager(this));
-        binding.rvMore.setAdapter(new ProfileAdapter(moreItems, item -> {
-            Toast.makeText(ProfileActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
-        }));
-    }
-
-    private void setupBottomNavigation() {
-        binding.bottomNavigation.setSelectedItemId(R.id.nav_profile);
-        binding.bottomNavigation.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_home) {
-                startActivity(new Intent(this, HomeActivity.class));
-                finish();
-                return true;
-            } else if (itemId == R.id.nav_category) {
-                startActivity(new Intent(this, CategoryActivity.class));
-                finish();
-                return true;
-            } else if (itemId == R.id.nav_orders) {
-                startActivity(new Intent(this, MyOrdersActivity.class));
-                finish();
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                return true;
-            }
-            return false;
+        findViewById(R.id.btn_logout).setOnClickListener(v -> {
+            sessionManager.logout();
+            Intent intent = new Intent(ProfileActivity.this, AuthActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
         });
     }
 }

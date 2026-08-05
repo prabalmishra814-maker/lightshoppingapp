@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.lightshop.api.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +34,18 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
+        setupWelcomeMessage();
         setupCategories();
         setupTopDeals();
         setupBottomNavigation();
         setupClickListeners();
+    }
+
+    private void setupWelcomeMessage() {
+        TextView tvWelcome = findViewById(R.id.tv_welcome);
+        SessionManager sessionManager = new SessionManager(this);
+        String name = sessionManager.getUserName();
+        tvWelcome.setText("Hi, " + name + " 👋");
     }
 
     private void setupClickListeners() {

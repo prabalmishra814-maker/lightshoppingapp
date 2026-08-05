@@ -37,6 +37,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.lightshop.api.SessionManager;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.AuthModels;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
@@ -60,14 +61,25 @@ public class AuthActivity extends AppCompatActivity {
     // Input fields
     private EditText etLoginEmail, etLoginPassword;
     private EditText etRegName, etRegEmail, etRegPassword, etRegConfirm;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
+        sessionManager = new SessionManager(this);
+        if (sessionManager.isLoggedIn()) {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_auth);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
+        View root = findViewById(R.id.auth_root);
+
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -101,6 +113,7 @@ public class AuthActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> handleLogin());
         btnRegister.setOnClickListener(v -> handleRegister());
         btnGoogle.setOnClickListener(v -> handleGoogleLogin());
+
     }
 
     private void setupBackNavigation() {
@@ -166,6 +179,17 @@ public class AuthActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Response<AuthModels.AuthResponse> response) {
                         btnGoogle.setEnabled(true);
                         if (response.isSuccessful() && response.body() != null) {
+                            AuthModels.AuthResponse authResponse = response.body();
+                            String name = "User";
+                            String email = "";
+                            if (authResponse.user != null) {
+                                email = authResponse.user.email;
+                                if (authResponse.user.userMetadata != null) {
+                                    name = authResponse.user.userMetadata.fullName;
+                                }
+                            }
+                            sessionManager.saveSession(authResponse.accessToken, email, name);
+                            
                             startActivity(new Intent(AuthActivity.this, HomeActivity.class));
                             finish();
                         } else {
@@ -207,6 +231,17 @@ public class AuthActivity extends AppCompatActivity {
                     public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
                         setLoadingState(btnLogin, false, "Login");
                         if (response.isSuccessful() && response.body() != null) {
+                            AuthModels.AuthResponse authResponse = response.body();
+                            String name = "User";
+                            String email = "";
+                            if (authResponse.user != null) {
+                                email = authResponse.user.email;
+                                if (authResponse.user.userMetadata != null) {
+                                    name = authResponse.user.userMetadata.fullName;
+                                }
+                            }
+                            sessionManager.saveSession(authResponse.accessToken, email, name);
+
                             startActivity(new Intent(AuthActivity.this, HomeActivity.class));
                             finish();
                         } else {
