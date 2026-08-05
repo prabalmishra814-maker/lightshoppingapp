@@ -1,63 +1,65 @@
-# Implementation Plan - Login & Register Screen Fix
+# Implementation Plan - Single Professional Bottom Navigation
 
-This plan addresses the requirement to remove the back button from the Login screen and implement full backend functionality for the Register screen using Supabase.
+Implement a unified, robust Bottom Navigation system across the main app screens (Home, Category, Orders, Profile) with proper layout handling for all devices.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - The loading indicator will be implemented by updating the button text (e.g., "Registering...") and disabling the button to prevent multiple clicks, as no ProgressBar is present in the XML and we must avoid UI/layout changes.
-> - The "Remove Back Arrow" requirement will be achieved by setting `btn_back` visibility to `GONE` when on the Login screen. This will cause the content below to shift up, fulfilling the "do not leave any empty space" requirement.
+> - All main activities will have their `launchMode` set to `singleTop` in `AndroidManifest.xml` to prevent multiple instances and state loss.
+> - A new utility class `NavigationHelper` will be created to centralize navigation logic and ensure consistent behavior.
+> - Layout IDs for the Bottom Navigation will be standardized to `bottom_nav` across all files.
 
 ## Proposed Changes
 
-### Auth Component
+### [Component] Navigation Architecture
 
-#### [MODIFY] [AuthActivity.java](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/java/com/example/lightshop/AuthActivity.java)
+#### [MODIFY] [AndroidManifest.xml](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/AndroidManifest.xml)
+- Set `android:launchMode="singleTop"` for `HomeActivity`, `CategoryActivity`, `MyOrdersActivity`, and `ProfileActivity`.
 
-- **UI Management**:
-    - Hide `btn_back` in `showLogin()` using `View.GONE`.
-    - Show `btn_back` in `showRegister()` using `View.VISIBLE`.
-    - Set a click listener on `btn_back` to call `showLogin()` when in the Register screen.
-- **Registration Logic (`handleRegister`)**:
-    - **Validations**:
-        - Full Name: Not empty.
-        - Email: Not empty and matches a valid email regex.
-        - Password: Minimum length (e.g., 6 characters).
-        - Confirm Password: Must match Password.
-        - Terms Checkbox: Must be checked.
-    - **Loading State**:
-        - Disable `btn_register`.
-        - Change text to "Creating account...".
-    - **API Call**:
-        - Invoke `SupabaseAuthService#signUp`.
-        - Handle `onResponse`:
-            - If successful: Show success Toast, switch to Login screen using `showLogin()`, and reset button state.
-            - If failure: Parse error using `parseError()` (handles duplicate email, etc.) and show Toast. Reset button state.
-        - Handle `onFailure`: Show network error Toast. Reset button state.
-- **Navigation**:
-    - Override `onBackPressed()`:
-        - If `registerContainer` is visible, call `showLogin()`.
-        - Otherwise, proceed with default behavior (`finish()`).
+#### [NEW] [NavigationHelper.java](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/java/com/example/lightshop/NavigationHelper.java)
+- Create a helper class to:
+    - Handle `OnItemSelectedListener` with `Intent.FLAG_ACTIVITY_REORDER_TO_FRONT`.
+    - Apply `WindowInsets` to the Bottom Navigation to fix clipping/overlap issues.
+    - Ensure the correct item is selected based on the current Activity.
+
+### [Component] Layout Standardization
+
+#### [MODIFY] [activity_home.xml](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/res/layout/activity_home.xml)
+- Standardize `bottom_nav` height to `wrap_content`.
+- Ensure constraints are correct for Edge-to-Edge.
+
+#### [MODIFY] [activity_category.xml](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/res/layout/activity_category.xml)
+- Rename `bottomNavigation` to `bottom_nav`.
+- Standardize height to `wrap_content`.
+
+#### [MODIFY] [activity_my_orders.xml](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/res/layout/activity_my_orders.xml)
+- Standardize height to `wrap_content`.
+
+#### [MODIFY] [activity_profile.xml](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/res/layout/activity_profile.xml)
+- Rename `bottomNavigation` to `bottom_nav`.
+- Standardize height to `wrap_content`.
+
+### [Component] Activity Logic
+
+#### [MODIFY] [HomeActivity.java](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/java/com/example/lightshop/HomeActivity.java)
+- Replace inline navigation logic with `NavigationHelper.setupBottomNavigation(this)`.
+
+#### [MODIFY] [CategoryActivity.java](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/java/com/example/lightshop/CategoryActivity.java)
+- Replace inline navigation logic with `NavigationHelper.setupBottomNavigation(this)`.
+
+#### [MODIFY] [MyOrdersActivity.java](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/java/com/example/lightshop/MyOrdersActivity.java)
+- Replace inline navigation logic with `NavigationHelper.setupBottomNavigation(this)`.
+
+#### [MODIFY] [ProfileActivity.java](file:///C:/Users/PRABAL%20MISHRA/AndroidStudioProjects/lightshop/app/src/main/java/com/example/lightshop/ProfileActivity.java)
+- Replace inline navigation logic with `NavigationHelper.setupBottomNavigation(this)`.
 
 ## Verification Plan
 
 ### Automated Tests
-- Build the project to ensure no syntax errors.
+- Build project to ensure no ID mismatches.
 
 ### Manual Verification
-- **Login Screen**: Verify that no back arrow is visible and the title is at the top.
-- **Registration**:
-    - Try registering with empty fields -> should show error toast.
-    - Try registering with invalid email -> should show error toast.
-    - Try registering with mismatching passwords -> should show error toast.
-    - Try registering without checking terms -> should show error toast.
-    - Perform a valid registration:
-        - Verify button text changes and button is disabled.
-        - Verify success toast appears.
-        - Verify screen switches to Login automatically.
-- **Duplicate Email**: Try registering with the same email again -> verify "Email already exists" (or similar) error from Supabase is shown.
-- **Back Navigation**:
-    - Click `Register` from Login -> back arrow should appear.
-    - Click Back Arrow -> should return to Login.
-    - Use Android system back gesture from Register -> should return to Login.
-    - Use Android system back gesture from Login -> should close the app.
+- **Navigation Flow**: Verify switching between all four tabs does not restart activities (check logs or screen transition).
+- **Clipping**: Test on a device with a gesture-based navigation bar (long bar) and a 3-button navigation bar to ensure the Bottom Nav is always fully visible and correctly padded.
+- **State Preservation**: Scroll down in Home, go to Category, then back to Home. The scroll position should be preserved.
+- **Back Stack**: Pressing the system back button should behave predictably (e.g., return to Home if not already there, then close).

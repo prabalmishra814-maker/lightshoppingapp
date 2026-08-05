@@ -9,7 +9,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_nav"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -179,15 +179,9 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigation"
+        android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:background="@color/white"
-        app:itemIconSize="24dp"
-        app:itemIconTint="@color/nav_item_tint"
-        app:itemRippleColor="@null"
-        app:itemTextColor="@color/nav_item_tint"
-        app:labelVisibilityMode="labeled"
+        android:layout_height="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_nav_menu" />
 

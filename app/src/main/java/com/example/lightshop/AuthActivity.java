@@ -22,7 +22,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,12 +32,10 @@ import androidx.credentials.GetCredentialRequest;
 import androidx.credentials.GetCredentialResponse;
 import androidx.credentials.exceptions.GetCredentialException;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.AuthModels;
+import com.example.lightshop.utils.StatusBarUtils;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.button.MaterialButton;
@@ -57,21 +54,13 @@ public class AuthActivity extends AppCompatActivity {
 
     private static final String GOOGLE_WEB_CLIENT_ID = "1046922122069-ivupev8q7ufu7ndg7ge7tkv340e4om1d.apps.googleusercontent.com";
 
-    // Input fields
-    private EditText etLoginEmail, etLoginPassword;
     private EditText etRegName, etRegEmail, etRegPassword, etRegConfirm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        StatusBarUtils.applyWhiteStatusBar(this);
         setContentView(R.layout.activity_auth);
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         initViews();
         setupSpannables();
@@ -91,8 +80,6 @@ public class AuthActivity extends AppCompatActivity {
         btnGoogle = findViewById(R.id.btn_google);
 
         // Initialize Input fields
-        etLoginEmail = findViewById(R.id.et_login_email);
-        etLoginPassword = findViewById(R.id.et_login_password);
         etRegName = findViewById(R.id.et_reg_name);
         etRegEmail = findViewById(R.id.et_reg_email);
         etRegPassword = findViewById(R.id.et_reg_password);
@@ -183,44 +170,8 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void handleLogin() {
-        String email = etLoginEmail.getText().toString().trim();
-        String password = etLoginPassword.getText().toString().trim();
-
-        if (email.isEmpty()) {
-            etLoginEmail.setError("Email is required");
-            etLoginEmail.requestFocus();
-            return;
-        }
-
-        if (password.isEmpty()) {
-            etLoginPassword.setError("Password is required");
-            etLoginPassword.requestFocus();
-            return;
-        }
-
-        setLoadingState(btnLogin, true, "Logging in...");
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        AuthModels.LoginRequest request = new AuthModels.LoginRequest(email, password);
-        SupabaseClient.getAuthService().login(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
-                .enqueue(new Callback<AuthModels.AuthResponse>() {
-                    @Override
-                    public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
-                        setLoadingState(btnLogin, false, "Login");
-                        if (response.isSuccessful() && response.body() != null) {
-                            startActivity(new Intent(AuthActivity.this, HomeActivity.class));
-                            finish();
-                        } else {
-                            String errorMsg = parseError(response);
-                            Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
-                        setLoadingState(btnLogin, false, "Login");
-                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        startActivity(new Intent(AuthActivity.this, HomeActivity.class));
+        finish();
     }
 
     private void handleRegister() {

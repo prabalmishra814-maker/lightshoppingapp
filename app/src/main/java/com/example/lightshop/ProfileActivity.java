@@ -3,13 +3,10 @@ package com.example.lightshop;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.lightshop.databinding.ActivityProfileBinding;
+import com.example.lightshop.utils.StatusBarUtils;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,15 +17,9 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        StatusBarUtils.applyWhiteStatusBar(this);
         binding = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
         setupMyAccountRecyclerView();
         setupMoreRecyclerView();
@@ -63,8 +54,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupBottomNavigation() {
-        binding.bottomNavigation.setSelectedItemId(R.id.nav_profile);
-        binding.bottomNavigation.setOnItemSelectedListener(item -> {
+        binding.bottomNav.setSelectedItemId(R.id.nav_profile);
+        binding.bottomNav.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.nav_home) {
                 startActivity(new Intent(this, HomeActivity.class));
