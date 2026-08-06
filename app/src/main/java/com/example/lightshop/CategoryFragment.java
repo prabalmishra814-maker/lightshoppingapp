@@ -1,31 +1,35 @@
 package com.example.lightshop;
 
-import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.appcompat.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.example.lightshop.databinding.ActivityCategoryBinding;
-import com.example.lightshop.utils.StatusBarUtils;
+import com.example.lightshop.databinding.FragmentCategoryBinding;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategoryActivity extends AppCompatActivity {
+public class CategoryFragment extends Fragment {
 
-    private ActivityCategoryBinding binding;
+    private FragmentCategoryBinding binding;
     private SidebarAdapter sidebarAdapter;
     private CategoryAdapter categoryAdapter;
 
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        StatusBarUtils.applyWhiteStatusBar(this);
-        binding = ActivityCategoryBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentCategoryBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         setupSidebar();
         setupCategories();
-        setupBottomNav();
     }
 
     private void setupSidebar() {
@@ -44,10 +48,9 @@ public class CategoryActivity extends AppCompatActivity {
 
         sidebarAdapter = new SidebarAdapter(sidebarItems, position -> {
             // Update main categories based on sidebar selection
-            // For now, we'll just show different counts or filter if needed
         });
 
-        binding.rvSidebar.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvSidebar.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvSidebar.setAdapter(sidebarAdapter);
     }
 
@@ -65,30 +68,13 @@ public class CategoryActivity extends AppCompatActivity {
         categoryItems.add(new Category("Grocery", "6,102 items", R.drawable.ic_grocery));
 
         categoryAdapter = new CategoryAdapter(categoryItems);
-        binding.rvCategories.setLayoutManager(new LinearLayoutManager(this));
+        binding.rvCategories.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvCategories.setAdapter(categoryAdapter);
     }
 
-    private void setupBottomNav() {
-        binding.bottomNav.setSelectedItemId(R.id.nav_category);
-        binding.bottomNav.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.nav_home) {
-                startActivity(new Intent(CategoryActivity.this, HomeActivity.class));
-                finish();
-                return true;
-            } else if (itemId == R.id.nav_category) {
-                return true;
-            } else if (itemId == R.id.nav_orders) {
-                startActivity(new Intent(CategoryActivity.this, MyOrdersActivity.class));
-                finish();
-                return true;
-            } else if (itemId == R.id.nav_profile) {
-                startActivity(new Intent(CategoryActivity.this, ProfileActivity.class));
-                finish();
-                return true;
-            }
-            return false;
-        });
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

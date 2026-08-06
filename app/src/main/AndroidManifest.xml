@@ -32,27 +32,6 @@
             android:theme="@style/Theme.LightShop" />
 
         <activity
-            android:name=".CategoryActivity"
-            android:exported="false"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightShop" />
-
-        <activity
-            android:name=".MyOrdersActivity"
-            android:exported="false"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightShop" />
-
-        <activity
-            android:name=".ProfileActivity"
-            android:exported="false"
-            android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.LightShop" />
-
-        <activity
             android:name=".AuthActivity"
             android:exported="false"
             android:screenOrientation="portrait"
