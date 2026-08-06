@@ -1,7 +1,13 @@
-- [x] Fix `activity_auth.xml` build errors (remove broken `btn_back` references)
-- [x] Implement field validations in `AuthActivity.java` (Name, Email, Password, Terms)
-- [x] Implement loading state for Register button
-- [x] Implement Supabase `signUp` integration in `AuthActivity.java`
-- [x] Handle navigation between Login and Register containers in Java
-- [x] Handle system back button to return to Login from Register
-- [x] Verify Login screen has no back button
+- [ ] Update `AndroidManifest.xml` with `launchMode="singleTop"` for main activities
+- [ ] Create `NavigationHelper.java` utility class
+- [ ] Standardize Bottom Navigation in XML layouts:
+    - [ ] `activity_home.xml`
+    - [ ] `activity_category.xml`
+    - [ ] `activity_my_orders.xml`
+    - [ ] `activity_profile.xml`
+- [ ] Update Activity classes to use `NavigationHelper`:
+    - [ ] `HomeActivity.java`
+    - [ ] `CategoryActivity.java`
+    - [ ] `MyOrdersActivity.java`
+    - [ ] `ProfileActivity.java`
+- [ ] Verify navigation and layout on device

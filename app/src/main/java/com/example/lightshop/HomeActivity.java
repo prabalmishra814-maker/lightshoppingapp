@@ -7,15 +7,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.lightshop.api.SessionManager;
+import com.example.lightshop.utils.StatusBarUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,27 +21,13 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
+        StatusBarUtils.applyWhiteStatusBar(this);
         setContentView(R.layout.activity_home);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        setupWelcomeMessage();
         setupCategories();
         setupTopDeals();
         setupBottomNavigation();
         setupClickListeners();
-    }
-
-    private void setupWelcomeMessage() {
-        TextView tvWelcome = findViewById(R.id.tv_welcome);
-        SessionManager sessionManager = new SessionManager(this);
-        String name = sessionManager.getUserName();
-        tvWelcome.setText("Hi, " + name + " 👋");
     }
 
     private void setupClickListeners() {
