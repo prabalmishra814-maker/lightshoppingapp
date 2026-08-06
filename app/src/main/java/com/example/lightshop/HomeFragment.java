@@ -10,10 +10,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.lightshop.models.ProductModel;
+import com.example.lightshop.api.SupabaseClient;
+import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
 
@@ -28,8 +35,37 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         setupCategories(view);
-        setupTopDeals(view);
         setupClickListeners(view);
+        fetchProductsFromSupabase(view);
+    }
+
+    private void fetchProductsFromSupabase(View view) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchProducts(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<List<ProductModel>>() {
+            @Override
+            public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ProductModel> products = response.body();
+                    
+                    // Setup All Products (Grid)
+                    RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
+                    if (rvAll != null) {
+                        rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
+                        rvAll.setAdapter(new ProductAdapter(products, false));
+                        rvAll.setNestedScrollingEnabled(false); // Since it's inside NestedScrollView
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ProductModel>> call, Throwable t) {
+                // Error handling
+            }
+        });
     }
 
     private void setupClickListeners(View view) {
@@ -56,17 +92,6 @@ public class HomeFragment extends Fragment {
 
         rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvCategories.setAdapter(new HomeCategoryAdapter(categories));
-    }
-
-    private void setupTopDeals(View view) {
-        RecyclerView rvDeals = view.findViewById(R.id.rv_deals);
-        List<HomeActivity.Product> products = new ArrayList<>();
-        products.add(new HomeActivity.Product("Analog Watch", "₹599", "₹999", "-40%", R.drawable.ic_watch));
-        products.add(new HomeActivity.Product("Sports Shoes", "₹1,299", "₹1,999", "-35%", R.drawable.ic_shoes));
-        products.add(new HomeActivity.Product("Backpack", "₹749", "₹999", "-25%", R.drawable.ic_backpack));
-
-        rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvDeals.setAdapter(new ProductAdapter(products));
     }
 
     // --- Adapters (Copied from HomeActivity) ---
@@ -114,10 +139,12 @@ public class HomeFragment extends Fragment {
     }
 
     public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
-        private List<HomeActivity.Product> items;
+        private final List<ProductModel> items;
+        private final boolean isHorizontal;
 
-        ProductAdapter(List<HomeActivity.Product> items) {
+        ProductAdapter(List<ProductModel> items, boolean isHorizontal) {
             this.items = items;
+            this.isHorizontal = isHorizontal;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -134,6 +161,13 @@ public class HomeFragment extends Fragment {
                 oldPrice = view.findViewById(R.id.tv_old_price);
                 discount = view.findViewById(R.id.tv_discount);
                 image = view.findViewById(R.id.iv_product);
+                
+                // Adjust layout for grid if needed
+                if (!isHorizontal) {
+                    ViewGroup.LayoutParams params = itemView.getLayoutParams();
+                    params.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                    itemView.setLayoutParams(params);
+                }
             }
         }
 
@@ -146,12 +180,39 @@ public class HomeFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            HomeActivity.Product item = items.get(position);
-            holder.name.setText(item.name);
-            holder.price.setText(item.price);
-            holder.oldPrice.setText(item.oldPrice);
-            holder.discount.setText(item.discount);
-            holder.image.setImageResource(item.imageRes);
+            ProductModel item = items.get(position);
+            holder.name.setText(item.getProductName());
+            
+            String sellingPrice = item.getSellingPrice();
+            String mrp = item.getMrp();
+            
+            holder.price.setText("₹" + (sellingPrice != null ? sellingPrice : "0"));
+            holder.oldPrice.setText("₹" + (mrp != null ? mrp : "0"));
+            
+            // Dynamic discount calculation
+            try {
+                if (sellingPrice != null && mrp != null) {
+                    double sPrice = Double.parseDouble(sellingPrice.replaceAll("[^0-9.]", ""));
+                    double mPrice = Double.parseDouble(mrp.replaceAll("[^0-9.]", ""));
+                    if (mPrice > sPrice) {
+                        int discountPercent = (int) (((mPrice - sPrice) / mPrice) * 100);
+                        holder.discount.setText("-" + discountPercent + "%");
+                        holder.discount.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.discount.setVisibility(View.GONE);
+                    }
+                } else {
+                    holder.discount.setVisibility(View.GONE);
+                }
+            } catch (Exception e) {
+                holder.discount.setVisibility(View.GONE);
+            }
+
+            Glide.with(getContext())
+                    .load(item.getProductImage())
+                    .placeholder(R.drawable.ic_category)
+                    .error(R.drawable.ic_category)
+                    .into(holder.image);
         }
 
         @Override

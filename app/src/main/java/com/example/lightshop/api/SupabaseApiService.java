@@ -1,5 +1,7 @@
 package com.example.lightshop.api;
 
+import com.example.lightshop.models.ProductModel;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +29,14 @@ public interface SupabaseApiService {
         @Header("apikey") String apiKey,
         @Header("Authorization") String authHeader,
         @Query("select") String select // e.g., "*"
+    );
+
+    // Specific Fetch for Products returning ProductModel list
+    @GET("rest/v1/Product")
+    Call<List<ProductModel>> fetchProducts(
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @Query("select") String select
     );
 
     // 2. ADD (Insert)

@@ -24,9 +24,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
-                android:text="Hi, Welcome 👋"
+                android:text="@string/welcome_message"
                 android:textColor="@color/text_primary"
-                android:textSize="32sp"
+                android:textSize="28sp"
+                android:fontFamily="sans-serif-condensed-medium"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/iv_notification"
                 app:layout_constraintStart_toStartOf="parent"
@@ -34,57 +35,69 @@
 
             <ImageView
                 android:id="@+id/iv_notification"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:layout_marginEnd="24dp"
+                android:padding="10dp"
+                android:background="@drawable/bg_circle_pastel"
                 android:contentDescription="Notifications"
-                android:src="@drawable/baseline_notifications_24"
+                android:src="@drawable/ic_notification"
                 app:layout_constraintBottom_toBottomOf="@id/tv_welcome"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_welcome" />
+                app:layout_constraintTop_toTopOf="@id/tv_welcome"
+                />
 
             <!-- Row 2: Search Bar & Cart Button -->
-            <LinearLayout
-                android:id="@+id/search_bar_container"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/search_bar_card"
                 android:layout_width="0dp"
                 android:layout_height="56dp"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginEnd="12dp"
-                android:background="@drawable/bg_search_bar"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#F3F4F6"
+                app:cardBackgroundColor="#F9FAFB"
                 app:layout_constraintEnd_toStartOf="@id/cart_button_card"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_welcome">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_search"
-                    app:tint="@color/text_hint" />
-
-                <EditText
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="12dp"
-                    android:background="@android:color/transparent"
-                    android:hint="Search for products"
-                    android:inputType="text"
-                    android:textColor="@color/text_primary"
-                    android:textColorHint="@color/text_hint"
-                    android:textSize="16sp" />
-            </LinearLayout>
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/text_hint" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="12dp"
+                        android:background="@android:color/transparent"
+                        android:hint="@string/search_hint"
+                        android:inputType="text"
+                        android:textColor="@color/text_primary"
+                        android:textColorHint="@color/text_hint"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <FrameLayout
                 android:id="@+id/cart_button_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
-                app:layout_constraintBottom_toBottomOf="@id/search_bar_container"
+                app:layout_constraintBottom_toBottomOf="@id/search_bar_card"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/search_bar_container">
+                app:layout_constraintTop_toTopOf="@id/search_bar_card">
 
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="56dp"
@@ -113,7 +126,7 @@
                 android:layout_marginTop="24dp"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="4dp"
-                app:layout_constraintTop_toBottomOf="@id/search_bar_container"
+                app:layout_constraintTop_toBottomOf="@id/search_bar_card"
                 app:strokeWidth="0dp">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -128,7 +141,7 @@
                         android:layout_marginStart="24dp"
                         android:layout_marginTop="24dp"
                         android:layout_marginEnd="16dp"
-                        android:text="Big Savings on\nTop Brands"
+                        android:text="@string/banner_title"
                         android:textColor="@color/white"
                         android:textSize="22sp"
                         android:textStyle="bold"
@@ -141,7 +154,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Up to 60% Off"
+                        android:text="@string/banner_subtitle"
                         android:textColor="#E9D5FF"
                         android:textSize="16sp"
                         app:layout_constraintStart_toStartOf="@id/tv_banner_title"
@@ -154,7 +167,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:backgroundTint="@color/white"
-                        android:text="Shop Now"
+                        android:text="@string/shop_now"
                         android:textAllCaps="false"
                         android:textColor="@color/primary"
                         android:textStyle="bold"
@@ -215,9 +228,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
-                android:text="Categories"
+                android:text="@string/categories"
                 android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-condensed-medium"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/slider_indicator" />
@@ -227,9 +241,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
-                android:text="View All"
+                android:text="@string/view_all"
                 android:textColor="@color/primary"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="@id/tv_cat_title"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -247,44 +261,32 @@
                 app:layout_constraintTop_toBottomOf="@id/tv_cat_title"
                 tools:listitem="@layout/item_category" />
 
-            <!-- Top Deals Section -->
+            <!-- All Products Section -->
             <TextView
-                android:id="@+id/tv_deals_title"
+                android:id="@+id/tv_all_products_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:text="Top Deals"
+                android:layout_marginTop="32dp"
+                android:text="Explore Products"
                 android:textColor="@color/text_primary"
-                android:textSize="22sp"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-condensed-medium"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/rv_categories" />
 
-            <TextView
-                android:id="@+id/tv_deals_view_all"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
-                android:text="View All"
-                android:textColor="@color/primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/tv_deals_title"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_deals_title" />
-
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_deals"
+                android:id="@+id/rv_all_products"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_deals_title"
-                tools:listitem="@layout/item_product" />
+                android:paddingHorizontal="16dp"
+                app:layout_constraintTop_toBottomOf="@id/tv_all_products_title"
+                tools:listitem="@layout/item_product"
+                tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                tools:spanCount="2"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
