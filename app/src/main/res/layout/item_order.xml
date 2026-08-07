@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="14dp">
 
         <!-- Top Row -->
 
@@ -44,7 +44,7 @@
             android:id="@+id/iv_product"
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:scaleType="centerInside"
             android:background="#F3F4F6"
             app:layout_constraintStart_toStartOf="parent"
@@ -55,7 +55,7 @@
             android:id="@+id/tv_product_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:text="Wireless Headphone"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
@@ -127,7 +127,7 @@
             style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="10dp"
             android:text="View Details"
             android:textAllCaps="false"
             android:textColor="@color/primary"

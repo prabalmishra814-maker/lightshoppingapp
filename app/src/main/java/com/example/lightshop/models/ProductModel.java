@@ -2,7 +2,7 @@ package com.example.lightshop.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ProductModel {
+public class  ProductModel {
     @SerializedName("PRODUCT_ID")
     private String productId;
 

@@ -1,6 +1,5 @@
 package com.example.lightshop;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +13,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.lightshop.models.ProductModel;
+import com.example.lightshop.models.CategoryModel;
 import com.example.lightshop.api.SupabaseClient;
 import com.bumptech.glide.Glide;
+import com.denzcoskun.imageslider.ImageSlider;
+import com.denzcoskun.imageslider.constants.ScaleTypes;
+import com.denzcoskun.imageslider.models.SlideModel;
 import java.util.ArrayList;
 import java.util.List;
 import retrofit2.Call;
@@ -34,9 +37,65 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        setupCategories(view);
         setupClickListeners(view);
+        setupImageSlider(view);
+        fetchCategoriesFromSupabase(view);
         fetchProductsFromSupabase(view);
+    }
+
+    private void setupImageSlider(View view) {
+        ImageSlider imageSlider = view.findViewById(R.id.image_slider);
+        if (imageSlider != null) {
+            ArrayList<SlideModel> imageList = new ArrayList<>();
+            // Only images, no titles
+            imageList.add(new SlideModel("https://bit.ly/2YoJ77H", ScaleTypes.FIT));
+            imageList.add(new SlideModel("https://bit.ly/2BteuF2", ScaleTypes.FIT));
+            imageList.add(new SlideModel("https://bit.ly/3fLJf72", ScaleTypes.FIT));
+            
+            imageSlider.setImageList(imageList, ScaleTypes.FIT);
+        }
+    }
+
+    private void fetchCategoriesFromSupabase(View view) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchCategories(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<List<CategoryModel>>() {
+            @Override
+            public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<CategoryModel> categories = response.body();
+                    RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
+                    if (rvCategories != null) {
+                        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                        rvCategories.setAdapter(new CategoryAdapter(categories));
+                    }
+                } else {
+                    // Fallback to hardcoded categories if table is empty or missing
+                    setupHardcodedCategories(view);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                setupHardcodedCategories(view);
+            }
+        });
+    }
+
+    private void setupHardcodedCategories(View view) {
+        RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
+        List<HomeActivity.HomeCategory> categories = new ArrayList<>();
+        categories.add(new HomeActivity.HomeCategory("Men", R.drawable.ic_men, R.color.cat_men_bg));
+        categories.add(new HomeActivity.HomeCategory("Women", R.drawable.ic_women, R.color.cat_women_bg));
+        categories.add(new HomeActivity.HomeCategory("Electronics", R.drawable.ic_electronics, R.color.cat_electronics_bg));
+        categories.add(new HomeActivity.HomeCategory("Home", R.drawable.ic_home_cat, R.color.cat_home_bg));
+        categories.add(new HomeActivity.HomeCategory("Beauty", R.drawable.ic_beauty, R.color.cat_beauty_bg));
+
+        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvCategories.setAdapter(new HomeCategoryAdapter(categories));
     }
 
     private void fetchProductsFromSupabase(View view) {
@@ -81,20 +140,58 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void setupCategories(View view) {
-        RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
-        List<HomeActivity.HomeCategory> categories = new ArrayList<>();
-        categories.add(new HomeActivity.HomeCategory("Men", R.drawable.ic_men, R.color.cat_men_bg));
-        categories.add(new HomeActivity.HomeCategory("Women", R.drawable.ic_women, R.color.cat_women_bg));
-        categories.add(new HomeActivity.HomeCategory("Electronics", R.drawable.ic_electronics, R.color.cat_electronics_bg));
-        categories.add(new HomeActivity.HomeCategory("Home", R.drawable.ic_home_cat, R.color.cat_home_bg));
-        categories.add(new HomeActivity.HomeCategory("Beauty", R.drawable.ic_beauty, R.color.cat_beauty_bg));
+    // --- Adapters ---
+    public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
+        private List<CategoryModel> items;
 
-        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvCategories.setAdapter(new HomeCategoryAdapter(categories));
+        CategoryAdapter(List<CategoryModel> items) {
+            this.items = items;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            TextView name;
+            ImageView icon;
+            View bg;
+
+            ViewHolder(View view) {
+                super(view);
+                name = view.findViewById(R.id.cat_name);
+                icon = view.findViewById(R.id.cat_icon);
+                bg = view.findViewById(R.id.cat_bg);
+            }
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_category, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            CategoryModel item = items.get(position);
+            holder.name.setText(item.getCategoryName());
+            
+            Glide.with(getContext())
+                    .load(item.getCategoryImage())
+                    .placeholder(R.drawable.ic_category)
+                    .error(R.drawable.ic_category)
+                    .into(holder.icon);
+
+            holder.itemView.setOnClickListener(v -> {
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).switchToCategory();
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
     }
 
-    // --- Adapters (Copied from HomeActivity) ---
     public class HomeCategoryAdapter extends RecyclerView.Adapter<HomeCategoryAdapter.ViewHolder> {
         private List<HomeActivity.HomeCategory> items;
 
@@ -130,6 +227,12 @@ public class HomeFragment extends Fragment {
             if (holder.bg != null && holder.bg.getBackground() != null) {
                 holder.bg.getBackground().setTint(getContext().getColor(item.bgRes));
             }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).switchToCategory();
+                }
+            });
         }
 
         @Override
@@ -153,6 +256,8 @@ public class HomeFragment extends Fragment {
             TextView oldPrice;
             TextView discount;
             ImageView image;
+            ImageView wishlist;
+            View btnAdd;
 
             ViewHolder(View view) {
                 super(view);
@@ -161,6 +266,8 @@ public class HomeFragment extends Fragment {
                 oldPrice = view.findViewById(R.id.tv_old_price);
                 discount = view.findViewById(R.id.tv_discount);
                 image = view.findViewById(R.id.iv_product);
+                wishlist = view.findViewById(R.id.iv_wishlist);
+                btnAdd = view.findViewById(R.id.btn_add_to_cart);
                 
                 // Adjust layout for grid if needed
                 if (!isHorizontal) {
@@ -183,28 +290,49 @@ public class HomeFragment extends Fragment {
             ProductModel item = items.get(position);
             holder.name.setText(item.getProductName());
             
-            String sellingPrice = item.getSellingPrice();
-            String mrp = item.getMrp();
+            String sellingPriceStr = item.getSellingPrice();
+            String mrpStr = item.getMrp();
             
-            holder.price.setText("₹" + (sellingPrice != null ? sellingPrice : "0"));
-            holder.oldPrice.setText("₹" + (mrp != null ? mrp : "0"));
-            
-            // Dynamic discount calculation
+            // Fallback if mrp or sellingPrice are null
+            if (sellingPriceStr == null) sellingPriceStr = item.getPrice();
+            if (mrpStr == null) mrpStr = item.getMainPrice();
+
+            // Format prices as integers and calculate discount
             try {
-                if (sellingPrice != null && mrp != null) {
-                    double sPrice = Double.parseDouble(sellingPrice.replaceAll("[^0-9.]", ""));
-                    double mPrice = Double.parseDouble(mrp.replaceAll("[^0-9.]", ""));
-                    if (mPrice > sPrice) {
-                        int discountPercent = (int) (((mPrice - sPrice) / mPrice) * 100);
-                        holder.discount.setText("-" + discountPercent + "%");
-                        holder.discount.setVisibility(View.VISIBLE);
+                String sClean = sellingPriceStr != null ? sellingPriceStr.replaceAll("[^0-9.]", "") : "";
+                String mClean = mrpStr != null ? mrpStr.replaceAll("[^0-9.]", "") : "";
+
+                if (!sClean.isEmpty() && !mClean.isEmpty()) {
+                    double sPrice = Double.parseDouble(sClean);
+                    double mPrice = Double.parseDouble(mClean);
+                    
+                    // Show only Integer value (no decimals)
+                    holder.price.setText("₹" + (int) sPrice);
+                    holder.oldPrice.setText("₹" + (int) mPrice);
+                    holder.oldPrice.setPaintFlags(holder.oldPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+
+                    // Discount Formula: ((MRP - SellingPrice) / MRP) * 100
+                    if (mPrice > sPrice && mPrice > 0) {
+                        double discount = ((mPrice - sPrice) / mPrice) * 100;
+                        int discountPercent = (int) Math.round(discount);
+                        
+                        if (discountPercent > 0) {
+                            holder.discount.setText(discountPercent + "% OFF");
+                            holder.discount.setVisibility(View.VISIBLE);
+                        } else {
+                            holder.discount.setVisibility(View.GONE);
+                        }
                     } else {
                         holder.discount.setVisibility(View.GONE);
                     }
                 } else {
+                    holder.price.setText("₹" + (sellingPriceStr != null && !sellingPriceStr.isEmpty() ? sellingPriceStr : "0"));
+                    holder.oldPrice.setText("₹" + (mrpStr != null && !mrpStr.isEmpty() ? mrpStr : "0"));
                     holder.discount.setVisibility(View.GONE);
                 }
             } catch (Exception e) {
+                holder.price.setText("₹" + (sellingPriceStr != null ? sellingPriceStr : "0"));
+                holder.oldPrice.setText("₹" + (mrpStr != null ? mrpStr : "0"));
                 holder.discount.setVisibility(View.GONE);
             }
 
@@ -213,6 +341,18 @@ public class HomeFragment extends Fragment {
                     .placeholder(R.drawable.ic_category)
                     .error(R.drawable.ic_category)
                     .into(holder.image);
+
+            if (holder.wishlist != null) {
+                holder.wishlist.setOnClickListener(v -> {
+                    // Toggle wishlist logic
+                });
+            }
+
+            if (holder.btnAdd != null) {
+                holder.btnAdd.setOnClickListener(v -> {
+                    // Add to cart logic
+                });
+            }
         }
 
         @Override

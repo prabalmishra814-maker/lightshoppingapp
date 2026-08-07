@@ -69,20 +69,4 @@ public class HomeActivity extends AppCompatActivity {
             this.bgRes = bgRes;
         }
     }
-
-    public static class Product {
-        public String name;
-        public String price;
-        public String oldPrice;
-        public String discount;
-        public int imageRes;
-
-        public Product(String name, String price, String oldPrice, String discount, int imageRes) {
-            this.name = name;
-            this.price = price;
-            this.oldPrice = oldPrice;
-            this.discount = discount;
-            this.imageRes = imageRes;
-        }
-    }
 }

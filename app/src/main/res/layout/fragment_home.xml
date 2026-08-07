@@ -29,65 +29,96 @@
                 android:textSize="28sp"
                 android:fontFamily="sans-serif-condensed-medium"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/iv_notification"
+                app:layout_constraintEnd_toStartOf="@id/notification_card"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/iv_notification"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/notification_card"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginEnd="24dp"
-                android:padding="10dp"
-                android:background="@drawable/bg_circle_pastel"
-                android:contentDescription="Notifications"
-                android:src="@drawable/ic_notification"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#F3F4F6"
+                app:strokeWidth="1dp"
                 app:layout_constraintBottom_toBottomOf="@id/tv_welcome"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_welcome"
-                />
+                app:layout_constraintTop_toTopOf="@id/tv_welcome">
+
+                <ImageView
+                    android:id="@+id/iv_notification"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="Notifications"
+                    android:src="@drawable/ic_notification"
+                    app:tint="@color/text_primary" />
+
+                <!-- Optional: Notification Red Dot Badge -->
+                <View
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:background="@drawable/bg_status_dot"
+                    android:backgroundTint="#EF4444" />
+
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Row 2: Search Bar & Cart Button -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/search_bar_card"
                 android:layout_width="0dp"
-                android:layout_height="56dp"
+                android:layout_height="50dp"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="12dp"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="#F3F4F6"
-                app:cardBackgroundColor="#F9FAFB"
+                app:strokeWidth="1.2dp"
+                app:strokeColor="#EEF0F2"
+                app:cardBackgroundColor="@color/white"
                 app:layout_constraintEnd_toStartOf="@id/cart_button_card"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/tv_welcome">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp">
+                    android:layout_height="match_parent">
 
                     <ImageView
+                        android:id="@+id/iv_search_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="16dp"
                         android:src="@drawable/ic_search"
-                        app:tint="@color/text_hint" />
+                        app:tint="@color/primary" />
 
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_centerVertical="true"
                         android:layout_marginStart="12dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_toEndOf="@id/iv_search_icon"
                         android:background="@android:color/transparent"
                         android:hint="@string/search_hint"
+                        android:imeOptions="actionSearch"
                         android:inputType="text"
+                        android:singleLine="true"
                         android:textColor="@color/text_primary"
-                        android:textColorHint="@color/text_hint"
+                        android:textColorHint="#9CA3AF"
                         android:textSize="14sp" />
-                </LinearLayout>
+
+                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <FrameLayout
@@ -95,131 +126,80 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="24dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
                 app:layout_constraintBottom_toBottomOf="@id/search_bar_card"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/search_bar_card">
 
                 <com.google.android.material.card.MaterialCardView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
                     app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="2dp"
-                    app:strokeWidth="0dp">
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#F3F4F6"
+                    app:strokeWidth="1dp">
 
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_cart"
-                        app:tint="@color/text_primary" />
+                        app:tint="@color/primary" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Professional Badge for Cart Items -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cart_badge_card"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginEnd="2dp"
+                    app:cardBackgroundColor="@color/primary"
+                    app:cardCornerRadius="9dp"
+                    app:cardElevation="4dp"
+                    app:strokeColor="@color/white"
+                    app:strokeWidth="1.2dp">
+
+                    <TextView
+                        android:id="@+id/tv_cart_count"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="3"
+                        android:textColor="@color/white"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
                 </com.google.android.material.card.MaterialCardView>
 
             </FrameLayout>
 
-            <!-- Offer Banner -->
+            <!-- Offer Banner / Image Slider -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/offer_banner"
+                android:id="@+id/offer_banner_card"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginHorizontal="10dp"
+                android:layout_marginTop="20dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="24dp"
                 app:cardElevation="4dp"
-                app:layout_constraintTop_toBottomOf="@id/search_bar_card"
-                app:strokeWidth="0dp">
+                app:strokeWidth="0dp"
+                app:layout_constraintTop_toBottomOf="@id/search_bar_card">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <com.denzcoskun.imageslider.ImageSlider
+                    android:id="@+id/image_slider"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/bg_offer_banner">
+                    app:iss_auto_cycle="true"
+                    app:iss_period="3000"
+                    app:iss_delay="1000"
+                    app:iss_text_align="CENTER"/>
 
-                    <TextView
-                        android:id="@+id/tv_banner_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="24dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginEnd="16dp"
-                        android:text="@string/banner_title"
-                        android:textColor="@color/white"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@id/iv_banner_girl"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/tv_banner_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/banner_subtitle"
-                        android:textColor="#E9D5FF"
-                        android:textSize="16sp"
-                        app:layout_constraintStart_toStartOf="@id/tv_banner_title"
-                        app:layout_constraintTop_toBottomOf="@id/tv_banner_title" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_shop_now"
-                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:backgroundTint="@color/white"
-                        android:text="@string/shop_now"
-                        android:textAllCaps="false"
-                        android:textColor="@color/primary"
-                        android:textStyle="bold"
-                        app:cornerRadius="12dp"
-                        app:layout_constraintStart_toStartOf="@id/tv_banner_title"
-                        app:layout_constraintTop_toBottomOf="@id/tv_banner_subtitle" />
-
-                    <ImageView
-                        android:id="@+id/iv_banner_girl"
-                        android:layout_width="150dp"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/illustration_auth"
-                        app:layout_constraintEnd_toEndOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <!-- Slider Indicator -->
-            <LinearLayout
-                android:id="@+id/slider_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/offer_banner">
-
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:background="@drawable/ic_dot_active" />
-
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/ic_dot_inactive" />
-
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/ic_dot_inactive" />
-
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/ic_dot_inactive" />
-            </LinearLayout>
 
             <!-- Categories Section -->
             <TextView
@@ -228,13 +208,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginTop="24dp"
+                android:fontFamily="sans-serif-condensed-medium"
                 android:text="@string/categories"
                 android:textColor="@color/text_primary"
                 android:textSize="20sp"
-                android:fontFamily="sans-serif-condensed-medium"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/slider_indicator" />
+                app:layout_constraintTop_toBottomOf="@id/offer_banner_card" />
 
             <TextView
                 android:id="@+id/tv_cat_view_all"
@@ -267,10 +247,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="25dp"
                 android:text="Explore Products"
                 android:textColor="@color/text_primary"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:fontFamily="sans-serif-condensed-medium"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -282,7 +262,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:clipToPadding="false"
-                android:paddingHorizontal="16dp"
+                android:paddingHorizontal="14dp"
                 app:layout_constraintTop_toBottomOf="@id/tv_all_products_title"
                 tools:listitem="@layout/item_product"
                 tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"

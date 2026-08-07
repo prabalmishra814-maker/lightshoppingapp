@@ -69,6 +69,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.glide)
+    implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
     annotationProcessor(libs.glide.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.espresso.core)
