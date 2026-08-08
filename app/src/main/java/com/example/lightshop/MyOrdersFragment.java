@@ -9,11 +9,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.content.Intent;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyOrdersFragment extends Fragment {
+public class MyOrdersFragment extends Fragment implements OrdersAdapter.OnOrderClickListener {
 
     private OrdersAdapter adapter;
     private List<OrderModel> allOrders;
@@ -37,16 +39,25 @@ public class MyOrdersFragment extends Fragment {
         allOrders.add(new OrderModel("#123456", "02 May 2025", "Wireless Headphone", "₹1,299", 1, "Delivered", R.drawable.ic_headphones));
         allOrders.add(new OrderModel("#123455", "30 Apr 2025", "Men's Casual Shirt", "₹699", 1, "Shipped", R.drawable.ic_men));
         allOrders.add(new OrderModel("#123454", "28 Apr 2025", "Sneakers Shoes", "₹1,499", 1, "Processing", R.drawable.ic_shoes));
-        allOrders.add(new OrderModel("#123453", "27 Apr 2025", "Smart Watch", "₹1,999", 1, "Processing", R.drawable.ic_watch));
-        allOrders.add(new OrderModel("#123452", "25 Apr 2025", "Bluetooth Speaker", "₹899", 2, "Processing", R.drawable.ic_electronics));
-        allOrders.add(new OrderModel("#123451", "26 Apr 2025", "Backpack", "₹749", 1, "Delivered", R.drawable.ic_backpack));
     }
 
     private void setupRecyclerView(View view) {
         RecyclerView rvOrders = view.findViewById(R.id.rv_orders);
-        adapter = new OrdersAdapter(allOrders, true);
+        adapter = new OrdersAdapter(allOrders, this);
         rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
         rvOrders.setAdapter(adapter);
+    }
+
+    @Override
+    public void onBuyAgainClick(OrderModel order) {
+        // Navigate to CheckoutActivity (Order placement page)
+        Intent intent = new Intent(getContext(), CheckoutActivity.class);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onViewDetailsClick(OrderModel order) {
+        // Implement View Details logic if needed
     }
 
     private void setupTabLayout(View view) {
@@ -54,8 +65,8 @@ public class MyOrdersFragment extends Fragment {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                String status = tab.getText() != null ? tab.getText().toString() : "All";
-                filterOrders(view, status);
+                String status = tab.getText() != null ? tab.getText().toString() : "ALL";
+                filterOrders(status);
             }
 
             @Override
@@ -65,20 +76,17 @@ public class MyOrdersFragment extends Fragment {
         });
     }
 
-    private void filterOrders(View view, String status) {
+    private void filterOrders(String status) {
         List<OrderModel> filteredList = new ArrayList<>();
-        if ("All".equals(status)) {
+        if ("ALL".equalsIgnoreCase(status)) {
             filteredList.addAll(allOrders);
         } else {
             for (OrderModel order : allOrders) {
-                if (status.equals(order.getStatus())) {
+                if (status.equalsIgnoreCase(order.getStatus())) {
                     filteredList.add(order);
                 }
             }
         }
-        
-        RecyclerView rvOrders = view.findViewById(R.id.rv_orders);
-        adapter = new OrdersAdapter(filteredList, "All".equals(status));
-        rvOrders.setAdapter(adapter);
+        adapter.updateData(filteredList);
     }
 }

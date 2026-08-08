@@ -222,40 +222,12 @@ public class AuthActivity extends AppCompatActivity {
             return;
         }
 
-        setLoadingState(btnLogin, true, "Logging in...");
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        AuthModels.LoginRequest request = new AuthModels.LoginRequest(email, password);
-        SupabaseClient.getAuthService().login(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
-                .enqueue(new Callback<AuthModels.AuthResponse>() {
-                    @Override
-                    public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
-                        setLoadingState(btnLogin, false, "Login");
-                        if (response.isSuccessful() && response.body() != null) {
-                            AuthModels.AuthResponse authResponse = response.body();
-                            String name = "User";
-                            String email = "";
-                            if (authResponse.user != null) {
-                                email = authResponse.user.email;
-                                if (authResponse.user.userMetadata != null) {
-                                    name = authResponse.user.userMetadata.fullName;
-                                }
-                            }
-                            sessionManager.saveSession(authResponse.accessToken, email, name);
-
-                            startActivity(new Intent(AuthActivity.this, HomeActivity.class));
-                            finish();
-                        } else {
-                            String errorMsg = parseError(response);
-                            Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
-                        setLoadingState(btnLogin, false, "Login");
-                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // --- BYPASS LOGIN ---
+        // For development/testing: bypass the real Supabase authentication
+        Toast.makeText(this, "Login successful (Bypass)", Toast.LENGTH_SHORT).show();
+        sessionManager.saveSession("dummy_token_bypass", email, "Test User");
+        startActivity(new Intent(AuthActivity.this, HomeActivity.class));
+        finish();
     }
 
     private void handleRegister() {

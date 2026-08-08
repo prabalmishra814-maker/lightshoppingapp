@@ -36,6 +36,18 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.LightShop" />
+
+        <activity
+            android:name=".CartActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LightShop" />
+
+        <activity
+            android:name=".CheckoutActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LightShop" />
     </application>
 
 </manifest>

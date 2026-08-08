@@ -1,0 +1,3 @@
+- [x] Implement login bypass in `AuthActivity.java`
+- [x] Verify navigation to `HomeActivity`
+- [x] Verify session persistence

@@ -57,6 +57,16 @@ public class HomeActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.nav_category);
     }
 
+    public void switchToOrders() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setSelectedItemId(R.id.nav_orders);
+    }
+
+    public void switchToProfile() {
+        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setSelectedItemId(R.id.nav_profile);
+    }
+
     // --- Data Models (Keep here as fragments reference them) ---
     public static class HomeCategory {
         public String name;

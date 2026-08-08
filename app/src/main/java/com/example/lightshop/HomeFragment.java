@@ -129,14 +129,13 @@ public class HomeFragment extends Fragment {
 
     private void setupClickListeners(View view) {
         view.findViewById(R.id.tv_cat_view_all).setOnClickListener(v -> {
-            // In a single activity app, we would usually switch fragments here.
-            // But the user didn't specify changing this behavior yet. 
-            // For now, I'll keep it as a Fragment switch if the host can handle it, 
-            // but the prompt asked to refactor the app to use Fragments.
-            // Let's assume we want to navigate to the Category fragment.
             if (getActivity() instanceof HomeActivity) {
                 ((HomeActivity) getActivity()).switchToCategory();
             }
+        });
+
+        view.findViewById(R.id.cart_button_card).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(getContext(), CartActivity.class));
         });
     }
 

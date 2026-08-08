@@ -8,18 +8,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.TextViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import java.util.List;
 
 public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewHolder> {
 
-    private List<OrderModel> orders;
-    private boolean isAllTab;
+    public interface OnOrderClickListener {
+        void onBuyAgainClick(OrderModel order);
+        void onViewDetailsClick(OrderModel order);
+    }
 
-    public OrdersAdapter(List<OrderModel> orders, boolean isAllTab) {
+    private List<OrderModel> orders;
+    private OnOrderClickListener listener;
+
+    public OrdersAdapter(List<OrderModel> orders, OnOrderClickListener listener) {
         this.orders = orders;
-        this.isAllTab = isAllTab;
+        this.listener = listener;
     }
 
     public void updateData(List<OrderModel> newOrders) {
@@ -37,44 +42,49 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     @Override
     public void onBindViewHolder(@NonNull OrderViewHolder holder, int position) {
         OrderModel order = orders.get(position);
-        holder.orderId.setText(order.getOrderId());
-        holder.orderDate.setText(order.getDate());
-        holder.productImage.setImageResource(order.getImageRes());
-        holder.productName.setText(order.getProductName());
-        holder.price.setText(order.getPrice());
-        holder.qty.setText("Qty: " + order.getQuantity());
+        holder.tvOrderId.setText(order.getOrderId());
+        holder.tvOrderDate.setText(order.getDate());
+        holder.ivProduct.setImageResource(order.getImageRes());
+        holder.tvProductName.setText(order.getProductName());
+        holder.tvPrice.setText(order.getPrice());
+        holder.tvQty.setText("Qty: " + order.getQuantity());
+        holder.tvStatus.setText(order.getStatus());
 
-        // Special handling for the first item in "All" tab
-        if (isAllTab && position == 0 && "#123456".equals(order.getOrderId())) {
-            holder.statusRight.setText("Shipped");
-            TextViewCompat.setCompoundDrawableTintList(holder.statusRight, ColorStateList.valueOf(ContextCompat.getColor(holder.itemView.getContext(), R.color.status_shipped)));
-            
-            holder.statusBottom.setVisibility(View.VISIBLE);
-            holder.statusBottom.setText("Delivered");
-            TextViewCompat.setCompoundDrawableTintList(holder.statusBottom, ColorStateList.valueOf(ContextCompat.getColor(holder.itemView.getContext(), R.color.status_delivered)));
-        } else {
-            holder.statusBottom.setVisibility(View.GONE);
-            holder.statusRight.setText(order.getStatus());
-            int statusColor;
-            switch (order.getStatus()) {
-                case "Delivered":
-                    statusColor = R.color.status_delivered;
-                    break;
-                case "Shipped":
-                    statusColor = R.color.status_shipped;
-                    break;
-                case "Processing":
-                    statusColor = R.color.status_processing;
-                    break;
-                case "Cancelled":
-                    statusColor = R.color.status_cancelled;
-                    break;
-                default:
-                    statusColor = R.color.text_subtitle;
-                    break;
-            }
-            TextViewCompat.setCompoundDrawableTintList(holder.statusRight, ColorStateList.valueOf(ContextCompat.getColor(holder.itemView.getContext(), statusColor)));
+        int statusColor;
+        switch (order.getStatus()) {
+            case "Delivered":
+                statusColor = R.color.status_delivered;
+                holder.btnSecondary.setVisibility(View.VISIBLE);
+                holder.btnSecondary.setText("Buy Again");
+                break;
+            case "Shipped":
+                statusColor = R.color.status_shipped;
+                holder.btnSecondary.setVisibility(View.VISIBLE);
+                holder.btnSecondary.setText("Track Order");
+                break;
+            case "Processing":
+                statusColor = R.color.status_processing;
+                holder.btnSecondary.setVisibility(View.GONE);
+                break;
+            case "Cancelled":
+                statusColor = R.color.status_cancelled;
+                holder.btnSecondary.setVisibility(View.GONE);
+                break;
+            default:
+                statusColor = R.color.text_subtitle;
+                holder.btnSecondary.setVisibility(View.GONE);
+                break;
         }
+
+        holder.vStatusDot.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(holder.itemView.getContext(), statusColor)));
+
+        holder.btnSecondary.setOnClickListener(v -> {
+            if (order.getStatus().equals("Delivered")) {
+                listener.onBuyAgainClick(order);
+            }
+        });
+
+        holder.btnViewDetails.setOnClickListener(v -> listener.onViewDetailsClick(order));
     }
 
     @Override
@@ -83,19 +93,23 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
     }
 
     static class OrderViewHolder extends RecyclerView.ViewHolder {
-        TextView orderId, orderDate, productName, price, qty, statusRight, statusBottom;
-        ImageView productImage;
+        TextView tvOrderId, tvOrderDate, tvProductName, tvPrice, tvQty, tvStatus;
+        ImageView ivProduct;
+        View vStatusDot;
+        MaterialButton btnSecondary, btnViewDetails;
 
         OrderViewHolder(View view) {
             super(view);
-            orderId = view.findViewById(R.id.tv_order_id);
-            orderDate = view.findViewById(R.id.tv_order_date);
-            productImage = view.findViewById(R.id.iv_product);
-            productName = view.findViewById(R.id.tv_product_name);
-            price = view.findViewById(R.id.tv_price);
-            qty = view.findViewById(R.id.tv_qty);
-            statusRight = view.findViewById(R.id.tv_status_right);
-            statusBottom = view.findViewById(R.id.tv_status_bottom);
+            tvOrderId = view.findViewById(R.id.tv_order_id);
+            tvOrderDate = view.findViewById(R.id.tv_order_date);
+            ivProduct = view.findViewById(R.id.iv_product);
+            tvProductName = view.findViewById(R.id.tv_product_name);
+            tvPrice = view.findViewById(R.id.tv_price);
+            tvQty = view.findViewById(R.id.tv_qty);
+            tvStatus = view.findViewById(R.id.tv_status);
+            vStatusDot = view.findViewById(R.id.v_status_dot);
+            btnSecondary = view.findViewById(R.id.btn_secondary);
+            btnViewDetails = view.findViewById(R.id.btn_view_details);
         }
     }
 }

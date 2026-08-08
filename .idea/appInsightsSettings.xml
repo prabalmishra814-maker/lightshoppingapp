@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.lightshop" />
+                  <option name="mobileSdkAppId" value="1:1046922122069:android:bd9ef81ac22429246b15dc" />
+                  <option name="projectId" value="sports-bet-cb7e6" />
+                  <option name="projectNumber" value="1046922122069" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

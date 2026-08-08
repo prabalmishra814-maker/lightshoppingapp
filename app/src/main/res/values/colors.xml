@@ -21,10 +21,20 @@
     <color name="profile_card_bg">#F8F5FF</color>
     <color name="color_logout">#DC2626</color>
 
+    <!-- UI Accent Colors -->
+    <color name="accent_blue">#1769E0</color>
+    <color name="savings_green">#00A651</color>
+    <color name="primary_yellow">#FFD400</color>
+    <color name="light_grey_bg">#F7F8FA</color>
+    <color name="strikethrough_grey">#9CA3AF</color>
+    <color name="radio_selected">#1769E0</color>
+    <color name="radio_unselected">#D1D5DB</color>
+
+
     <!-- Order Status Colors -->
-    <color name="status_delivered">#16A34A</color>
+    <color name="status_delivered">#00A651</color>
     <color name="status_processing">#F59E0B</color>
-    <color name="status_shipped">#2563EB</color>
+    <color name="status_shipped">#1769E0</color>
     <color name="status_cancelled">#DC2626</color>
 
     <!-- Banner Gradients -->

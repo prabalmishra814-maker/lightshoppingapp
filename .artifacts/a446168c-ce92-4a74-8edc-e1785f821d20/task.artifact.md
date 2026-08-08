@@ -1,0 +1,24 @@
+# Task: Professional E-commerce Profile Screen Redesign
+
+- `[ ]` Create/Update UI Resources
+    - `[ ]` Create `bg_profile_photo.xml` (circular background)
+    - `[ ]` Create `bg_card_white.xml` (rounded card with subtle border)
+    - `[ ]` Create `bg_quick_action.xml` (for 2-column grid items)
+- `[ ]` Redesign `fragment_profile.xml`
+    - `[ ]` Implement `NestedScrollView` structure
+    - `[ ]` Implement Profile Header
+    - `[ ]` Implement My Account Section (2-column grid)
+    - `[ ]` Implement My Orders Card
+    - `[ ]` Implement Account & Settings Card
+    - `[ ]` Implement Help & Support Card
+    - `[ ]` Implement About Card
+    - `[ ]` Implement Logout button
+- `[ ]` Update `ProfileFragment.java`
+    - `[ ]` Bind new UI elements
+    - `[ ]` Implement click listeners for all sections
+    - `[ ]` Add Logout confirmation dialog
+    - `[ ]` Connect navigation to `MyOrdersFragment`
+- `[ ]` Verification
+    - `[ ]` Build the project
+    - `[ ]` Verify UI in Profile tab
+    - `[ ]` Verify navigation and logout dialog
