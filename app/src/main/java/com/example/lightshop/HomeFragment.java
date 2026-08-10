@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,6 +17,8 @@ import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.models.CategoryModel;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.api.SessionManager;
+import com.example.lightshop.utils.CartHelper;
+import com.example.lightshop.utils.CartManager;
 import com.bumptech.glide.Glide;
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
@@ -100,13 +103,13 @@ public class HomeFragment extends Fragment {
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
                 "eq." + userId,
-                "product_id"
+                "*"
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     for (Map<String, Object> item : response.body()) {
-                        Object pid = item.get("product_id");
+                        Object pid = item.get("PRODUCT_ID") != null ? item.get("PRODUCT_ID") : item.get("product_id");
                         if (pid != null) {
                             cartProductIds.add(String.valueOf(pid));
                         }
@@ -391,12 +394,14 @@ public class HomeFragment extends Fragment {
             ProductModel item = items.get(position);
             holder.name.setText(item.getProductName());
             
-            String sellingPriceStr = item.getSellingPrice();
-            String mrpStr = item.getMrp();
+            // product_price is the selling price (to buy)
+            String sellingPriceStr = item.getPrice();
+            // product_main_price is the previous price (original/MRP)
+            String mrpStr = item.getMainPrice();
             
-            // Fallback if mrp or sellingPrice are null
-            if (sellingPriceStr == null) sellingPriceStr = item.getPrice();
-            if (mrpStr == null) mrpStr = item.getMainPrice();
+            // Fallback if null
+            if (sellingPriceStr == null) sellingPriceStr = "0";
+            if (mrpStr == null) mrpStr = sellingPriceStr;
 
             // Format prices as integers and calculate discount
             try {
@@ -496,6 +501,13 @@ public class HomeFragment extends Fragment {
                 public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
                     if (response.isSuccessful()) {
                         cartProductIds.remove(product.getProductId());
+                        // Sync with CartManager
+                        for (int i = 0; i < CartManager.getInstance().getCartItems().size(); i++) {
+                            if (CartManager.getInstance().getCartItems().get(i).getProduct().getProductId().equals(product.getProductId())) {
+                                CartManager.getInstance().removeItem(i);
+                                break;
+                            }
+                        }
                         notifyDataSetChanged();
                     }
                 }
@@ -508,46 +520,17 @@ public class HomeFragment extends Fragment {
         }
 
         private void addToCart(ProductModel product) {
-            String userId = sessionManager.getUserId();
-            if (userId.isEmpty()) {
-                android.widget.Toast.makeText(getContext(), "Please login to add to cart", android.widget.Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Map<String, Object> data = new HashMap<>();
-            data.put("user_id", userId);
-            data.put("product_id", product.getProductId());
-            data.put("product_name", product.getProductName());
-            data.put("product_price", product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice());
-            data.put("product_mrp", product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : product.getPrice()));
-            data.put("product_image", product.getProductImage());
-            data.put("quantity", 1);
-
-            String userToken = sessionManager.getToken();
-            String authHeader = "Bearer " + (userToken != null && !userToken.isEmpty() ? userToken : SupabaseClient.SUPABASE_ANON_KEY);
-
-            // Use UPSERT logic (resolution=merge-duplicates) to update quantity if already exists
-            // Or just add and handle 409. For now, let's just add to Cart table.
-            SupabaseClient.getApiService().addData(
-                    "cart",
-                    SupabaseClient.SUPABASE_ANON_KEY,
-                    authHeader,
-                    "resolution=merge-duplicates,return=representation",
-                    data
-            ).enqueue(new Callback<List<Map<String, Object>>>() {
+            CartHelper.addToCart(getContext(), product, new CartHelper.CartCallback() {
                 @Override
-                public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
-                    if (response.isSuccessful()) {
-                        cartProductIds.add(product.getProductId());
-                        notifyDataSetChanged();
-                    } else {
-                        android.widget.Toast.makeText(getContext(), "Failed to add: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
-                    }
+                public void onSuccess() {
+                    cartProductIds.add(product.getProductId());
+                    notifyDataSetChanged();
+                    Toast.makeText(getContext(), "Added to Cart", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
-                    android.widget.Toast.makeText(getContext(), "Network error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                public void onFailure(String error) {
+                    Toast.makeText(getContext(), "Failed: " + error, Toast.LENGTH_SHORT).show();
                 }
             });
         }

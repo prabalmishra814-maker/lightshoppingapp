@@ -11,7 +11,6 @@ public class CartManager {
 
     private CartManager() {
         cartItems = new ArrayList<>();
-        // No sample data, fetch from DB
     }
 
     public static synchronized CartManager getInstance() {
@@ -29,11 +28,32 @@ public class CartManager {
         return cartItems;
     }
 
+    public void addItem(ProductModel product, int quantity) {
+        for (CartItem item : cartItems) {
+            if (item.getProduct().getProductId().equals(product.getProductId())) {
+                item.setQuantity(item.getQuantity() + quantity);
+                return;
+            }
+        }
+        cartItems.add(new CartItem(product, quantity));
+    }
+
     public void updateQuantity(int position, int delta) {
-        CartItem item = cartItems.get(position);
-        int newQty = item.getQuantity() + delta;
-        if (newQty > 0) {
-            item.setQuantity(newQty);
+        if (position >= 0 && position < cartItems.size()) {
+            CartItem item = cartItems.get(position);
+            int newQty = item.getQuantity() + delta;
+            if (newQty > 0) {
+                item.setQuantity(newQty);
+            }
+        }
+    }
+
+    public void updateQuantityByProductId(String productId, int newQty) {
+        for (CartItem item : cartItems) {
+            if (item.getProduct().getProductId().equals(productId)) {
+                item.setQuantity(newQty);
+                return;
+            }
         }
     }
 
@@ -43,34 +63,24 @@ public class CartManager {
         }
     }
 
+    public void clear() {
+        cartItems.clear();
+    }
+
     public int getTotalMrp() {
-        int total = 0;
+        double total = 0;
         for (CartItem item : cartItems) {
-            try {
-                String mrpStr = item.getProduct().getMrp();
-                if (mrpStr == null) mrpStr = "0";
-                String clean = mrpStr.replaceAll("[^0-9.]", "");
-                if (!clean.isEmpty()) {
-                    total += (int) Double.parseDouble(clean) * item.getQuantity();
-                }
-            } catch (Exception ignored) {}
+            total += PriceUtils.parsePrice(item.getProduct().getMrp()) * item.getQuantity();
         }
-        return total;
+        return (int) Math.round(total);
     }
 
     public int getTotalSellingPrice() {
-        int total = 0;
+        double total = 0;
         for (CartItem item : cartItems) {
-            try {
-                String priceStr = item.getProduct().getSellingPrice();
-                if (priceStr == null) priceStr = "0";
-                String clean = priceStr.replaceAll("[^0-9.]", "");
-                if (!clean.isEmpty()) {
-                    total += (int) Double.parseDouble(clean) * item.getQuantity();
-                }
-            } catch (Exception ignored) {}
+            total += PriceUtils.parsePrice(item.getProduct().getSellingPrice()) * item.getQuantity();
         }
-        return total;
+        return (int) Math.round(total);
     }
 
     public int getTotalDiscount() {

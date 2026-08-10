@@ -43,8 +43,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.tvProductName.setText(product.getProductName());
         holder.tvProductDesc.setText(product.getShortDescription());
         holder.tvStockStatus.setText(product.getStock());
-        holder.tvSellingPrice.setText("₹" + product.getSellingPrice());
-        holder.tvMrp.setText("₹" + product.getMrp());
+        
+        double sellingPrice = com.example.lightshop.utils.PriceUtils.parsePrice(product.getSellingPrice());
+        double mrp = com.example.lightshop.utils.PriceUtils.parsePrice(product.getMrp());
+        
+        holder.tvSellingPrice.setText(com.example.lightshop.utils.PriceUtils.formatPrice(sellingPrice));
+        holder.tvMrp.setText(com.example.lightshop.utils.PriceUtils.formatPrice(mrp));
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
         // Load image using Glide
@@ -55,21 +59,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
                 .into(holder.ivProductImage);
 
         // Calculate discount %
-        try {
-            String mrpStr = product.getMrp() != null ? product.getMrp().replaceAll("[^0-9.]", "") : "0";
-            String sellingStr = product.getSellingPrice() != null ? product.getSellingPrice().replaceAll("[^0-9.]", "") : "0";
-            
-            if (!mrpStr.isEmpty() && !sellingStr.isEmpty()) {
-                double mrp = Double.parseDouble(mrpStr);
-                double selling = Double.parseDouble(sellingStr);
-                if (mrp > 0) {
-                    int discount = (int) (((mrp - selling) * 100) / mrp);
-                    holder.tvDiscount.setText(discount + "% off");
-                } else {
-                    holder.tvDiscount.setText("0% off");
-                }
-            }
-        } catch (Exception e) {
+        if (mrp > 0) {
+            int discount = (int) (((mrp - sellingPrice) * 100) / mrp);
+            holder.tvDiscount.setText(discount + "% off");
+        } else {
             holder.tvDiscount.setText("0% off");
         }
 

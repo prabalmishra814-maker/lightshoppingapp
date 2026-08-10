@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.lightshop.utils.CartManager;
+import com.example.lightshop.utils.PriceUtils;
 import com.example.lightshop.utils.StatusBarUtils;
 
 import android.widget.Toast;
@@ -83,20 +84,25 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     for (Map<String, Object> map : response.body()) {
                         try {
                             ProductModel p = new ProductModel();
-                            p.setProductId(String.valueOf(map.get("product_id")));
-                            p.setProductName(String.valueOf(map.get("product_name")));
-                            p.setSellingPrice(String.valueOf(map.get("product_price")));
-                            p.setProductImage(String.valueOf(map.get("product_image")));
+                            // Mapping correct columns from DB to ProductModel
+                            p.setProductId(getStringFromMap(map, "product_id", "PRODUCT_ID"));
+                            p.setProductName(getStringFromMap(map, "product_name"));
                             
-                            Object mrpObj = map.get("product_mrp");
-                            p.setMrp(mrpObj != null ? String.valueOf(mrpObj) : String.valueOf(map.get("product_price")));
+                            String sellingPrice = getStringFromMap(map, "product_price", "product_selling_price");
+                            p.setSellingPrice(sellingPrice);
+                            p.setProductImage(getStringFromMap(map, "product_image"));
+                            
+                            String mrp = getStringFromMap(map, "product_mrp");
+                            p.setMrp(mrp != null && !mrp.isEmpty() ? mrp : sellingPrice);
 
                             int qty = 1;
                             Object qtyObj = map.get("quantity");
                             if (qtyObj instanceof Number) {
                                 qty = ((Number) qtyObj).intValue();
                             } else if (qtyObj instanceof String) {
-                                qty = Integer.parseInt((String) qtyObj);
+                                try {
+                                    qty = Integer.parseInt((String) qtyObj);
+                                } catch (NumberFormatException ignored) {}
                             }
                             
                             fetchedItems.add(new CartItem(p, qty));
@@ -114,7 +120,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     adapter.notifyDataSetChanged();
                     updatePriceDetails();
                 } else {
-                    Toast.makeText(CartActivity.this, "Failed to load cart: " + response.code(), Toast.LENGTH_SHORT).show();
+                    String error = "Failed to load cart: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            error += " - " + response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    Toast.makeText(CartActivity.this, error, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -148,10 +160,10 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         
         tvCartTitle.setText("My Cart (" + count + ")");
         tvItemsCount.setText("Price (" + count + " items)");
-        tvTotalPriceMrp.setText("₹" + String.format("%,d", manager.getTotalMrp()));
-        tvTotalDiscount.setText("-₹" + String.format("%,d", manager.getTotalDiscount()));
-        tvTotalSellingPrice.setText("₹" + String.format("%,d", manager.getTotalSellingPrice()));
-        tvSavingsMessage.setText("You will save ₹" + String.format("%,d", manager.getTotalDiscount()) + " on this order");
+        tvTotalPriceMrp.setText(PriceUtils.formatPrice(manager.getTotalMrp()));
+        tvTotalDiscount.setText("-" + PriceUtils.formatPrice(manager.getTotalDiscount()));
+        tvTotalSellingPrice.setText(PriceUtils.formatPrice(manager.getTotalSellingPrice()));
+        tvSavingsMessage.setText("You will save " + PriceUtils.formatPrice(manager.getTotalDiscount()) + " on this order");
         
         btnPlaceOrder.setEnabled(count > 0);
     }
@@ -161,8 +173,19 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         if (position < 0 || position >= cartItems.size()) return;
 
         CartItem item = cartItems.get(position);
-        int newQty = item.getQuantity() + delta;
-        if (newQty <= 0) return;
+        int oldQty = item.getQuantity();
+        int newQty = oldQty + delta;
+
+        if (newQty <= 0) {
+            onRemoveItem(position);
+            return;
+        }
+
+        // Optimistic Update
+        item.setQuantity(newQty);
+        CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), newQty);
+        adapter.notifyItemChanged(position);
+        updatePriceDetails();
 
         String userId = sessionManager.getUserId();
         String authHeader = "Bearer " + (sessionManager.getToken() != null ? sessionManager.getToken() : SupabaseClient.SUPABASE_ANON_KEY);
@@ -183,21 +206,23 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         ).enqueue(new Callback<okhttp3.ResponseBody>() {
             @Override
             public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    // Update Local list
-                    item.setQuantity(newQty);
-                    // Update Manager
-                    CartManager.getInstance().updateQuantity(position, delta);
-                    
+                if (!response.isSuccessful()) {
+                    // Rollback
+                    item.setQuantity(oldQty);
+                    CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), oldQty);
                     adapter.notifyItemChanged(position);
                     updatePriceDetails();
-                } else {
                     Toast.makeText(CartActivity.this, "Failed to update quantity", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+                // Rollback
+                item.setQuantity(oldQty);
+                CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), oldQty);
+                adapter.notifyItemChanged(position);
+                updatePriceDetails();
                 Toast.makeText(CartActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
             }
         });
@@ -401,5 +426,18 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private String getStringFromMap(Map<String, Object> map, String... keys) {
+        for (String key : keys) {
+            Object value = map.get(key);
+            if (value != null) {
+                String strValue = String.valueOf(value);
+                if (!strValue.equalsIgnoreCase("null") && !strValue.isEmpty()) {
+                    return strValue;
+                }
+            }
+        }
+        return "0";
     }
 }

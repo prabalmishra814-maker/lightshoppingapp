@@ -18,6 +18,7 @@ import com.example.lightshop.api.SessionManager;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.CartItem;
 import com.example.lightshop.utils.CartManager;
+import com.example.lightshop.utils.PriceUtils;
 import com.example.lightshop.utils.StatusBarUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -154,13 +155,7 @@ public class CheckoutActivity extends AppCompatActivity {
             itemMap.put("product_id", item.getProduct().getProductId());
             itemMap.put("product_name", item.getProduct().getProductName());
             
-            String priceStr = item.getProduct().getSellingPrice();
-            int price = 0;
-            if (priceStr != null) {
-                try {
-                    price = Integer.parseInt(priceStr.replaceAll("[^0-9]", ""));
-                } catch (Exception ignored) {}
-            }
+            int price = PriceUtils.parsePriceInt(item.getProduct().getSellingPrice());
             
             itemMap.put("price_per_unit", price);
             itemMap.put("quantity", item.getQuantity());
@@ -256,13 +251,13 @@ public class CheckoutActivity extends AppCompatActivity {
         int deliveryFee = 0;
         int totalSelling = manager.getTotalSellingPrice() + deliveryFee;
 
-        tvTotalPriceMrp.setText("₹" + String.format("%,d", manager.getTotalMrp()));
-        tvTotalDiscount.setText("-₹" + String.format("%,d", manager.getTotalDiscount()));
+        tvTotalPriceMrp.setText(PriceUtils.formatPrice(manager.getTotalMrp()));
+        tvTotalDiscount.setText("-" + PriceUtils.formatPrice(manager.getTotalDiscount()));
         tvDeliveryCharges.setText("FREE");
         tvDeliveryCharges.setTextColor(getResources().getColor(R.color.savings_green));
         
-        tvTotalSellingPrice.setText("₹" + String.format("%,d", totalSelling));
-        tvSavingsMessage.setText("You will save ₹" + String.format("%,d", manager.getTotalDiscount()) + " on this order");
+        tvTotalSellingPrice.setText(PriceUtils.formatPrice(totalSelling));
+        tvSavingsMessage.setText("You will save " + PriceUtils.formatPrice(manager.getTotalDiscount()) + " on this order");
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.models.WishlistModel;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.api.SessionManager;
+import com.example.lightshop.utils.CartHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,12 +89,15 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
                     }
                     adapter.notifyDataSetChanged();
                 } else {
-                    // Show the actual error code (e.g., 401 or 404) to help debugging
                     String errorMsg = "Error: " + response.code();
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg += " - " + response.errorBody().string();
+                        }
+                    } catch (Exception ignored) {}
+                    
                     if (response.code() == 404) {
-                        errorMsg = "Wishlist table not found. Please check database.";
-                    } else if (response.code() == 401) {
-                        errorMsg = "Session expired. Please log in again.";
+                        errorMsg = "Table not found (404). Check if 'wishlist' table exists.";
                     }
                     Toast.makeText(WishlistActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                 }
@@ -159,45 +163,17 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
     @Override
     public void onAddToCart(int position) {
         if (position < 0 || position >= wishlistList.size()) return;
-        
         ProductModel product = wishlistList.get(position);
-        String userId = sessionManager.getUserId();
-        if (userId.isEmpty()) {
-            Toast.makeText(this, "Please login to add to cart", Toast.LENGTH_SHORT).show();
-            return;
-        }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("user_id", userId);
-        data.put("product_id", product.getProductId());
-        data.put("product_name", product.getProductName());
-        data.put("product_price", product.getSellingPrice());
-        data.put("product_mrp", product.getMrp() != null ? product.getMrp() : product.getSellingPrice());
-        data.put("product_image", product.getProductImage());
-        data.put("quantity", 1);
-
-        String userToken = sessionManager.getToken();
-        String authHeader = "Bearer " + (userToken != null && !userToken.isEmpty() ? userToken : SupabaseClient.SUPABASE_ANON_KEY);
-
-        SupabaseClient.getApiService().addData(
-                "cart",
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "resolution=merge-duplicates,return=representation",
-                data
-        ).enqueue(new Callback<List<Map<String, Object>>>() {
+        CartHelper.addToCart(this, product, new CartHelper.CartCallback() {
             @Override
-            public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(WishlistActivity.this, "Added to cart", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(WishlistActivity.this, "Failed to add to cart: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
+            public void onSuccess() {
+                Toast.makeText(WishlistActivity.this, "Added to cart", Toast.LENGTH_SHORT).show();
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
-                Toast.makeText(WishlistActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+            public void onFailure(String error) {
+                Toast.makeText(WishlistActivity.this, "Failed: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }

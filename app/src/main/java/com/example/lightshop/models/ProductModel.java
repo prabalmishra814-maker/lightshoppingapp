@@ -3,7 +3,7 @@ package com.example.lightshop.models;
 import com.google.gson.annotations.SerializedName;
 
 public class  ProductModel {
-    @SerializedName(value = "product_id", alternate = {"id"})
+    @SerializedName(value = "product_id", alternate = {"id", "PRODUCT_ID"})
     private String productId;
 
     @SerializedName(value = "product_name", alternate = {"name"})
