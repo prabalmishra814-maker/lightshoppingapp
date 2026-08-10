@@ -1,0 +1,4 @@
+- [x] Redesign `activity_product_detail.xml` (remove tabs, restyle description)
+- [x] Remove `productTabs` reference in `ProductDetailActivity.java`
+- [x] Verify project builds successfully
+- [x] Create walkthrough

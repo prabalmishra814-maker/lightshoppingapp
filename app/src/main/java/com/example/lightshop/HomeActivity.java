@@ -52,6 +52,12 @@ public class HomeActivity extends AppCompatActivity {
                 .commit();
     }
 
+    public void openProductDetail(com.example.lightshop.models.ProductModel product) {
+        android.content.Intent intent = new android.content.Intent(this, ProductDetailActivity.class);
+        intent.putExtra("product", product);
+        startActivity(intent);
+    }
+
     public void switchToCategory() {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_category);

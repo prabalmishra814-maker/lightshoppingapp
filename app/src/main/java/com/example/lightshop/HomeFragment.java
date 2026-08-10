@@ -159,6 +159,10 @@ public class HomeFragment extends Fragment {
                         rvCategories.setAdapter(new CategoryAdapter(categories));
                     }
                 } else {
+                    if (response.code() == 404) {
+                        fetchCategoriesPluralFromSupabase(view);
+                        return;
+                    }
                     // Fallback to hardcoded categories if table is empty or missing
                     if (getContext() != null) {
                         android.widget.Toast.makeText(getContext(), "Categories Table Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
@@ -169,9 +173,40 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Categories Network Error", android.widget.Toast.LENGTH_SHORT).show();
+                android.util.Log.e("SupabaseError", "Categories Fetch Failed", t);
+                // Try plural on failure too if it might be a DNS/URL issue related to path
+                fetchCategoriesPluralFromSupabase(view);
+            }
+        });
+    }
+
+    private void fetchCategoriesPluralFromSupabase(View view) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchCategoriesPlural(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<List<CategoryModel>>() {
+            @Override
+            public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<CategoryModel> categories = response.body();
+                    RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
+                    if (rvCategories != null) {
+                        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                        rvCategories.setAdapter(new CategoryAdapter(categories));
+                    }
+                } else {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Categories Plural Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                    setupHardcodedCategories(view);
                 }
+            }
+
+            @Override
+            public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                android.util.Log.e("SupabaseError", "Categories Plural Fetch Failed", t);
                 setupHardcodedCategories(view);
             }
         });
@@ -211,6 +246,10 @@ public class HomeFragment extends Fragment {
                         rvAll.setNestedScrollingEnabled(false); // Since it's inside NestedScrollView
                     }
                 } else {
+                    if (response.code() == 404) {
+                        fetchProductsPluralFromSupabase(view);
+                        return;
+                    }
                     if (getContext() != null) {
                         android.widget.Toast.makeText(getContext(), "Products Table Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
                     }
@@ -219,11 +258,82 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<ProductModel>> call, Throwable t) {
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Products Network Error", android.widget.Toast.LENGTH_SHORT).show();
-                }
+                android.util.Log.e("SupabaseError", "Products Fetch Failed", t);
+                fetchProductsPluralFromSupabase(view);
             }
         });
+    }
+
+    private void fetchProductsPluralFromSupabase(View view) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchProductsPlural(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<List<ProductModel>>() {
+            @Override
+            public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<ProductModel> products = response.body();
+                    RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
+                    if (rvAll != null) {
+                        rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
+                        allProductsAdapter = new ProductAdapter(products, false);
+                        rvAll.setAdapter(allProductsAdapter);
+                        rvAll.setNestedScrollingEnabled(false);
+                    }
+                } else {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Products Plural Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ProductModel>> call, Throwable t) {
+                android.util.Log.e("SupabaseError", "Products Plural Fetch Failed", t);
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Showing offline products", android.widget.Toast.LENGTH_SHORT).show();
+                }
+                setupHardcodedProducts(view);
+            }
+        });
+    }
+
+    private void setupHardcodedProducts(View view) {
+        List<ProductModel> dummyProducts = new ArrayList<>();
+        
+        ProductModel p1 = new ProductModel();
+        p1.setProductId("dummy1");
+        p1.setProductName("boAt Airdopes 141 Pro");
+        p1.setSellingPrice("1299");
+        p1.setMrp("1999");
+        p1.setProductImage("https://m.media-amazon.com/images/I/315vj6oj-FL._MCnd_AC_CEL_SR450,600_.jpg");
+        p1.setRating("4.3");
+        p1.setReviewsCount("12,456");
+        p1.setSoldCount("1.2L+");
+        p1.setDescription("Premium Bluetooth earbuds with 42 hours playtime and ASAP charge.");
+        dummyProducts.add(p1);
+
+        ProductModel p2 = new ProductModel();
+        p2.setProductId("dummy2");
+        p2.setProductName("Noise Pulse 2 Max");
+        p2.setSellingPrice("1799");
+        p2.setMrp("5999");
+        p2.setProductImage("https://m.media-amazon.com/images/I/71Scpa62s+L._SX679_.jpg");
+        p2.setRating("4.1");
+        p2.setReviewsCount("8,234");
+        p2.setSoldCount("50K+");
+        p2.setDescription("1.85'' Display, Bluetooth Calling, 10 Days Battery Smartwatch.");
+        dummyProducts.add(p2);
+
+        RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
+        if (rvAll != null) {
+            rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            allProductsAdapter = new ProductAdapter(dummyProducts, false);
+            rvAll.setAdapter(allProductsAdapter);
+            rvAll.setNestedScrollingEnabled(false);
+        }
     }
 
     private void setupClickListeners(View view) {
@@ -480,6 +590,12 @@ public class HomeFragment extends Fragment {
                     }
                 });
             }
+
+            holder.itemView.setOnClickListener(v -> {
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).openProductDetail(item);
+                }
+            });
         }
 
         private void removeFromCart(ProductModel product) {

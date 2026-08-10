@@ -1,0 +1,6 @@
+- `[x]` Create `fragment_product_detail.xml` layout
+- `[x]` Create `ProductDetailFragment.java`
+- `[x]` Update `HomeActivity.java` to support `ProductDetailFragment` navigation
+- `[x]` Update `HomeFragment.java` to navigate to `ProductDetailFragment` on product click
+- `[x]` Integrate existing Cart and Wishlist logic in `ProductDetailFragment`
+- `[x]` Verify UI and functionality

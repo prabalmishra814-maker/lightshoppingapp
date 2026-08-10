@@ -11,6 +11,7 @@ public class SessionManager {
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_PROFILE = "user_profile";
+    private static final String KEY_RECENTLY_VIEWED = "recently_viewed";
 
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
@@ -36,6 +37,34 @@ public class SessionManager {
         editor.putString(KEY_TOKEN, token);
         editor.putString(KEY_REFRESH_TOKEN, refreshToken);
         editor.apply();
+    }
+
+    public void addToRecentlyViewed(com.example.lightshop.models.ProductModel product) {
+        java.util.List<com.example.lightshop.models.ProductModel> list = getRecentlyViewed();
+        // Remove if already exists to move it to top
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getProductId().equals(product.getProductId())) {
+                list.remove(i);
+                break;
+            }
+        }
+        list.add(0, product);
+        // Limit to 10
+        if (list.size() > 10) {
+            list.remove(list.size() - 1);
+        }
+        
+        String json = new com.google.gson.Gson().toJson(list);
+        editor.putString(KEY_RECENTLY_VIEWED, json);
+        editor.apply();
+    }
+
+    public java.util.List<com.example.lightshop.models.ProductModel> getRecentlyViewed() {
+        String json = pref.getString(KEY_RECENTLY_VIEWED, null);
+        if (json == null) return new java.util.ArrayList<>();
+        
+        java.lang.reflect.Type type = new com.google.gson.reflect.TypeToken<java.util.List<com.example.lightshop.models.ProductModel>>() {}.getType();
+        return new com.google.gson.Gson().fromJson(json, type);
     }
 
     public boolean isLoggedIn() {

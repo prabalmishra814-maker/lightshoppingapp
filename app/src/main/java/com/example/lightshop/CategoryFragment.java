@@ -55,13 +55,46 @@ public class CategoryFragment extends Fragment {
                         fetchSubCategories(categories.get(0).getId()); // Fetch subcategories for first category
                     }
                 } else {
+                    if (response.code() == 404) {
+                        fetchCategoriesPlural();
+                        return;
+                    }
                     Toast.makeText(getContext(), "Categories Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to fetch categories", Toast.LENGTH_SHORT).show();
+                android.util.Log.e("SupabaseError", "Categories Fetch Failed", t);
+                fetchCategoriesPlural();
+            }
+        });
+    }
+
+    private void fetchCategoriesPlural() {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchCategoriesPlural(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<CategoryModel>> call, @NonNull Response<List<CategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    categories = response.body();
+                    setupSidebar();
+                    if (!categories.isEmpty()) {
+                        fetchSubCategories(categories.get(0).getId());
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Categories Plural Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<CategoryModel>> call, @NonNull Throwable t) {
+                android.util.Log.e("SupabaseError", "Categories Plural Fetch Failed", t);
+                Toast.makeText(getContext(), "Failed to fetch categories: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -88,13 +121,43 @@ public class CategoryFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     setupSubCategories(response.body());
                 } else {
+                    if (response.code() == 404) {
+                        fetchSubCategoriesPlural(categoryId);
+                        return;
+                    }
                     Toast.makeText(getContext(), "SubCategories Error: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<SubCategoryModel>> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to fetch subcategories", Toast.LENGTH_SHORT).show();
+                android.util.Log.e("SupabaseError", "SubCategories Fetch Failed", t);
+                fetchSubCategoriesPlural(categoryId);
+            }
+        });
+    }
+
+    private void fetchSubCategoriesPlural(long categoryId) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchSubCategoriesPlural(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "eq." + categoryId,
+                "*"
+        ).enqueue(new Callback<List<SubCategoryModel>>() {
+            @Override
+            public void onResponse(Call<List<SubCategoryModel>> call, Response<List<SubCategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    setupSubCategories(response.body());
+                } else {
+                    Toast.makeText(getContext(), "SubCategories Plural Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<SubCategoryModel>> call, Throwable t) {
+                android.util.Log.e("SupabaseError", "SubCategories Plural Fetch Failed", t);
+                Toast.makeText(getContext(), "Failed to fetch subcategories: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

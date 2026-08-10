@@ -22,11 +22,11 @@ public class SplashActivity extends AppCompatActivity {
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             SessionManager sessionManager = new SessionManager(SplashActivity.this);
-            if (sessionManager.isLoggedIn()) {
-                startActivity(new Intent(SplashActivity.this, HomeActivity.class));
-            } else {
-                startActivity(new Intent(SplashActivity.this, AuthActivity.class));
+            if (!sessionManager.isLoggedIn()) {
+                // Bypass login for development: set dummy session
+                sessionManager.saveSession("dummy_token_bypass", "dummy_refresh_token", "dummy_uid", "guest@example.com", "Guest User", "");
             }
+            startActivity(new Intent(SplashActivity.this, HomeActivity.class));
             finish();
         }, 2000); // 2 seconds delay
     }

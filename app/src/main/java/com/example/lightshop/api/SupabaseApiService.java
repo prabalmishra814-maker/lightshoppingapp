@@ -50,6 +50,13 @@ public interface SupabaseApiService {
         @Query("select") String select
     );
 
+    @GET("rest/v1/products")
+    Call<List<ProductModel>> fetchProductsPlural(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("select") String select
+    );
+
     // Specific Fetch for Categories
     @GET("rest/v1/Category")
     Call<List<CategoryModel>> fetchCategories(
@@ -58,12 +65,27 @@ public interface SupabaseApiService {
         @Query("select") String select
     );
 
+    @GET("rest/v1/categories")
+    Call<List<CategoryModel>> fetchCategoriesPlural(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("select") String select
+    );
+
     // Specific Fetch for SubCategories
     @GET("rest/v1/SubCategory")
     Call<List<com.example.lightshop.models.SubCategoryModel>> fetchSubCategories(
             @Header("apikey") String apiKey,
             @Header("Authorization") String authHeader,
             @Query("category_id") String categoryIdFilter, // e.g., "eq.1"
+            @Query("select") String select
+    );
+
+    @GET("rest/v1/subcategories")
+    Call<List<com.example.lightshop.models.SubCategoryModel>> fetchSubCategoriesPlural(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("category_id") String categoryIdFilter,
             @Query("select") String select
     );
 

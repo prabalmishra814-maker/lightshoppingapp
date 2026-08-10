@@ -1,0 +1,3 @@
+- [x] Reduce card and image size in `item_product_recommendation.xml`
+- [x] Update RecyclerView heights in `activity_product_detail.xml`
+- [x] Verify UI changes

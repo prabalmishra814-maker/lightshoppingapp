@@ -1,8 +1,9 @@
 package com.example.lightshop.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class  ProductModel {
+public class  ProductModel implements Serializable {
     @SerializedName(value = "product_id", alternate = {"id", "PRODUCT_ID"})
     private String productId;
 
@@ -56,6 +57,15 @@ public class  ProductModel {
 
     @SerializedName("product_image5")
     private String productImage5;
+
+    @SerializedName("product_rating")
+    private String rating;
+
+    @SerializedName("product_reviews_count")
+    private String reviewsCount;
+
+    @SerializedName("product_sold_count")
+    private String soldCount;
 
     public ProductModel() {
     }
@@ -114,4 +124,13 @@ public class  ProductModel {
 
     public String getProductImage5() { return productImage5; }
     public void setProductImage5(String productImage5) { this.productImage5 = productImage5; }
+
+    public String getRating() { return rating; }
+    public void setRating(String rating) { this.rating = rating; }
+
+    public String getReviewsCount() { return reviewsCount; }
+    public void setReviewsCount(String reviewsCount) { this.reviewsCount = reviewsCount; }
+
+    public String getSoldCount() { return soldCount; }
+    public void setSoldCount(String soldCount) { this.soldCount = soldCount; }
 }
