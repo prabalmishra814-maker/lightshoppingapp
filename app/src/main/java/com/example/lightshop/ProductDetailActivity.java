@@ -97,21 +97,11 @@ public class ProductDetailActivity extends AppCompatActivity {
     private void setupImageSlider() {
         List<SlideModel> slideModels = new ArrayList<>();
         
-        if (product.getProductImage() != null && !product.getProductImage().isEmpty()) {
-            slideModels.add(new SlideModel(product.getProductImage(), ScaleTypes.FIT));
-        }
-        if (product.getProductImage2() != null && !product.getProductImage2().isEmpty()) {
-            slideModels.add(new SlideModel(product.getProductImage2(), ScaleTypes.FIT));
-        }
-        if (product.getProductImage3() != null && !product.getProductImage3().isEmpty()) {
-            slideModels.add(new SlideModel(product.getProductImage3(), ScaleTypes.FIT));
-        }
-        if (product.getProductImage4() != null && !product.getProductImage4().isEmpty()) {
-            slideModels.add(new SlideModel(product.getProductImage4(), ScaleTypes.FIT));
-        }
-        if (product.getProductImage5() != null && !product.getProductImage5().isEmpty()) {
-            slideModels.add(new SlideModel(product.getProductImage5(), ScaleTypes.FIT));
-        }
+        addImageToSlider(product.getProductImage(), slideModels);
+        addImageToSlider(product.getProductImage2(), slideModels);
+        addImageToSlider(product.getProductImage3(), slideModels);
+        addImageToSlider(product.getProductImage4(), slideModels);
+        addImageToSlider(product.getProductImage5(), slideModels);
 
         if (slideModels.isEmpty()) {
             slideModels.add(new SlideModel(R.drawable.ic_headphones, ScaleTypes.FIT));
@@ -123,16 +113,13 @@ public class ProductDetailActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(int position) {
                 ArrayList<String> images = new ArrayList<>();
-                if (product.getProductImage() != null && !product.getProductImage().isEmpty()) images.add(product.getProductImage());
-                if (product.getProductImage2() != null && !product.getProductImage2().isEmpty()) images.add(product.getProductImage2());
-                if (product.getProductImage3() != null && !product.getProductImage3().isEmpty()) images.add(product.getProductImage3());
-                if (product.getProductImage4() != null && !product.getProductImage4().isEmpty()) images.add(product.getProductImage4());
-                if (product.getProductImage5() != null && !product.getProductImage5().isEmpty()) images.add(product.getProductImage5());
+                addImageToList(product.getProductImage(), images);
+                addImageToList(product.getProductImage2(), images);
+                addImageToList(product.getProductImage3(), images);
+                addImageToList(product.getProductImage4(), images);
+                addImageToList(product.getProductImage5(), images);
 
-                if (images.isEmpty()) {
-                    // Fallback to placeholder if needed, but usually slider has at least one
-                    return;
-                }
+                if (images.isEmpty()) return;
 
                 android.content.Intent intent = new android.content.Intent(ProductDetailActivity.this, FullScreenImageActivity.class);
                 intent.putStringArrayListExtra("images", images);
@@ -141,10 +128,30 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
             
             @Override
-            public void doubleClick(int position) {
-                // Not used
-            }
+            public void doubleClick(int position) {}
         });
+    }
+
+    private void addImageToSlider(String imageSource, List<SlideModel> slideModels) {
+        if (imageSource == null || imageSource.isEmpty()) return;
+
+        if (imageSource.startsWith("http")) {
+            slideModels.add(new SlideModel(imageSource, ScaleTypes.FIT));
+        } else {
+            // Try to resolve as drawable resource name
+            int resId = getResources().getIdentifier(imageSource, "drawable", getPackageName());
+            if (resId != 0) {
+                slideModels.add(new SlideModel(resId, ScaleTypes.FIT));
+            } else if (imageSource.contains("/") || imageSource.contains(".")) {
+                // It might be a URL without http or some other path, try as URL anyway
+                slideModels.add(new SlideModel(imageSource, ScaleTypes.FIT));
+            }
+        }
+    }
+
+    private void addImageToList(String imageSource, List<String> images) {
+        if (imageSource == null || imageSource.isEmpty()) return;
+        images.add(imageSource);
     }
 
     private void setupRecommendations() {

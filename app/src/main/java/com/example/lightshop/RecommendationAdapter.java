@@ -102,11 +102,7 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
         holder.rating.setText(item.getRating() + " ★");
         holder.reviewCount.setText("(" + (item.getReviewsCount() != null ? item.getReviewsCount() : "0") + ")");
 
-        Glide.with(context)
-                .load(item.getProductImage())
-                .placeholder(R.drawable.ic_headphones)
-                .error(R.drawable.ic_headphones)
-                .into(holder.image);
+        loadImage(item.getProductImage(), holder.image);
 
         if (wishlistProductIds.contains(item.getProductId())) {
             holder.wishlist.setImageResource(R.drawable.ic_heart_filled);
@@ -129,6 +125,35 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             intent.putExtra("product", item);
             context.startActivity(intent);
         });
+    }
+
+    private void loadImage(String imageSource, ImageView imageView) {
+        if (imageSource == null || imageSource.isEmpty()) {
+            imageView.setImageResource(R.drawable.ic_headphones);
+            return;
+        }
+
+        if (imageSource.startsWith("http")) {
+            Glide.with(context)
+                    .load(imageSource)
+                    .placeholder(R.drawable.ic_headphones)
+                    .error(R.drawable.ic_headphones)
+                    .into(imageView);
+        } else {
+            int resId = context.getResources().getIdentifier(imageSource, "drawable", context.getPackageName());
+            if (resId != 0) {
+                Glide.with(context)
+                        .load(resId)
+                        .placeholder(R.drawable.ic_headphones)
+                        .into(imageView);
+            } else {
+                Glide.with(context)
+                        .load(imageSource)
+                        .placeholder(R.drawable.ic_headphones)
+                        .error(R.drawable.ic_headphones)
+                        .into(imageView);
+            }
+        }
     }
 
     private void addToWishlist(ProductModel product) {

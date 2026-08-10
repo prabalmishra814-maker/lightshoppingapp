@@ -478,7 +478,7 @@
             android:layout_height="56dp"
             android:background="@drawable/bg_yellow_button"
             android:text="PLACE ORDER"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>

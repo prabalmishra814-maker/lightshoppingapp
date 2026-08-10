@@ -74,10 +74,31 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Glide.with(FullScreenImageActivity.this)
-                    .load(images.get(position))
-                    .placeholder(R.drawable.ic_headphones)
-                    .into(holder.photoView);
+            String imageSource = images.get(position);
+            if (imageSource == null || imageSource.isEmpty()) {
+                holder.photoView.setImageResource(R.drawable.ic_headphones);
+                return;
+            }
+
+            if (imageSource.startsWith("http")) {
+                Glide.with(FullScreenImageActivity.this)
+                        .load(imageSource)
+                        .placeholder(R.drawable.ic_headphones)
+                        .into(holder.photoView);
+            } else {
+                int resId = getResources().getIdentifier(imageSource, "drawable", getPackageName());
+                if (resId != 0) {
+                    Glide.with(FullScreenImageActivity.this)
+                            .load(resId)
+                            .placeholder(R.drawable.ic_headphones)
+                            .into(holder.photoView);
+                } else {
+                    Glide.with(FullScreenImageActivity.this)
+                            .load(imageSource)
+                            .placeholder(R.drawable.ic_headphones)
+                            .into(holder.photoView);
+                }
+            }
         }
 
         @Override

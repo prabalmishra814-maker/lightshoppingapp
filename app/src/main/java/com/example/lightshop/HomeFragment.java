@@ -385,17 +385,42 @@ public class HomeFragment extends Fragment {
             CategoryModel item = items.get(position);
             holder.name.setText(item.getCategoryName());
             
-            Glide.with(getContext())
-                    .load(item.getCategoryImage())
-                    .placeholder(R.drawable.ic_category)
-                    .error(R.drawable.ic_category)
-                    .into(holder.icon);
+            loadImage(item.getCategoryImage(), holder.icon);
 
             holder.itemView.setOnClickListener(v -> {
                 if (getActivity() instanceof HomeActivity) {
                     ((HomeActivity) getActivity()).switchToCategory();
                 }
             });
+        }
+
+        private void loadImage(String imageSource, ImageView imageView) {
+            if (imageSource == null || imageSource.isEmpty()) {
+                imageView.setImageResource(R.drawable.ic_category);
+                return;
+            }
+
+            if (imageSource.startsWith("http")) {
+                Glide.with(getContext())
+                        .load(imageSource)
+                        .placeholder(R.drawable.ic_category)
+                        .error(R.drawable.ic_category)
+                        .into(imageView);
+            } else {
+                int resId = getResources().getIdentifier(imageSource, "drawable", requireContext().getPackageName());
+                if (resId != 0) {
+                    Glide.with(getContext())
+                            .load(resId)
+                            .placeholder(R.drawable.ic_category)
+                            .into(imageView);
+                } else {
+                    Glide.with(getContext())
+                            .load(imageSource)
+                            .placeholder(R.drawable.ic_category)
+                            .error(R.drawable.ic_category)
+                            .into(imageView);
+                }
+            }
         }
 
         @Override
@@ -552,11 +577,7 @@ public class HomeFragment extends Fragment {
                 holder.discount.setVisibility(View.GONE);
             }
 
-            Glide.with(getContext())
-                    .load(item.getProductImage())
-                    .placeholder(R.drawable.ic_category)
-                    .error(R.drawable.ic_category)
-                    .into(holder.image);
+            loadImage(item.getProductImage(), holder.image);
 
             if (holder.wishlist != null) {
                 if (wishlistProductIds.contains(item.getProductId())) {
@@ -596,6 +617,35 @@ public class HomeFragment extends Fragment {
                     ((HomeActivity) getActivity()).openProductDetail(item);
                 }
             });
+        }
+
+        private void loadImage(String imageSource, ImageView imageView) {
+            if (imageSource == null || imageSource.isEmpty()) {
+                imageView.setImageResource(R.drawable.ic_category);
+                return;
+            }
+
+            if (imageSource.startsWith("http")) {
+                Glide.with(getContext())
+                        .load(imageSource)
+                        .placeholder(R.drawable.ic_category)
+                        .error(R.drawable.ic_category)
+                        .into(imageView);
+            } else {
+                int resId = getResources().getIdentifier(imageSource, "drawable", requireContext().getPackageName());
+                if (resId != 0) {
+                    Glide.with(getContext())
+                            .load(resId)
+                            .placeholder(R.drawable.ic_category)
+                            .into(imageView);
+                } else {
+                    Glide.with(getContext())
+                            .load(imageSource)
+                            .placeholder(R.drawable.ic_category)
+                            .error(R.drawable.ic_category)
+                            .into(imageView);
+                }
+            }
         }
 
         private void removeFromCart(ProductModel product) {
