@@ -42,11 +42,32 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         SubCategoryModel subCategory = subCategories.get(position);
         holder.name.setText(subCategory.getSubCategoryName());
         
-        // Circular image container style is in XML. 
-        // For subcategories, we usually have specific icons. 
-        // Using ic_category as default if no image URL is provided in SubCategoryModel.
-        holder.image.setImageResource(R.drawable.ic_category);
-        holder.image.setColorFilter(holder.itemView.getContext().getColor(R.color.secondary_gray));
+        // Handle local resource images if URL starts with "res:"
+        String imgUrl = null; // SubCategoryModel doesn't have image field currently, but we might want to add one or use a convention.
+        // Assuming we use ic_category as default for now, but I'll add logic to check for resource icons if we pass them.
+        
+        // Since I'll be populating subcategories with local icons, I'll update the model later or use a map.
+        // For now, let's use a generic approach if subCategoryName matches certain keywords.
+        
+        int iconRes = R.drawable.ic_category;
+        String name = subCategory.getSubCategoryName().toLowerCase();
+        if (name.contains("laptop")) iconRes = R.drawable.ic_electronics;
+        else if (name.contains("mobile")) iconRes = R.drawable.ic_electronics;
+        else if (name.contains("watch")) iconRes = R.drawable.ic_watch;
+        else if (name.contains("shoe")) iconRes = R.drawable.ic_shoes;
+        else if (name.contains("shirt")) iconRes = R.drawable.ic_men;
+        else if (name.contains("beauty")) iconRes = R.drawable.ic_beauty;
+        else if (name.contains("home")) iconRes = R.drawable.ic_home_cat;
+        else if (name.contains("kid")) iconRes = R.drawable.ic_kids;
+        
+        holder.image.setImageResource(iconRes);
+        // Remove color filter to show actual icons if they are colorful, or keep for consistency.
+        // User wants REAL images, so I'll clear color filter if it's not a generic icon.
+        if (iconRes == R.drawable.ic_category) {
+            holder.image.setColorFilter(holder.itemView.getContext().getColor(R.color.secondary_gray));
+        } else {
+            holder.image.clearColorFilter();
+        }
     }
 
     @Override

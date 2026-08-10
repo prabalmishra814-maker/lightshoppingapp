@@ -16,18 +16,60 @@
         android:elevation="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
+            android:layout_weight="1"
             android:text="Categories"
             android:textColor="@color/dark_navy"
             android:textSize="22sp"
             android:textStyle="bold"
             android:singleLine="true" />
+
+        <ImageView
+            android:id="@+id/btn_search"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_search"
+            app:tint="@color/dark_navy" />
+
+        <ImageView
+            android:id="@+id/btn_wishlist"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_heart_outline"
+            app:tint="@color/dark_navy" />
+
+        <RelativeLayout
+            android:id="@+id/btn_cart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_cart"
+                app:tint="@color/dark_navy" />
+
+            <TextView
+                android:id="@+id/tv_cart_badge"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/bg_cart_badge"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </RelativeLayout>
 
     </LinearLayout>
 
@@ -46,6 +88,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0.27"
             android:background="#FAFAFC"
+            android:scrollbars="none"
             tools:listitem="@layout/item_sidebar" />
 
         <!-- Right Content (73%) -->
@@ -55,6 +98,20 @@
             android:layout_weight="0.73"
             android:background="@color/white"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_section_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="ALL CATEGORIES"
+                android:textColor="@color/secondary_gray"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCategories"
