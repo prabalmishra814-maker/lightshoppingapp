@@ -1,3 +1,6 @@
-- [x] Reduce card and image size in `item_product_recommendation.xml`
-- [x] Update RecyclerView heights in `activity_product_detail.xml`
-- [x] Verify UI changes
+- [x] Add `photoview` dependency in `libs.versions.toml` and `build.gradle.kts`
+- [x] Create layouts for full-screen viewer
+- [x] Implement `FullScreenImageActivity.java`
+- [x] Integrate full-screen viewer in `ProductDetailActivity.java`
+- [x] Register activity in `AndroidManifest.xml`
+- [x] Verify build and functionality

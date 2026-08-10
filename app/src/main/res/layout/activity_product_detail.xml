@@ -27,7 +27,7 @@
             app:tint="@color/dark_navy" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="222dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_weight="1"
@@ -107,66 +107,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
-                        <ImageView
-                            android:id="@+id/iv_product_main"
+                        <com.denzcoskun.imageslider.ImageSlider
+                            android:id="@+id/image_slider"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:padding="24dp"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/ic_headphones" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="12dp"
-                            android:background="@drawable/bg_discount_badge"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="35% OFF"
-                            android:textColor="@color/white"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:layout_alignParentEnd="true"
-                            android:layout_margin="12dp"
-                            android:src="@drawable/ic_play_circle"
-                            app:tint="@color/dark_navy" />
-
-                        <!-- Carousel Dots -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentBottom="true"
-                            android:layout_centerHorizontal="true"
-                            android:layout_marginBottom="16dp"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:src="@drawable/ic_dot_active" />
-
-                            <ImageView
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="6dp"
-                                android:src="@drawable/ic_dot_inactive" />
-
-                            <ImageView
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="6dp"
-                                android:src="@drawable/ic_dot_inactive" />
-
-                            <ImageView
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="6dp"
-                                android:src="@drawable/ic_dot_inactive" />
-                        </LinearLayout>
+                            app:iss_auto_cycle="false"
+                            app:iss_delay="0"
+                            app:iss_period="1000" />
                     </RelativeLayout>
                 </com.google.android.material.card.MaterialCardView>
             </RelativeLayout>

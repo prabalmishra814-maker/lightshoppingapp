@@ -1,27 +1,52 @@
-# Implementation Plan - Reduce Product Recommendation Size
+# Implementation Plan - Standardize Brand Color to Primary Blue
 
-The user wants to reduce the size of the product recommendation items and their containers in the Product Detail view.
+Replace all occurrences of `@color/primary` (Purple) with `@color/primary_blue` (Blue) to unify the application's branding.
 
 ## Proposed Changes
 
-### [Recommendation Item Layout](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/item_product_recommendation.xml)
+### [Layout Components]
 
-#### [MODIFY] [item_product_recommendation.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/item_product_recommendation.xml)
-- Reduce `MaterialCardView` width from `180dp` to `160dp`.
-- Reduce `MaterialCardView` height from `300dp` to `260dp`.
-- Change `ConstraintLayout` height from `261dp` to `match_parent`.
-- Reduce `ImageView` (product image) height from `140dp` to `120dp`.
+#### [MODIFY] [activity_auth.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/activity_auth.xml)
+- Replace all `@color/primary` with `@color/primary_blue`.
+- Change `android:backgroundTint` to `app:backgroundTint` for `MaterialButton` components (`btn_login`, `btn_register`).
+- Update `app:boxStrokeColor`, `android:textColor`, and `android:buttonTint` references.
 
-### [Product Detail Layout](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/activity_product_detail.xml)
+#### [MODIFY] [activity_checkout.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/activity_checkout.xml)
+- Update "Coming Soon" text color to `@color/primary_blue`.
 
-#### [MODIFY] [activity_product_detail.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/activity_product_detail.xml)
-- Update `rv_you_may_also_like` height to `275dp`.
-- Update `rv_similar_products` height to `275dp`.
-- Update `rv_recently_viewed` height to `275dp`.
-- Update `rv_more_products` height to `275dp`.
+#### [MODIFY] [activity_wishlist.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/activity_wishlist.xml)
+- Update `btnContinueShopping` to use `app:backgroundTint="@color/primary_blue"`.
+
+#### [MODIFY] [fragment_home.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/fragment_home.xml)
+- Update search icon tint, cart badge background, and "View All" text colors to `@color/primary_blue`.
+
+#### [MODIFY] [item_product.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/item_product.xml)
+- Update price text color and "Add to Cart" button background to `@color/primary_blue`.
+
+#### [MODIFY] [item_wishlist.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/layout/item_wishlist.xml)
+- Update price text color and "Add to Cart" button stroke color to `@color/primary_blue`.
+
+### [Drawable & Color Resources]
+
+#### [MODIFY] [nav_selector.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/color/nav_selector.xml)
+- Update active state color to `@color/primary_blue`.
+
+#### [MODIFY] [bg_button_purple.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/drawable/bg_button_purple.xml)
+- Update solid color to `@color/primary_blue`.
+
+#### [MODIFY] [bg_edittext.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/drawable/bg_edittext.xml)
+- Update focus stroke color to `@color/primary_blue`.
+
+#### [MODIFY] [bg_toggle_selected.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/drawable/bg_toggle_selected.xml)
+- Update solid color to `@color/primary_blue`.
+
+#### [MODIFY] [ic_dot_active.xml](file:///C:/Users/PRABAL MISHRA/AndroidStudioProjects/lightshoppingapp/app/src/main/res/drawable/ic_dot_active.xml)
+- Update solid color to `@color/primary_blue`.
 
 ## Verification Plan
 
+### Automated Tests
+- Run Gradle build to ensure all layout files are valid.
+
 ### Manual Verification
-- Render the `item_product_recommendation` preview to ensure the elements are not cramped.
-- Run the app and check the horizontal scroll sections to verify they look proportional.
+- Walk through the app (Home, Auth, Wishlist, Checkout) to ensure all purple elements have successfully transitioned to blue.

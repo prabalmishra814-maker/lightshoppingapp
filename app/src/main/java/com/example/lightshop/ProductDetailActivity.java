@@ -5,12 +5,15 @@ import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.bumptech.glide.Glide;
+import com.denzcoskun.imageslider.constants.ScaleTypes;
+import com.denzcoskun.imageslider.interfaces.ItemClickListener;
+import com.denzcoskun.imageslider.models.SlideModel;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.api.SessionManager;
 import com.example.lightshop.databinding.ActivityProductDetailBinding;
 import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.utils.StatusBarUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,11 +91,60 @@ public class ProductDetailActivity extends AppCompatActivity {
         binding.tvSoldCount.setText((product.getSoldCount() != null ? product.getSoldCount() : "0") + " Sold");
         binding.tvStockStatus.setText(product.getStock() != null ? product.getStock() : "In Stock");
 
-        Glide.with(this)
-                .load(product.getProductImage())
-                .placeholder(R.drawable.ic_headphones)
-                .error(R.drawable.ic_headphones)
-                .into(binding.ivProductMain);
+        setupImageSlider();
+    }
+
+    private void setupImageSlider() {
+        List<SlideModel> slideModels = new ArrayList<>();
+        
+        if (product.getProductImage() != null && !product.getProductImage().isEmpty()) {
+            slideModels.add(new SlideModel(product.getProductImage(), ScaleTypes.FIT));
+        }
+        if (product.getProductImage2() != null && !product.getProductImage2().isEmpty()) {
+            slideModels.add(new SlideModel(product.getProductImage2(), ScaleTypes.FIT));
+        }
+        if (product.getProductImage3() != null && !product.getProductImage3().isEmpty()) {
+            slideModels.add(new SlideModel(product.getProductImage3(), ScaleTypes.FIT));
+        }
+        if (product.getProductImage4() != null && !product.getProductImage4().isEmpty()) {
+            slideModels.add(new SlideModel(product.getProductImage4(), ScaleTypes.FIT));
+        }
+        if (product.getProductImage5() != null && !product.getProductImage5().isEmpty()) {
+            slideModels.add(new SlideModel(product.getProductImage5(), ScaleTypes.FIT));
+        }
+
+        if (slideModels.isEmpty()) {
+            slideModels.add(new SlideModel(R.drawable.ic_headphones, ScaleTypes.FIT));
+        }
+
+        binding.imageSlider.setImageList(slideModels, ScaleTypes.FIT);
+
+        binding.imageSlider.setItemClickListener(new ItemClickListener() {
+            @Override
+            public void onItemSelected(int position) {
+                ArrayList<String> images = new ArrayList<>();
+                if (product.getProductImage() != null && !product.getProductImage().isEmpty()) images.add(product.getProductImage());
+                if (product.getProductImage2() != null && !product.getProductImage2().isEmpty()) images.add(product.getProductImage2());
+                if (product.getProductImage3() != null && !product.getProductImage3().isEmpty()) images.add(product.getProductImage3());
+                if (product.getProductImage4() != null && !product.getProductImage4().isEmpty()) images.add(product.getProductImage4());
+                if (product.getProductImage5() != null && !product.getProductImage5().isEmpty()) images.add(product.getProductImage5());
+
+                if (images.isEmpty()) {
+                    // Fallback to placeholder if needed, but usually slider has at least one
+                    return;
+                }
+
+                android.content.Intent intent = new android.content.Intent(ProductDetailActivity.this, FullScreenImageActivity.class);
+                intent.putStringArrayListExtra("images", images);
+                intent.putExtra("position", position);
+                startActivity(intent);
+            }
+            
+            @Override
+            public void doubleClick(int position) {
+                // Not used
+            }
+        });
     }
 
     private void setupRecommendations() {
