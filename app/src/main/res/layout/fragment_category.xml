@@ -15,7 +15,6 @@
         android:background="@color/white"
         android:elevation="4dp"
         android:gravity="center_vertical"
-        android:paddingEnd="12dp"
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -29,80 +28,6 @@
             android:textSize="22sp"
             android:textStyle="bold"
             android:singleLine="true" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackgroundBorderless">
-            <ImageView
-                android:id="@+id/btnSearch"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_search"
-                android:contentDescription="Search"
-                app:tint="@color/dark_navy" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackgroundBorderless">
-            <ImageView
-                android:id="@+id/btnWishlist"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_heart_outline"
-                android:contentDescription="Wishlist"
-                app:tint="@color/dark_navy" />
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="48dp"
-            android:layout_height="match_parent"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackgroundBorderless">
-
-            <RelativeLayout
-                android:id="@+id/btnCart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Cart"
-                    android:src="@drawable/ic_cart"
-                    app:tint="@color/dark_navy" />
-
-                <TextView
-                    android:id="@+id/tv_cart_badge"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="-4dp"
-                    android:layout_marginEnd="-6dp"
-                    android:background="@drawable/bg_cart_badge"
-                    android:gravity="center"
-                    android:text="0"
-                    android:textColor="@color/white"
-                    android:textSize="9sp"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
-            </RelativeLayout>
-        </FrameLayout>
 
     </LinearLayout>
 
@@ -130,19 +55,6 @@
             android:layout_weight="0.73"
             android:background="@color/white"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_section_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                android:text="All Categories"
-                android:textColor="@color/secondary_gray"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvCategories"

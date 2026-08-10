@@ -17,7 +17,6 @@ import com.example.lightshop.models.CategoryModel;
 import com.example.lightshop.models.SubCategoryModel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,7 +27,6 @@ public class CategoryFragment extends Fragment {
     private SidebarAdapter sidebarAdapter;
     private CategoryAdapter subCategoryAdapter;
     private List<CategoryModel> categories = new ArrayList<>();
-    private SessionManager sessionManager;
 
     @Nullable
     @Override
@@ -40,24 +38,7 @@ public class CategoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        sessionManager = new SessionManager(requireContext());
-        setupHeaderActions();
         fetchCategories();
-        updateCartBadge();
-    }
-
-    private void setupHeaderActions() {
-        binding.btnSearch.setOnClickListener(v -> {
-            // Future search implementation
-        });
-
-        binding.btnWishlist.setOnClickListener(v -> {
-            startActivity(new android.content.Intent(getContext(), WishlistActivity.class));
-        });
-
-        binding.btnCart.setOnClickListener(v -> {
-            startActivity(new android.content.Intent(getContext(), CartActivity.class));
-        });
     }
 
     private void fetchCategories() {
@@ -132,7 +113,7 @@ public class CategoryFragment extends Fragment {
 
     private void updateSectionLabel(String categoryName) {
         if (binding != null) {
-            binding.tvSectionLabel.setText("All " + categoryName);
+           
         }
     }
 
@@ -190,38 +171,6 @@ public class CategoryFragment extends Fragment {
         } else {
             subCategoryAdapter.updateData(subCategories);
         }
-    }
-
-    private void updateCartBadge() {
-        String userId = sessionManager.getUserId();
-        if (userId.isEmpty()) {
-            binding.tvCartBadge.setVisibility(View.GONE);
-            return;
-        }
-
-        String authHeader = "Bearer " + sessionManager.getToken();
-        SupabaseClient.getApiService().fetchCart(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "eq." + userId,
-                "product_id"
-        ).enqueue(new Callback<List<Map<String, Object>>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    int count = response.body().size();
-                    if (count > 0) {
-                        binding.tvCartBadge.setText(String.valueOf(count));
-                        binding.tvCartBadge.setVisibility(View.VISIBLE);
-                    } else {
-                        binding.tvCartBadge.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {}
-        });
     }
 
     @Override
