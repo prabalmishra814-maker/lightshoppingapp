@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
 import com.example.lightshop.models.CartItem;
 import com.example.lightshop.models.ProductModel;
 import java.util.List;
@@ -19,6 +20,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     public interface OnCartUpdateListener {
         void onQuantityChanged(int position, int delta);
         void onRemoveItem(int position);
+        void onMoveToWishlist(int position);
     }
 
     public CartAdapter(List<CartItem> cartItems, OnCartUpdateListener listener) {
@@ -45,26 +47,59 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.tvMrp.setText("₹" + product.getMrp());
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
+        // Load image using Glide
+        Glide.with(holder.itemView.getContext())
+                .load(product.getProductImage())
+                .placeholder(R.drawable.ic_headphones)
+                .error(R.drawable.ic_headphones)
+                .into(holder.ivProductImage);
+
         // Calculate discount %
         try {
-            int mrp = Integer.parseInt(product.getMrp());
-            int selling = Integer.parseInt(product.getSellingPrice());
-            int discount = ((mrp - selling) * 100) / mrp;
-            holder.tvDiscount.setText(discount + "% off");
+            String mrpStr = product.getMrp() != null ? product.getMrp().replaceAll("[^0-9.]", "") : "0";
+            String sellingStr = product.getSellingPrice() != null ? product.getSellingPrice().replaceAll("[^0-9.]", "") : "0";
+            
+            if (!mrpStr.isEmpty() && !sellingStr.isEmpty()) {
+                double mrp = Double.parseDouble(mrpStr);
+                double selling = Double.parseDouble(sellingStr);
+                if (mrp > 0) {
+                    int discount = (int) (((mrp - selling) * 100) / mrp);
+                    holder.tvDiscount.setText(discount + "% off");
+                } else {
+                    holder.tvDiscount.setText("0% off");
+                }
+            }
         } catch (Exception e) {
             holder.tvDiscount.setText("0% off");
         }
 
-        // Set Image (Hardcoded for demo as per reference or use existing)
-        if (product.getProductName().contains("boAt")) {
-            holder.ivProductImage.setImageResource(R.drawable.ic_headphones);
-        } else if (product.getProductName().contains("Noise")) {
-            holder.ivProductImage.setImageResource(R.drawable.ic_watch);
-        }
+        holder.btnPlus.setOnClickListener(v -> {
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onQuantityChanged(pos, 1);
+            }
+        });
 
-        holder.btnPlus.setOnClickListener(v -> listener.onQuantityChanged(position, 1));
-        holder.btnMinus.setOnClickListener(v -> listener.onQuantityChanged(position, -1));
-        holder.btnRemove.setOnClickListener(v -> listener.onRemoveItem(position));
+        holder.btnMinus.setOnClickListener(v -> {
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onQuantityChanged(pos, -1);
+            }
+        });
+
+        holder.btnRemove.setOnClickListener(v -> {
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onRemoveItem(pos);
+            }
+        });
+
+        holder.btnMoveToWishlist.setOnClickListener(v -> {
+            int pos = holder.getBindingAdapterPosition();
+            if (pos != RecyclerView.NO_POSITION) {
+                listener.onMoveToWishlist(pos);
+            }
+        });
     }
 
     @Override
@@ -74,7 +109,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProductImage, btnMinus, btnPlus;
-        TextView tvProductName, tvProductDesc, tvStockStatus, tvSellingPrice, tvMrp, tvDiscount, tvQuantity, btnRemove, btnSaveForLater;
+        TextView tvProductName, tvProductDesc, tvStockStatus, tvSellingPrice, tvMrp, tvDiscount, tvQuantity, btnRemove, btnMoveToWishlist;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,7 +124,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvDiscount = itemView.findViewById(R.id.tvDiscount);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             btnRemove = itemView.findViewById(R.id.btnRemove);
-            btnSaveForLater = itemView.findViewById(R.id.btnSaveForLater);
+            btnMoveToWishlist = itemView.findViewById(R.id.btnMoveToWishlist);
         }
     }
 }

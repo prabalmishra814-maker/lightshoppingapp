@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/light_grey_bg"
+        app:liftOnScroll="false"
         app:elevation="0dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -28,40 +29,27 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <ImageView
-                android:id="@+id/iv_settings"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_settings"
-                app:layout_constraintBottom_toBottomOf="@id/tv_title"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_title"
-                app:tint="@color/text_primary" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageView
-                android:id="@+id/iv_notifications"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_notification"
-                app:layout_constraintBottom_toBottomOf="@id/tv_title"
-                app:layout_constraintEnd_toStartOf="@id/iv_settings"
-                app:layout_constraintTop_toTopOf="@id/tv_title"
-                app:tint="@color/text_primary" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-            <!-- Profile Info Header -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Profile Info Header (Now inside scrollable content) -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cl_profile_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                app:layout_constraintTop_toBottomOf="@id/tv_title">
+                android:layout_marginBottom="24dp">
 
                 <FrameLayout
                     android:id="@+id/fl_profile_image"
@@ -85,13 +73,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
+                    android:drawablePadding="8dp"
                     android:text="Prabal Mishra"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:drawablePadding="8dp"
                     app:drawableEndCompat="@drawable/ic_verified"
-                    app:layout_constraintEnd_toStartOf="@id/btn_edit_profile"
                     app:layout_constraintStart_toEndOf="@id/fl_profile_image"
                     app:layout_constraintTop_toTopOf="@id/fl_profile_image" />
 
@@ -103,7 +90,6 @@
                     android:text="prabal@example.com"
                     android:textColor="@color/text_subtitle"
                     android:textSize="14sp"
-                    app:layout_constraintEnd_toStartOf="@id/btn_edit_profile"
                     app:layout_constraintStart_toStartOf="@id/tv_profile_name"
                     app:layout_constraintTop_toBottomOf="@id/tv_profile_name" />
 
@@ -115,41 +101,10 @@
                     android:text="+91 98765 43210"
                     android:textColor="@color/text_subtitle"
                     android:textSize="14sp"
-                    app:layout_constraintEnd_toStartOf="@id/btn_edit_profile"
                     app:layout_constraintStart_toStartOf="@id/tv_profile_name"
                     app:layout_constraintTop_toBottomOf="@id/tv_profile_email" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_edit_profile"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Edit Profile >"
-                    android:textAllCaps="false"
-                    android:textColor="@color/accent_blue"
-                    android:textSize="12sp"
-                    app:cornerRadius="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:strokeColor="@color/accent_blue" />
-
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
 
             <!-- My Account Section -->
             <TextView
@@ -240,6 +195,101 @@
                     layout="@layout/item_profile_row" />
 
             </LinearLayout>
+
+            <!-- Support Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Support"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_white"
+                android:orientation="vertical"
+                android:padding="4dp">
+
+                <include
+                    android:id="@+id/row_help_center"
+                    layout="@layout/item_profile_row" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="56dp"
+                    android:background="@color/divider_color" />
+
+                <include
+                    android:id="@+id/row_contact_us"
+                    layout="@layout/item_profile_row" />
+
+            </LinearLayout>
+
+            <!-- About Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="About"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_card_white"
+                android:orientation="vertical"
+                android:padding="4dp">
+
+                <include
+                    android:id="@+id/row_about_app"
+                    layout="@layout/item_profile_row" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="56dp"
+                    android:background="@color/divider_color" />
+
+                <include
+                    android:id="@+id/row_terms"
+                    layout="@layout/item_profile_row" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="56dp"
+                    android:background="@color/divider_color" />
+
+                <include
+                    android:id="@+id/row_privacy_policy"
+                    layout="@layout/item_profile_row" />
+
+            </LinearLayout>
+
+            <!-- Logout Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_logout"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/bg_card_white"
+                android:text="Log Out"
+                android:textAllCaps="false"
+                android:textColor="@color/color_logout"
+                android:textStyle="bold"
+                app:icon="@drawable/ic_logout"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconTint="@color/color_logout" />
 
         </LinearLayout>
 

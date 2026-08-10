@@ -7,14 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.lightshop.models.SubCategoryModel;
 import java.util.List;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
 
-    private List<Category> categories;
+    private List<SubCategoryModel> subCategories;
 
-    public CategoryAdapter(List<Category> categories) {
-        this.categories = categories;
+    public CategoryAdapter(List<SubCategoryModel> subCategories) {
+        this.subCategories = subCategories;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -40,19 +41,20 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Category category = categories.get(position);
-        holder.name.setText(category.getName());
-        holder.count.setText(category.getItemCount());
-        holder.icon.setImageResource(category.getIconRes());
+        SubCategoryModel subCategory = subCategories.get(position);
+        holder.name.setText(subCategory.getSubCategoryName());
+        holder.count.setVisibility(View.GONE); // Hide item count for now
+        holder.icon.setImageResource(R.drawable.ic_chevron_right);
+        holder.icon.setColorFilter(holder.itemView.getContext().getColor(R.color.divider_color));
     }
 
     @Override
     public int getItemCount() {
-        return categories != null ? categories.size() : 0;
+        return subCategories != null ? subCategories.size() : 0;
     }
 
-    public void updateData(List<Category> newCategories) {
-        this.categories = newCategories;
+    public void updateData(List<SubCategoryModel> newSubCategories) {
+        this.subCategories = newSubCategories;
         notifyDataSetChanged();
     }
 }

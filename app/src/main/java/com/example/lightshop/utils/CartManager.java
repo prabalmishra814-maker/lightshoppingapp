@@ -11,8 +11,7 @@ public class CartManager {
 
     private CartManager() {
         cartItems = new ArrayList<>();
-        // Pre-populate with sample data as per reference screenshot
-        addSampleData();
+        // No sample data, fetch from DB
     }
 
     public static synchronized CartManager getInstance() {
@@ -22,22 +21,8 @@ public class CartManager {
         return instance;
     }
 
-    private void addSampleData() {
-        ProductModel p1 = new ProductModel();
-        p1.setProductName("boAt Airdopes 141 Pro");
-        p1.setShortDescription("Bluetooth Earbuds (Black)");
-        p1.setSellingPrice("1299");
-        p1.setMrp("1999");
-        p1.setStock("In Stock");
-        cartItems.add(new CartItem(p1, 1));
-
-        ProductModel p2 = new ProductModel();
-        p2.setProductName("Noise ColorFit Pulse 2");
-        p2.setShortDescription("Max Smartwatch (Jet Black)");
-        p2.setSellingPrice("1799");
-        p2.setMrp("2499");
-        p2.setStock("In Stock");
-        cartItems.add(new CartItem(p2, 1));
+    public void setCartItems(List<CartItem> items) {
+        this.cartItems = items;
     }
 
     public List<CartItem> getCartItems() {
@@ -62,7 +47,12 @@ public class CartManager {
         int total = 0;
         for (CartItem item : cartItems) {
             try {
-                total += Integer.parseInt(item.getProduct().getMrp()) * item.getQuantity();
+                String mrpStr = item.getProduct().getMrp();
+                if (mrpStr == null) mrpStr = "0";
+                String clean = mrpStr.replaceAll("[^0-9.]", "");
+                if (!clean.isEmpty()) {
+                    total += (int) Double.parseDouble(clean) * item.getQuantity();
+                }
             } catch (Exception ignored) {}
         }
         return total;
@@ -72,7 +62,12 @@ public class CartManager {
         int total = 0;
         for (CartItem item : cartItems) {
             try {
-                total += Integer.parseInt(item.getProduct().getSellingPrice()) * item.getQuantity();
+                String priceStr = item.getProduct().getSellingPrice();
+                if (priceStr == null) priceStr = "0";
+                String clean = priceStr.replaceAll("[^0-9.]", "");
+                if (!clean.isEmpty()) {
+                    total += (int) Double.parseDouble(clean) * item.getQuantity();
+                }
             } catch (Exception ignored) {}
         }
         return total;

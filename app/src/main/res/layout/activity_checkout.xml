@@ -201,6 +201,7 @@
                         android:textColor="@color/text_subtitle"
                         android:textSize="14sp" />
 
+
                     <TextView
                         android:id="@+id/tvPhone"
                         android:layout_width="wrap_content"
@@ -212,11 +213,12 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Delivery Options -->
+            <!-- Payment Options -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="0dp"
                 app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="2dp"
@@ -231,13 +233,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Delivery Options"
+                        android:text="Payment Options"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <!-- COD Option -->
                     <LinearLayout
-                        android:id="@+id/optionFree"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
@@ -247,7 +249,6 @@
                         android:padding="12dp">
 
                         <ImageView
-                            android:id="@+id/ivRadioFree"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:src="@drawable/ic_radio_selected" />
@@ -262,7 +263,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="FREE Delivery"
+                                android:text="Cash on Delivery"
                                 android:textColor="@color/text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -270,35 +271,28 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Delivery by Tue, 20 Aug"
+                                android:text="Pay when you receive the order"
                                 android:textColor="@color/text_subtitle"
                                 android:textSize="12sp" />
                         </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="FREE"
-                            android:textColor="@color/savings_green"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
                     </LinearLayout>
 
+                    <!-- UPI Option (Coming Soon) -->
                     <LinearLayout
-                        android:id="@+id/optionExpress"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
+                        android:alpha="0.6"
                         android:background="@drawable/bg_quantity_selector"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:padding="12dp">
 
                         <ImageView
-                            android:id="@+id/ivRadioExpress"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_radio_unselected" />
+                            android:src="@drawable/ic_radio_unselected"
+                            app:tint="@color/text_subtitle" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -310,25 +304,19 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Express Delivery"
-                                android:textColor="@color/text_primary"
+                                android:text="Pay Online using UPI"
+                                android:textColor="@color/text_subtitle"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Delivery by Mon, 19 Aug"
-                                android:textColor="@color/text_subtitle"
-                                android:textSize="12sp" />
+                                android:text="Coming Soon"
+                                android:textColor="@color/primary"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
                         </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="₹40"
-                            android:textColor="@color/text_primary"
-                            android:textSize="14sp" />
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -481,6 +469,7 @@
         android:layout_alignParentBottom="true"
         android:background="@color/white"
         android:elevation="8dp"
+        android:orientation="vertical"
         android:padding="16dp">
 
         <android.widget.Button
@@ -488,7 +477,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="@drawable/bg_yellow_button"
-            android:text="CONTINUE TO PAYMENT"
+            android:text="PLACE ORDER"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold" />

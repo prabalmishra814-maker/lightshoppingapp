@@ -48,6 +48,8 @@ public class AuthModels {
     public static class AuthResponse {
         @SerializedName("access_token")
         public String accessToken;
+        @SerializedName("refresh_token")
+        public String refreshToken;
         @SerializedName("token_type")
         public String tokenType;
         @SerializedName("user")
@@ -68,5 +70,7 @@ public class AuthModels {
     public static class UserMetadata {
         @SerializedName("full_name")
         public String fullName;
+        @SerializedName("avatar_url")
+        public String avatarUrl;
     }
 }

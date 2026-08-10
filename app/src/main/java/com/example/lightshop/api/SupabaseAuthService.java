@@ -2,6 +2,8 @@ package com.example.lightshop.api;
 
 import com.example.lightshop.models.AuthModels;
 
+import java.util.Map;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.Header;
@@ -28,5 +30,12 @@ public interface SupabaseAuthService {
         @Header("apikey") String apiKey,
         @Header("Authorization") String authHeader,
         @Body AuthModels.IdTokenRequest request
+    );
+
+    @POST("auth/v1/token?grant_type=refresh_token")
+    Call<AuthModels.AuthResponse> refreshToken(
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @Body Map<String, String> body
     );
 }

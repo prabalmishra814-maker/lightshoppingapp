@@ -9,11 +9,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import com.example.lightshop.models.CategoryModel;
 import java.util.List;
 
 public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHolder> {
 
-    private final List<Category> categories;
+    private final List<CategoryModel> categories;
     private final OnItemClickListener listener;
     private int selectedPosition = 0;
 
@@ -21,7 +23,7 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
         void onItemClick(int position);
     }
 
-    public SidebarAdapter(List<Category> categories, OnItemClickListener listener) {
+    public SidebarAdapter(List<CategoryModel> categories, OnItemClickListener listener) {
         this.categories = categories;
         this.listener = listener;
     }
@@ -49,23 +51,31 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Category category = categories.get(position);
-        holder.name.setText(category.getName());
-        holder.icon.setImageResource(category.getIconRes());
+        CategoryModel category = categories.get(position);
+        holder.name.setText(category.getCategoryName());
+        
+        Glide.with(holder.itemView.getContext())
+                .load(category.getCategoryImage())
+                .placeholder(R.drawable.ic_category)
+                .error(R.drawable.ic_category)
+                .into(holder.icon);
 
         if (position == selectedPosition) {
             holder.container.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.selected_bg));
-            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary));
-            holder.icon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary));
+            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.black));
+            holder.name.setTypeface(null, android.graphics.Typeface.BOLD);
         } else {
             holder.container.setBackgroundColor(Color.TRANSPARENT);
-            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.text_subtitle));
-            holder.icon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.text_hint));
+            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.text_primary));
+            holder.name.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
+        
+        // Remove color filters from icon to show original image colors
+        holder.icon.clearColorFilter();
 
         holder.itemView.setOnClickListener(v -> {
             int oldPos = selectedPosition;
-            selectedPosition = holder.getAdapterPosition();
+            selectedPosition = holder.getBindingAdapterPosition();
             notifyItemChanged(oldPos);
             notifyItemChanged(selectedPosition);
             if (listener != null) {

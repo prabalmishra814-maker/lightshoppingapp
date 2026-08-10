@@ -182,16 +182,19 @@ public class AuthActivity extends AppCompatActivity {
                             AuthModels.AuthResponse authResponse = response.body();
                             String name = "User";
                             String email = "";
+                            String userId = "";
+                            String profileUrl = "";
                             if (authResponse.user != null) {
+                                userId = authResponse.user.id;
                                 email = authResponse.user.email;
                                 if (authResponse.user.userMetadata != null) {
                                     name = authResponse.user.userMetadata.fullName;
+                                    profileUrl = authResponse.user.userMetadata.avatarUrl;
                                 }
                             }
-                            sessionManager.saveSession(authResponse.accessToken, email, name);
+                            sessionManager.saveSession(authResponse.accessToken, authResponse.refreshToken, userId, email, name, profileUrl);
                             
-                            startActivity(new Intent(AuthActivity.this, HomeActivity.class));
-                            finish();
+                            syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                         } else {
                             String errorMsg = parseError(response);
                             Toast.makeText(AuthActivity.this, "Supabase Google Login failed: " + errorMsg, Toast.LENGTH_LONG).show();
@@ -204,6 +207,48 @@ public class AuthActivity extends AppCompatActivity {
                         Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void syncUserToDatabase(String userId, String name, String profileUrl, String accessToken) {
+        java.util.Map<String, Object> userData = new java.util.HashMap<>();
+        userData.put("uid", userId);
+        userData.put("name", name);
+        if (profileUrl != null && !profileUrl.isEmpty()) {
+            userData.put("profile_url", profileUrl);
+        }
+
+        String authHeader = "Bearer " + accessToken;
+
+        SupabaseClient.getApiService().addData(
+                "Users",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "resolution=merge-duplicates,return=representation",
+                userData
+        ).enqueue(new Callback<java.util.List<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Response<java.util.List<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful()) {
+                    android.util.Log.d("SupabaseSync", "User synced successfully");
+                } else {
+                    android.util.Log.e("SupabaseSync", "Sync failed: " + response.code());
+                    try {
+                        if (response.errorBody() != null) {
+                            android.util.Log.e("SupabaseSync", "Error details: " + response.errorBody().string());
+                        }
+                    } catch (Exception e) { e.printStackTrace(); }
+                }
+                startActivity(new Intent(AuthActivity.this, HomeActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {
+                android.util.Log.e("SupabaseSync", "Network Error: " + t.getMessage());
+                startActivity(new Intent(AuthActivity.this, HomeActivity.class));
+                finish();
+            }
+        });
     }
 
     private void handleLogin() {
@@ -225,9 +270,8 @@ public class AuthActivity extends AppCompatActivity {
         // --- BYPASS LOGIN ---
         // For development/testing: bypass the real Supabase authentication
         Toast.makeText(this, "Login successful (Bypass)", Toast.LENGTH_SHORT).show();
-        sessionManager.saveSession("dummy_token_bypass", email, "Test User");
-        startActivity(new Intent(AuthActivity.this, HomeActivity.class));
-        finish();
+        sessionManager.saveSession("dummy_token_bypass", "dummy_refresh_token", "dummy_uid", email, "Test User", "");
+        syncUserToDatabase("dummy_uid", "Test User", "", SupabaseClient.SUPABASE_ANON_KEY);
     }
 
     private void handleRegister() {

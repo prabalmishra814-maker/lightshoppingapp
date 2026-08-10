@@ -3,13 +3,13 @@ package com.example.lightshop.models;
 import com.google.gson.annotations.SerializedName;
 
 public class  ProductModel {
-    @SerializedName("PRODUCT_ID")
+    @SerializedName(value = "product_id", alternate = {"id"})
     private String productId;
 
-    @SerializedName("product_name")
+    @SerializedName(value = "product_name", alternate = {"name"})
     private String productName;
 
-    @SerializedName("product_image")
+    @SerializedName(value = "product_image", alternate = {"image"})
     private String productImage;
 
     @SerializedName("product_short_description")
@@ -18,10 +18,10 @@ public class  ProductModel {
     @SerializedName("product_category")
     private String category;
 
-    @SerializedName("product_price")
+    @SerializedName(value = "product_price", alternate = {"price"})
     private String price;
 
-    @SerializedName("product_main_price")
+    @SerializedName(value = "product_main_price", alternate = {"main_price"})
     private String mainPrice;
 
     @SerializedName("product_size")
@@ -39,10 +39,10 @@ public class  ProductModel {
     @SerializedName("product_brand")
     private String brand;
 
-    @SerializedName("product_mrp")
+    @SerializedName(value = "product_mrp", alternate = {"mrp"})
     private String mrp;
 
-    @SerializedName("product_selling_price")
+    @SerializedName(value = "product_selling_price", alternate = {"selling_price"})
     private String sellingPrice;
 
     @SerializedName("product_image2")

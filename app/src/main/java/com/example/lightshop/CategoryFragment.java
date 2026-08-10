@@ -4,19 +4,27 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.databinding.FragmentCategoryBinding;
+import com.example.lightshop.models.CategoryModel;
+import com.example.lightshop.models.SubCategoryModel;
 import java.util.ArrayList;
 import java.util.List;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CategoryFragment extends Fragment {
 
     private FragmentCategoryBinding binding;
     private SidebarAdapter sidebarAdapter;
-    private CategoryAdapter categoryAdapter;
+    private CategoryAdapter subCategoryAdapter;
+    private List<CategoryModel> categories = new ArrayList<>();
 
     @Nullable
     @Override
@@ -28,48 +36,77 @@ public class CategoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setupSidebar();
-        setupCategories();
+        fetchCategories();
+    }
+
+    private void fetchCategories() {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchCategories(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<CategoryModel>> call, @NonNull Response<List<CategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    categories = response.body();
+                    setupSidebar();
+                    if (!categories.isEmpty()) {
+                        fetchSubCategories(categories.get(0).getId()); // Fetch subcategories for first category
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Categories Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                Toast.makeText(getContext(), "Failed to fetch categories", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupSidebar() {
-        List<Category> sidebarItems = new ArrayList<>();
-        sidebarItems.add(new Category("All Categories", R.drawable.ic_all_categories));
-        sidebarItems.add(new Category("Men", R.drawable.ic_men));
-        sidebarItems.add(new Category("Women", R.drawable.ic_women));
-        sidebarItems.add(new Category("Kids", R.drawable.ic_kids));
-        sidebarItems.add(new Category("Electronics", R.drawable.ic_headphones));
-        sidebarItems.add(new Category("Home", R.drawable.ic_home));
-        sidebarItems.add(new Category("Beauty", R.drawable.ic_beauty));
-        sidebarItems.add(new Category("Sports", R.drawable.ic_sports));
-        sidebarItems.add(new Category("Automotive", R.drawable.ic_car));
-        sidebarItems.add(new Category("Books", R.drawable.ic_book));
-        sidebarItems.add(new Category("Grocery", R.drawable.ic_grocery));
-
-        sidebarAdapter = new SidebarAdapter(sidebarItems, position -> {
-            // Update main categories based on sidebar selection
+        sidebarAdapter = new SidebarAdapter(categories, position -> {
+            fetchSubCategories(categories.get(position).getId());
         });
 
         binding.rvSidebar.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.rvSidebar.setAdapter(sidebarAdapter);
     }
 
-    private void setupCategories() {
-        List<Category> categoryItems = new ArrayList<>();
-        categoryItems.add(new Category("Men", "25,342 items", R.drawable.ic_men));
-        categoryItems.add(new Category("Women", "32,142 items", R.drawable.ic_women));
-        categoryItems.add(new Category("Kids", "12,532 items", R.drawable.ic_kids));
-        categoryItems.add(new Category("Electronics", "18,231 items", R.drawable.ic_headphones));
-        categoryItems.add(new Category("Home & Kitchen", "15,312 items", R.drawable.ic_home));
-        categoryItems.add(new Category("Beauty", "9,213 items", R.drawable.ic_beauty));
-        categoryItems.add(new Category("Sports", "7,432 items", R.drawable.ic_sports));
-        categoryItems.add(new Category("Automotive", "5,421 items", R.drawable.ic_car));
-        categoryItems.add(new Category("Books", "8,932 items", R.drawable.ic_book));
-        categoryItems.add(new Category("Grocery", "6,102 items", R.drawable.ic_grocery));
+    private void fetchSubCategories(long categoryId) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchSubCategories(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "eq." + categoryId,
+                "*"
+        ).enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<SubCategoryModel>> call, @NonNull Response<List<SubCategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    setupSubCategories(response.body());
+                } else {
+                    Toast.makeText(getContext(), "SubCategories Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
 
-        categoryAdapter = new CategoryAdapter(categoryItems);
-        binding.rvCategories.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.rvCategories.setAdapter(categoryAdapter);
+            @Override
+            public void onFailure(Call<List<SubCategoryModel>> call, Throwable t) {
+                Toast.makeText(getContext(), "Failed to fetch subcategories", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void setupSubCategories(List<SubCategoryModel> subCategories) {
+        if (subCategoryAdapter == null) {
+            subCategoryAdapter = new CategoryAdapter(subCategories);
+            binding.rvCategories.setLayoutManager(new LinearLayoutManager(getContext()));
+            binding.rvCategories.setAdapter(subCategoryAdapter);
+        } else {
+            subCategoryAdapter.updateData(subCategories);
+        }
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.example.lightshop.api;
 
 import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.models.CategoryModel;
+import com.example.lightshop.models.WishlistModel;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 
 /**
  * Generic Interface for Supabase PostgREST CRUD operations.
@@ -29,7 +31,15 @@ public interface SupabaseApiService {
         @Path("table") String tableName,
         @Header("apikey") String apiKey,
         @Header("Authorization") String authHeader,
-        @Query("select") String select // e.g., "*"
+        @Query("select") String select
+    );
+
+    @GET("rest/v1/{table}")
+    Call<List<Map<String, Object>>> fetchDataWithFilters(
+        @Path("table") String tableName,
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @QueryMap Map<String, String> filters
     );
 
     // Specific Fetch for Products returning ProductModel list
@@ -46,6 +56,33 @@ public interface SupabaseApiService {
         @Header("apikey") String apiKey,
         @Header("Authorization") String authHeader,
         @Query("select") String select
+    );
+
+    // Specific Fetch for SubCategories
+    @GET("rest/v1/SubCategory")
+    Call<List<com.example.lightshop.models.SubCategoryModel>> fetchSubCategories(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("category_id") String categoryIdFilter, // e.g., "eq.1"
+            @Query("select") String select
+    );
+
+    // Specific Fetch for Wishlist - Fixed endpoint
+    @GET("rest/v1/wishlist")
+    Call<List<WishlistModel>> fetchWishlist(
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @Query("user_id") String userIdFilter, // e.g., "eq.uuid"
+        @Query("select") String select // e.g., "*"
+    );
+
+    // Specific Fetch for Cart
+    @GET("rest/v1/cart")
+    Call<List<Map<String, Object>>> fetchCart(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("user_id") String userIdFilter,
+            @Query("select") String select
     );
 
     // 2. ADD (Insert)
@@ -68,6 +105,15 @@ public interface SupabaseApiService {
         @Body Map<String, Object> data
     );
 
+    @PATCH("rest/v1/{table}")
+    Call<ResponseBody> updateDataByColumn(
+        @Path("table") String tableName,
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @QueryMap Map<String, String> filters,
+        @Body Map<String, Object> data
+    );
+
     // 4. DELETE
     @DELETE("rest/v1/{table}")
     Call<ResponseBody> deleteData(
@@ -75,5 +121,13 @@ public interface SupabaseApiService {
         @Header("apikey") String apiKey,
         @Header("Authorization") String authHeader,
         @Query("id") String idFilter // e.g., "eq.123"
+    );
+
+    @DELETE("rest/v1/{table}")
+    Call<ResponseBody> deleteDataByFilters(
+        @Path("table") String tableName,
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @QueryMap Map<String, String> filters
     );
 }

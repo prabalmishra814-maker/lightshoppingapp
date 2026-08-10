@@ -34,14 +34,6 @@
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/btnWishlist"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Move to Wishlist"
-            android:textColor="@color/accent_blue"
-            android:textSize="14sp"
-            android:textStyle="bold" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -97,9 +89,10 @@
                             android:textSize="12sp" />
 
                         <TextView
+                            android:id="@+id/tvDeliverTo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Mau 275101"
+                            android:text="Select Address"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:textStyle="bold" />

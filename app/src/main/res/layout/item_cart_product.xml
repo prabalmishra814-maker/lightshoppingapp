@@ -98,13 +98,6 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/ivWishlist"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:src="@drawable/ic_heart_outline"
-                app:tint="@color/text_subtitle" />
 
         </RelativeLayout>
 
@@ -154,23 +147,24 @@
                 android:layout_weight="1" />
 
             <TextView
+                android:id="@+id/btnMoveToWishlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="Move to Wishlist"
+                android:textColor="@color/text_subtitle"
+                android:textSize="14sp" />
+
+            <TextView
                 android:id="@+id/btnRemove"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:padding="8dp"
                 android:text="Remove"
                 android:textColor="@color/text_subtitle"
                 android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/btnSaveForLater"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:padding="8dp"
-                android:text="Save for later"
-                android:textColor="@color/text_subtitle"
-                android:textSize="14sp" />
 
         </LinearLayout>
     </LinearLayout>

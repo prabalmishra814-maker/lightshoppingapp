@@ -11,7 +11,7 @@
     <item
         android:id="@+id/nav_orders"
         android:icon="@drawable/ic_orders_bottom"
-        android:title="My Orders" />
+        android:title="Orders" />
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_profile_bottom"

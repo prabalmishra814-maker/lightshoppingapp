@@ -15,17 +15,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.models.CategoryModel;
 import com.example.lightshop.api.SupabaseClient;
+import com.example.lightshop.api.SessionManager;
 import com.bumptech.glide.Glide;
 import com.denzcoskun.imageslider.ImageSlider;
 import com.denzcoskun.imageslider.constants.ScaleTypes;
 import com.denzcoskun.imageslider.models.SlideModel;
+import okhttp3.ResponseBody;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
+
+    private SessionManager sessionManager;
+    private Set<String> cartProductIds = new HashSet<>();
+    private Set<String> wishlistProductIds = new HashSet<>();
+    private ProductAdapter allProductsAdapter;
 
     @Nullable
     @Override
@@ -37,10 +48,82 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        sessionManager = new SessionManager(requireContext());
         setupClickListeners(view);
         setupImageSlider(view);
         fetchCategoriesFromSupabase(view);
+        fetchCartProductIds();
+        fetchWishlistProductIds();
         fetchProductsFromSupabase(view);
+    }
+
+    private void fetchWishlistProductIds() {
+        String userId = sessionManager.getUserId();
+        if (userId.isEmpty()) return;
+
+        String authHeader = "Bearer " + sessionManager.getToken();
+        SupabaseClient.getApiService().fetchWishlist(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "eq." + userId,
+                "product_id"
+        ).enqueue(new Callback<List<com.example.lightshop.models.WishlistModel>>() {
+            @Override
+            public void onResponse(Call<List<com.example.lightshop.models.WishlistModel>> call, Response<List<com.example.lightshop.models.WishlistModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    for (com.example.lightshop.models.WishlistModel item : response.body()) {
+                        if (item.getProductId() != null) {
+                            wishlistProductIds.add(String.valueOf(item.getProductId()));
+                        }
+                    }
+                    if (allProductsAdapter != null) {
+                        allProductsAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<com.example.lightshop.models.WishlistModel>> call, Throwable t) {
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Wishlist Error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void fetchCartProductIds() {
+        String userId = sessionManager.getUserId();
+        if (userId.isEmpty()) return;
+
+        String authHeader = "Bearer " + sessionManager.getToken();
+        SupabaseClient.getApiService().fetchCart(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "eq." + userId,
+                "product_id"
+        ).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    for (Map<String, Object> item : response.body()) {
+                        Object pid = item.get("product_id");
+                        if (pid != null) {
+                            cartProductIds.add(String.valueOf(pid));
+                        }
+                    }
+                    if (allProductsAdapter != null) {
+                        allProductsAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Cart Error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void setupImageSlider(View view) {
@@ -74,12 +157,18 @@ public class HomeFragment extends Fragment {
                     }
                 } else {
                     // Fallback to hardcoded categories if table is empty or missing
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Categories Table Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
+                    }
                     setupHardcodedCategories(view);
                 }
             }
 
             @Override
             public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Categories Network Error", android.widget.Toast.LENGTH_SHORT).show();
+                }
                 setupHardcodedCategories(view);
             }
         });
@@ -114,15 +203,22 @@ public class HomeFragment extends Fragment {
                     RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
                     if (rvAll != null) {
                         rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
-                        rvAll.setAdapter(new ProductAdapter(products, false));
+                        allProductsAdapter = new ProductAdapter(products, false);
+                        rvAll.setAdapter(allProductsAdapter);
                         rvAll.setNestedScrollingEnabled(false); // Since it's inside NestedScrollView
+                    }
+                } else {
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Products Table Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<List<ProductModel>> call, Throwable t) {
-                // Error handling
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Products Network Error", android.widget.Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -136,6 +232,10 @@ public class HomeFragment extends Fragment {
 
         view.findViewById(R.id.cart_button_card).setOnClickListener(v -> {
             startActivity(new android.content.Intent(getContext(), CartActivity.class));
+        });
+
+        view.findViewById(R.id.wishlist_card).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(getContext(), WishlistActivity.class));
         });
     }
 
@@ -256,6 +356,7 @@ public class HomeFragment extends Fragment {
             TextView discount;
             ImageView image;
             ImageView wishlist;
+            ImageView ivAddIcon;
             View btnAdd;
 
             ViewHolder(View view) {
@@ -267,6 +368,7 @@ public class HomeFragment extends Fragment {
                 image = view.findViewById(R.id.iv_product);
                 wishlist = view.findViewById(R.id.iv_wishlist);
                 btnAdd = view.findViewById(R.id.btn_add_to_cart);
+                ivAddIcon = view.findViewById(R.id.iv_add_icon);
                 
                 // Adjust layout for grid if needed
                 if (!isHorizontal) {
@@ -342,16 +444,185 @@ public class HomeFragment extends Fragment {
                     .into(holder.image);
 
             if (holder.wishlist != null) {
+                if (wishlistProductIds.contains(item.getProductId())) {
+                    holder.wishlist.setImageResource(R.drawable.ic_heart_filled);
+                    holder.wishlist.setColorFilter(null); // Use original color (#FF0000)
+                } else {
+                    holder.wishlist.setImageResource(R.drawable.ic_heart_outline);
+                    holder.wishlist.setColorFilter(getResources().getColor(R.color.text_subtitle));
+                }
+
                 holder.wishlist.setOnClickListener(v -> {
-                    // Toggle wishlist logic
+                    if (wishlistProductIds.contains(item.getProductId())) {
+                        removeFromWishlist(item);
+                    } else {
+                        addToWishlist(item);
+                    }
                 });
             }
 
             if (holder.btnAdd != null) {
+                if (cartProductIds.contains(item.getProductId())) {
+                    holder.ivAddIcon.setImageResource(R.drawable.ic_check);
+                } else {
+                    holder.ivAddIcon.setImageResource(R.drawable.ic_add);
+                }
                 holder.btnAdd.setOnClickListener(v -> {
-                    // Add to cart logic
+                    if (cartProductIds.contains(item.getProductId())) {
+                        removeFromCart(item);
+                    } else {
+                        addToCart(item);
+                    }
                 });
             }
+        }
+
+        private void removeFromCart(ProductModel product) {
+            String userId = sessionManager.getUserId();
+            if (userId.isEmpty()) return;
+
+            String authHeader = "Bearer " + sessionManager.getToken();
+            Map<String, String> filters = new HashMap<>();
+            filters.put("user_id", "eq." + userId);
+            filters.put("product_id", "eq." + product.getProductId());
+
+            SupabaseClient.getApiService().deleteDataByFilters(
+                    "cart",
+                    SupabaseClient.SUPABASE_ANON_KEY,
+                    authHeader,
+                    filters
+            ).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        cartProductIds.remove(product.getProductId());
+                        notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    android.widget.Toast.makeText(getContext(), "Failed to remove: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void addToCart(ProductModel product) {
+            String userId = sessionManager.getUserId();
+            if (userId.isEmpty()) {
+                android.widget.Toast.makeText(getContext(), "Please login to add to cart", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("user_id", userId);
+            data.put("product_id", product.getProductId());
+            data.put("product_name", product.getProductName());
+            data.put("product_price", product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice());
+            data.put("product_mrp", product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : product.getPrice()));
+            data.put("product_image", product.getProductImage());
+            data.put("quantity", 1);
+
+            String userToken = sessionManager.getToken();
+            String authHeader = "Bearer " + (userToken != null && !userToken.isEmpty() ? userToken : SupabaseClient.SUPABASE_ANON_KEY);
+
+            // Use UPSERT logic (resolution=merge-duplicates) to update quantity if already exists
+            // Or just add and handle 409. For now, let's just add to Cart table.
+            SupabaseClient.getApiService().addData(
+                    "cart",
+                    SupabaseClient.SUPABASE_ANON_KEY,
+                    authHeader,
+                    "resolution=merge-duplicates,return=representation",
+                    data
+            ).enqueue(new Callback<List<Map<String, Object>>>() {
+                @Override
+                public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                    if (response.isSuccessful()) {
+                        cartProductIds.add(product.getProductId());
+                        notifyDataSetChanged();
+                    } else {
+                        android.widget.Toast.makeText(getContext(), "Failed to add: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                    android.widget.Toast.makeText(getContext(), "Network error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void addToWishlist(ProductModel product) {
+            String userId = sessionManager.getUserId();
+            if (userId.isEmpty()) {
+                android.widget.Toast.makeText(getContext(), "Please login to add to wishlist", android.widget.Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("user_id", userId);
+            data.put("product_id", product.getProductId());
+            data.put("product_name", product.getProductName());
+            data.put("product_price", product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice());
+            data.put("product_image", product.getProductImage());
+
+            String userToken = sessionManager.getToken();
+            String authHeader = "Bearer " + (userToken != null && !userToken.isEmpty() ? userToken : SupabaseClient.SUPABASE_ANON_KEY);
+            
+            SupabaseClient.getApiService().addData(
+                    "wishlist",
+                    SupabaseClient.SUPABASE_ANON_KEY,
+                    authHeader,
+                    "return=representation",
+                    data
+            ).enqueue(new Callback<List<Map<String, Object>>>() {
+                @Override
+                public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                    if (response.isSuccessful()) {
+                        wishlistProductIds.add(product.getProductId());
+                        notifyDataSetChanged();
+                    } else if (response.code() == 409) {
+                        // Already handled by toggle logic
+                    } else {
+                        android.widget.Toast.makeText(getContext(), "Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                    android.widget.Toast.makeText(getContext(), "Error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private void removeFromWishlist(ProductModel product) {
+            String userId = sessionManager.getUserId();
+            if (userId.isEmpty()) return;
+
+            String authHeader = "Bearer " + sessionManager.getToken();
+            Map<String, String> filters = new HashMap<>();
+            filters.put("user_id", "eq." + userId);
+            filters.put("product_id", "eq." + product.getProductId());
+
+            SupabaseClient.getApiService().deleteDataByFilters(
+                    "wishlist",
+                    SupabaseClient.SUPABASE_ANON_KEY,
+                    authHeader,
+                    filters
+            ).enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        wishlistProductIds.remove(product.getProductId());
+                        notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    android.widget.Toast.makeText(getContext(), "Failed to remove: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
         }
 
         @Override
