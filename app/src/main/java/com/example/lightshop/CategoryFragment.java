@@ -1,5 +1,6 @@
 package com.example.lightshop;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +17,9 @@ import com.example.lightshop.databinding.FragmentCategoryBinding;
 import com.example.lightshop.models.CategoryModel;
 import com.example.lightshop.models.SubCategoryModel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,6 +30,8 @@ public class CategoryFragment extends Fragment {
     private SidebarAdapter sidebarAdapter;
     private CategoryAdapter subCategoryAdapter;
     private List<CategoryModel> categories = new ArrayList<>();
+    private Map<Integer, List<SubCategoryModel>> subCategoryMap = new HashMap<>();
+    private SessionManager sessionManager;
 
     @Nullable
     @Override
@@ -38,73 +43,114 @@ public class CategoryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        fetchCategories();
+        sessionManager = new SessionManager(requireContext());
+        loadProfessionalData();
     }
 
-    private void fetchCategories() {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchCategories(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "*"
-        ).enqueue(new Callback<List<CategoryModel>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<CategoryModel>> call, @NonNull Response<List<CategoryModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    categories = response.body();
-                    setupSidebar();
-                    if (!categories.isEmpty()) {
-                        updateSectionLabel(categories.get(0).getCategoryName());
-                        fetchSubCategories(categories.get(0).getId());
-                    }
-                } else {
-                    if (response.code() == 404) {
-                        fetchCategoriesPlural();
-                        return;
-                    }
-                    Toast.makeText(getContext(), "Categories Error: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
+    private void loadProfessionalData() {
+        categories.clear();
+        subCategoryMap.clear();
 
-            @Override
-            public void onFailure(@NonNull Call<List<CategoryModel>> call, @NonNull Throwable t) {
-                android.util.Log.e("SupabaseError", "Categories Fetch Failed", t);
-                fetchCategoriesPlural();
-            }
+        // 1. Electronics
+        addCategory(1, "Electronics", R.drawable.ic_electronics, new String[]{
+                "Laptops", "Mobiles", "Tablets", "Headphones", "Smart Watches", "Speakers", "Cameras", "Televisions"
         });
+
+        // 2. Mobiles
+        addCategory(2, "Mobiles", R.drawable.ic_electronics, new String[]{
+                "Smartphones", "Feature Phones", "Cases & Covers", "Screen Protectors", "Power Banks", "Chargers"
+        });
+
+        // 3. Men
+        addCategory(3, "Men", R.drawable.ic_men, new String[]{
+                "T-Shirts", "Shirts", "Jeans", "Trousers", "Shoes", "Watches", "Wallets", "Jackets"
+        });
+
+        // 4. Women
+        addCategory(4, "Women", R.drawable.ic_women, new String[]{
+                "Sarees", "Kurtis", "Dresses", "Tops", "Jeans", "Footwear", "Jewellery", "Handbags"
+        });
+
+        // 5. Kids
+        addCategory(5, "Kids", R.drawable.ic_kids, new String[]{
+                "Boys Clothing", "Girls Clothing", "Toys", "Baby Care", "Kids Shoes", "School Bags"
+        });
+
+        // 6. Beauty
+        addCategory(6, "Beauty", R.drawable.ic_beauty, new String[]{
+                "Makeup", "Skincare", "Hair Care", "Fragrances", "Personal Care"
+        });
+
+        // 7. Home & Kitchen
+        addCategory(7, "Home & Kitchen", R.drawable.ic_home_cat, new String[]{
+                "Kitchenware", "Cookware", "Home Decor", "Furniture", "Storage", "Cleaning"
+        });
+
+        // 8. Footwear
+        addCategory(8, "Footwear", R.drawable.ic_shoes, new String[]{
+                "Men Shoes", "Women Shoes", "Kids Shoes", "Sandals", "Slippers"
+        });
+
+        // 9. Grocery
+        addCategory(9, "Grocery", R.drawable.ic_grocery, new String[]{
+                "Staples", "Snacks", "Beverages", "Dairy", "Personal Care", "Household"
+        });
+
+        // 10. Accessories
+        addCategory(10, "Accessories", R.drawable.ic_backpack, new String[]{
+                "Bags", "Belts", "Sunglasses", "Caps", "Ties"
+        });
+
+        // 11. Watches
+        addCategory(11, "Watches", R.drawable.ic_watch, new String[]{
+                "Analog", "Digital", "Smart", "Luxury", "Sports"
+        });
+
+        // 12. Sports
+        addCategory(12, "Sports", R.drawable.ic_sports, new String[]{
+                "Cricket", "Football", "Badminton", "Fitness", "Outdoor"
+        });
+
+        // 13. Books
+        addCategory(13, "Books", R.drawable.ic_book, new String[]{
+                "Fiction", "Non-Fiction", "Self-Help", "Educational", "Comics"
+        });
+
+        // 14. Toys
+        addCategory(14, "Toys", R.drawable.ic_kids, new String[]{
+                "Action Figures", "Puzzles", "Educational Toys", "Dolls", "Remote Control"
+        });
+
+        setupSidebar();
+        if (!categories.isEmpty()) {
+            updateSectionLabel(categories.get(0).getCategoryName());
+            setupSubCategories(subCategoryMap.get(categories.get(0).getId()));
+        }
     }
 
-    private void fetchCategoriesPlural() {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchCategoriesPlural(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "*"
-        ).enqueue(new Callback<List<CategoryModel>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<CategoryModel>> call, @NonNull Response<List<CategoryModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    categories = response.body();
-                    setupSidebar();
-                    if (!categories.isEmpty()) {
-                        updateSectionLabel(categories.get(0).getCategoryName());
-                        fetchSubCategories(categories.get(0).getId());
-                    }
-                }
-            }
+    private void addCategory(int id, String name, int iconRes, String[] subCats) {
+        CategoryModel cat = new CategoryModel();
+        cat.setId(id);
+        cat.setCategoryName(name);
+        cat.setCategoryImage("res:" + iconRes);
+        categories.add(cat);
 
-            @Override
-            public void onFailure(@NonNull Call<List<CategoryModel>> call, @NonNull Throwable t) {
-                android.util.Log.e("SupabaseError", "Categories Plural Fetch Failed", t);
-            }
-        });
+        List<SubCategoryModel> subList = new ArrayList<>();
+        for (int i = 0; i < subCats.length; i++) {
+            SubCategoryModel sub = new SubCategoryModel();
+            sub.setId(id * 100 + i);
+            sub.setCategoryId(id);
+            sub.setSubCategoryName(subCats[i]);
+            subList.add(sub);
+        }
+        subCategoryMap.put(id, subList);
     }
 
     private void setupSidebar() {
         sidebarAdapter = new SidebarAdapter(categories, position -> {
             CategoryModel selected = categories.get(position);
             updateSectionLabel(selected.getCategoryName());
-            fetchSubCategories(selected.getId());
+            setupSubCategories(subCategoryMap.get(selected.getId()));
         });
 
         binding.rvSidebar.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -113,54 +159,8 @@ public class CategoryFragment extends Fragment {
 
     private void updateSectionLabel(String categoryName) {
         if (binding != null) {
-           
+            binding.tvSectionLabel.setText("ALL " + categoryName);
         }
-    }
-
-    private void fetchSubCategories(long categoryId) {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchSubCategories(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "eq." + categoryId,
-                "*"
-        ).enqueue(new Callback<List<SubCategoryModel>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<SubCategoryModel>> call, @NonNull Response<List<SubCategoryModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    setupSubCategories(response.body());
-                } else {
-                    if (response.code() == 404) {
-                        fetchSubCategoriesPlural(categoryId);
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<SubCategoryModel>> call, @NonNull Throwable t) {
-                fetchSubCategoriesPlural(categoryId);
-            }
-        });
-    }
-
-    private void fetchSubCategoriesPlural(long categoryId) {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchSubCategoriesPlural(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "eq." + categoryId,
-                "*"
-        ).enqueue(new Callback<List<SubCategoryModel>>() {
-            @Override
-            public void onResponse(@NonNull Call<List<SubCategoryModel>> call, @NonNull Response<List<SubCategoryModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    setupSubCategories(response.body());
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<List<SubCategoryModel>> call, @NonNull Throwable t) {}
-        });
     }
 
     private void setupSubCategories(List<SubCategoryModel> subCategories) {
