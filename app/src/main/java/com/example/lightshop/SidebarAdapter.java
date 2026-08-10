@@ -1,6 +1,7 @@
 package com.example.lightshop;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +31,16 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final View container;
+        public final View selectionIndicator;
+        public final View iconContainer;
         public final ImageView icon;
         public final TextView name;
 
         public ViewHolder(View view) {
             super(view);
             container = view.findViewById(R.id.sidebar_container);
+            selectionIndicator = view.findViewById(R.id.selection_indicator);
+            iconContainer = view.findViewById(R.id.icon_container);
             icon = view.findViewById(R.id.sidebar_icon);
             name = view.findViewById(R.id.sidebar_name);
         }
@@ -61,25 +66,30 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
                 .into(holder.icon);
 
         if (position == selectedPosition) {
-            holder.container.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.selected_bg));
-            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.black));
-            holder.name.setTypeface(null, android.graphics.Typeface.BOLD);
+            holder.container.setBackgroundColor(Color.WHITE);
+            holder.selectionIndicator.setVisibility(View.VISIBLE);
+            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_blue));
+            holder.name.setTypeface(null, Typeface.BOLD);
+            holder.iconContainer.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ContextCompat.getColor(holder.itemView.getContext(), R.color.icon_blue_bg)));
+            holder.icon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_blue));
         } else {
             holder.container.setBackgroundColor(Color.TRANSPARENT);
-            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.text_primary));
-            holder.name.setTypeface(null, android.graphics.Typeface.NORMAL);
+            holder.selectionIndicator.setVisibility(View.GONE);
+            holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.secondary_gray));
+            holder.name.setTypeface(null, Typeface.NORMAL);
+            holder.iconContainer.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.WHITE));
+            holder.icon.clearColorFilter();
         }
-        
-        // Remove color filters from icon to show original image colors
-        holder.icon.clearColorFilter();
 
         holder.itemView.setOnClickListener(v -> {
             int oldPos = selectedPosition;
             selectedPosition = holder.getBindingAdapterPosition();
-            notifyItemChanged(oldPos);
-            notifyItemChanged(selectedPosition);
-            if (listener != null) {
-                listener.onItemClick(selectedPosition);
+            if (oldPos != selectedPosition) {
+                notifyItemChanged(oldPos);
+                notifyItemChanged(selectedPosition);
+                if (listener != null) {
+                    listener.onItemClick(selectedPosition);
+                }
             }
         });
     }

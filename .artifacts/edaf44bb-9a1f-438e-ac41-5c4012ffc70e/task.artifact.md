@@ -1,6 +1,5 @@
-- [x] Add `photoview` dependency in `libs.versions.toml` and `build.gradle.kts`
-- [x] Create layouts for full-screen viewer
-- [x] Implement `FullScreenImageActivity.java`
-- [x] Integrate full-screen viewer in `ProductDetailActivity.java`
-- [x] Register activity in `AndroidManifest.xml`
-- [x] Verify build and functionality
+- [ ] Add `fitsSystemWindows` to `fragment_category.xml` root
+- [ ] Add `paddingEnd` to `topBar` in `fragment_category.xml`
+- [ ] Standardize header icon container widths to 48dp
+- [ ] Fix cart badge positioning to prevent cut-off
+- [ ] Verify with a fresh screenshot

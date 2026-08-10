@@ -102,7 +102,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="₹599"
-                android:textColor="@color/primary"
+                android:textColor="@color/primary_blue"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -123,7 +123,7 @@
             android:layout_height="28dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="11dp"
-            app:cardBackgroundColor="@color/primary"
+            app:cardBackgroundColor="@color/primary_blue"
             app:cardCornerRadius="8dp"
             app:cardElevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"

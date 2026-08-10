@@ -66,6 +66,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth)
     implementation(libs.glide)
+    implementation(libs.photoview)
     implementation(libs.androidx.swiperefreshlayout)
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
     annotationProcessor(libs.glide.compiler)

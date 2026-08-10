@@ -19,15 +19,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public final ImageView icon;
+        public final ImageView image;
         public final TextView name;
-        public final TextView count;
 
         public ViewHolder(View view) {
             super(view);
-            icon = view.findViewById(R.id.category_icon);
-            name = view.findViewById(R.id.category_name);
-            count = view.findViewById(R.id.item_count);
+            image = view.findViewById(R.id.subcategory_image);
+            name = view.findViewById(R.id.subcategory_name);
         }
     }
 
@@ -35,7 +33,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_category_row, parent, false);
+                .inflate(R.layout.item_subcategory_grid, parent, false);
         return new ViewHolder(view);
     }
 
@@ -43,9 +41,12 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         SubCategoryModel subCategory = subCategories.get(position);
         holder.name.setText(subCategory.getSubCategoryName());
-        holder.count.setVisibility(View.GONE); // Hide item count for now
-        holder.icon.setImageResource(R.drawable.ic_chevron_right);
-        holder.icon.setColorFilter(holder.itemView.getContext().getColor(R.color.divider_color));
+        
+        // Circular image container style is in XML. 
+        // For subcategories, we usually have specific icons. 
+        // Using ic_category as default if no image URL is provided in SubCategoryModel.
+        holder.image.setImageResource(R.drawable.ic_category);
+        holder.image.setColorFilter(holder.itemView.getContext().getColor(R.color.secondary_gray));
     }
 
     @Override
