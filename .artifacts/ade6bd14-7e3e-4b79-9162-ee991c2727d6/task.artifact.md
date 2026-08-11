@@ -1,0 +1,4 @@
+- [x] Add cart icon and badge to `activity_product_detail.xml`
+- [x] Implement cart click listener in `ProductDetailActivity.java`
+- [x] Verify build
+- [x] Final walkthrough

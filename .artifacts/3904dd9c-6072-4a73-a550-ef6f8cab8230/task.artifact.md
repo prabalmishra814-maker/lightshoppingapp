@@ -1,7 +1,4 @@
-- `[x]` Update `fragment_category.xml` layout for sidebar/grid and header icons
-- `[x]` Update `item_sidebar.xml` for professional look and selection indicator
-- `[x]` Update `item_subcategory_grid.xml` for subcategory items
-- `[x]` Modify `SidebarAdapter.java` to support local resource images and refined selection styling
-- `[x]` Modify `CategoryAdapter.java` to support local resource images and grid styling
-- `[x]` Update `CategoryFragment.java` to populate professional data and handle logic
-- `[ ]` Verify build and UI on device/emulator
+- `[x]` Fix `SessionManager.java`: Add null checks for `productId`
+- `[x]` Fix `HomeFragment.java`: Add missing IDs to hardcoded products and improve `DealAdapter` safety
+- `[x]` Fix `ProductDetailActivity.java`: Add safety checks for UI population and cart logic
+- `[x]` Verify build and test on device

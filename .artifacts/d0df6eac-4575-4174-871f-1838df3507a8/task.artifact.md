@@ -1,0 +1,6 @@
+- `[x]` Create `ic_logo_basket.xml`
+- `[x]` Update `colors.xml` with UI colors
+- `[x]` Update `strings.xml` with "Lite Basket" text
+- `[x]` Redesign `fragment_home.xml` to match reference image
+- `[x]` Update `HomeFragment.java` logic
+- `[x]` Verify changes on device

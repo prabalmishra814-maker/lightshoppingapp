@@ -10,7 +10,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.lightshop.models.ProductModel;
@@ -54,10 +53,75 @@ public class HomeFragment extends Fragment {
         sessionManager = new SessionManager(requireContext());
         setupClickListeners(view);
         setupImageSlider(view);
-        fetchCategoriesFromSupabase(view);
+
+        populateProfessionalHome(view);
         fetchCartProductIds();
         fetchWishlistProductIds();
-        fetchProductsFromSupabase(view);
+    }
+
+
+
+    private void populateProfessionalHome(View view) {
+        // 1. Professional Categories
+        RecyclerView rvCat = view.findViewById(R.id.rv_home_categories);
+        List<HomeActivity.HomeCategory> catList = new ArrayList<>();
+        catList.add(new HomeActivity.HomeCategory("Top Offers", R.drawable.ic_all_categories, R.color.white));
+        catList.add(new HomeActivity.HomeCategory("Mobiles", R.drawable.ic_electronics, R.color.white));
+        catList.add(new HomeActivity.HomeCategory("Fashion", R.drawable.ic_men, R.color.white));
+        catList.add(new HomeActivity.HomeCategory("Electronics", R.drawable.ic_headphones, R.color.white));
+        catList.add(new HomeActivity.HomeCategory("Home", R.drawable.ic_home_cat, R.color.white));
+        catList.add(new HomeActivity.HomeCategory("Beauty", R.drawable.ic_beauty, R.color.white));
+        
+        rvCat.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvCat.setAdapter(new HomeCategoryAdapter(catList));
+
+        // 2. Sample Deals of the Day (to match image)
+        RecyclerView rvDeals = view.findViewById(R.id.rv_deals);
+        List<ProductModel> dealList = new ArrayList<>();
+        
+        ProductModel d1 = new ProductModel();
+        d1.setProductId("deal1");
+        d1.setProductName("Noise ColorFit Pulse 2 Max");
+        d1.setSellingPrice("1799");
+        d1.setPrice("1799");
+        d1.setMrp("2499");
+        d1.setMainPrice("2499");
+        d1.setRating("4.4");
+        d1.setReviewsCount("5.6K");
+        d1.setProductImage("https://m.media-amazon.com/images/I/61X-u4fX1yL._SX679_.jpg");
+        dealList.add(d1);
+
+        ProductModel d2 = new ProductModel();
+        d2.setProductId("deal2");
+        d2.setProductName("boAt Airdopes 141 Pro");
+        d2.setSellingPrice("1299");
+        d2.setPrice("1299");
+        d2.setMrp("1999");
+        d2.setMainPrice("1999");
+        d2.setRating("4.3");
+        d2.setReviewsCount("2.3K");
+        d2.setProductImage("https://m.media-amazon.com/images/I/315vj6oj-FL._MCnd_AC_CEL_SR450,600_.jpg");
+        dealList.add(d2);
+
+        ProductModel d3 = new ProductModel();
+        d3.setProductId("deal3");
+        d3.setProductName("Campus Running Shoes");
+        d3.setSellingPrice("1499");
+        d3.setPrice("1499");
+        d3.setMrp("1999");
+        d3.setMainPrice("1999");
+        d3.setRating("4.2");
+        d3.setReviewsCount("1.2K");
+        d3.setProductImage("https://m.media-amazon.com/images/I/61+9EwG96VL._SY695_.jpg");
+        dealList.add(d3);
+
+        rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvDeals.setAdapter(new DealAdapter(dealList));
+
+        // 3. Best Selling
+        RecyclerView rvBest = view.findViewById(R.id.rv_best_selling);
+        rvBest.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        fetchProductsFromSupabase(view); // Reusing existing fetch for Best Selling
     }
 
     private void fetchWishlistProductIds() {
@@ -108,121 +172,46 @@ public class HomeFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    cartProductIds.clear();
                     for (Map<String, Object> item : response.body()) {
                         Object pid = item.get("PRODUCT_ID") != null ? item.get("PRODUCT_ID") : item.get("product_id");
                         if (pid != null) {
                             cartProductIds.add(String.valueOf(pid));
                         }
                     }
-                    if (allProductsAdapter != null) {
-                        allProductsAdapter.notifyDataSetChanged();
-                    }
+                    updateHomeCartBadge(cartProductIds.size());
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Cart Error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
-                }
-            }
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
         });
     }
 
-    private void setupImageSlider(View view) {
-        ImageSlider imageSlider = view.findViewById(R.id.image_slider);
-        if (imageSlider != null) {
-            ArrayList<SlideModel> imageList = new ArrayList<>();
-            // Only images, no titles
-            imageList.add(new SlideModel("https://bit.ly/2YoJ77H", ScaleTypes.FIT));
-            imageList.add(new SlideModel("https://bit.ly/2BteuF2", ScaleTypes.FIT));
-            imageList.add(new SlideModel("https://bit.ly/3fLJf72", ScaleTypes.FIT));
-            
-            imageSlider.setImageList(imageList, ScaleTypes.FIT);
+    private void updateHomeCartBadge(int count) {
+        if (getView() == null) return;
+        TextView badge = getView().findViewById(R.id.tv_home_cart_badge);
+        if (badge != null) {
+            if (count > 0) {
+                badge.setText(String.valueOf(count));
+                badge.setVisibility(View.VISIBLE);
+            } else {
+                badge.setVisibility(View.GONE);
+            }
         }
     }
 
-    private void fetchCategoriesFromSupabase(View view) {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchCategories(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "*"
-        ).enqueue(new Callback<List<CategoryModel>>() {
-            @Override
-            public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<CategoryModel> categories = response.body();
-                    RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
-                    if (rvCategories != null) {
-                        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                        rvCategories.setAdapter(new CategoryAdapter(categories));
-                    }
-                } else {
-                    if (response.code() == 404) {
-                        fetchCategoriesPluralFromSupabase(view);
-                        return;
-                    }
-                    // Fallback to hardcoded categories if table is empty or missing
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Categories Table Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
-                    }
-                    setupHardcodedCategories(view);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
-                android.util.Log.e("SupabaseError", "Categories Fetch Failed", t);
-                // Try plural on failure too if it might be a DNS/URL issue related to path
-                fetchCategoriesPluralFromSupabase(view);
-            }
-        });
-    }
-
-    private void fetchCategoriesPluralFromSupabase(View view) {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchCategoriesPlural(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "*"
-        ).enqueue(new Callback<List<CategoryModel>>() {
-            @Override
-            public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<CategoryModel> categories = response.body();
-                    RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
-                    if (rvCategories != null) {
-                        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                        rvCategories.setAdapter(new CategoryAdapter(categories));
-                    }
-                } else {
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Categories Plural Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
-                    }
-                    setupHardcodedCategories(view);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
-                android.util.Log.e("SupabaseError", "Categories Plural Fetch Failed", t);
-                setupHardcodedCategories(view);
-            }
-        });
-    }
-
-    private void setupHardcodedCategories(View view) {
-        RecyclerView rvCategories = view.findViewById(R.id.rv_categories);
-        List<HomeActivity.HomeCategory> categories = new ArrayList<>();
-        categories.add(new HomeActivity.HomeCategory("Men", R.drawable.ic_men, R.color.cat_men_bg));
-        categories.add(new HomeActivity.HomeCategory("Women", R.drawable.ic_women, R.color.cat_women_bg));
-        categories.add(new HomeActivity.HomeCategory("Electronics", R.drawable.ic_electronics, R.color.cat_electronics_bg));
-        categories.add(new HomeActivity.HomeCategory("Home", R.drawable.ic_home_cat, R.color.cat_home_bg));
-        categories.add(new HomeActivity.HomeCategory("Beauty", R.drawable.ic_beauty, R.color.cat_beauty_bg));
-
-        rvCategories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvCategories.setAdapter(new HomeCategoryAdapter(categories));
+    private void setupImageSlider(View view) {
+        ImageSlider imageSlider = view.findViewById(R.id.home_image_slider);
+        if (imageSlider != null) {
+            ArrayList<SlideModel> imageList = new ArrayList<>();
+            // High quality professional banners
+            imageList.add(new SlideModel("https://img.freepik.com/free-vector/shopping-day-banner-with-realistic-bags-shopping-cart-gifts-boxes_1361-2983.jpg", ScaleTypes.FIT));
+            imageList.add(new SlideModel("https://img.freepik.com/free-vector/flat-shopping-background-with-sales_23-2149363065.jpg", ScaleTypes.FIT));
+            imageList.add(new SlideModel("https://img.freepik.com/free-vector/gradient-sale-background_23-2148817454.jpg", ScaleTypes.FIT));
+            
+            imageSlider.setImageList(imageList, ScaleTypes.FIT);
+        }
     }
 
     private void fetchProductsFromSupabase(View view) {
@@ -236,120 +225,111 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ProductModel> products = response.body();
-                    
-                    // Setup All Products (Grid)
-                    RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
-                    if (rvAll != null) {
-                        rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
-                        allProductsAdapter = new ProductAdapter(products, false);
-                        rvAll.setAdapter(allProductsAdapter);
-                        rvAll.setNestedScrollingEnabled(false); // Since it's inside NestedScrollView
-                    }
-                } else {
-                    if (response.code() == 404) {
-                        fetchProductsPluralFromSupabase(view);
-                        return;
-                    }
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Products Table Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
+                    RecyclerView rvBest = view.findViewById(R.id.rv_best_selling);
+                    if (rvBest != null && getContext() != null) {
+                        // Horizontal scroll for Best Selling
+                        rvBest.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+                        allProductsAdapter = new ProductAdapter(products, true);
+                        rvBest.setAdapter(allProductsAdapter);
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<List<ProductModel>> call, Throwable t) {
-                android.util.Log.e("SupabaseError", "Products Fetch Failed", t);
-                fetchProductsPluralFromSupabase(view);
-            }
+            public void onFailure(Call<List<ProductModel>> call, Throwable t) {}
         });
-    }
-
-    private void fetchProductsPluralFromSupabase(View view) {
-        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
-        SupabaseClient.getApiService().fetchProductsPlural(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "*"
-        ).enqueue(new Callback<List<ProductModel>>() {
-            @Override
-            public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<ProductModel> products = response.body();
-                    RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
-                    if (rvAll != null) {
-                        rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
-                        allProductsAdapter = new ProductAdapter(products, false);
-                        rvAll.setAdapter(allProductsAdapter);
-                        rvAll.setNestedScrollingEnabled(false);
-                    }
-                } else {
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Products Plural Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<ProductModel>> call, Throwable t) {
-                android.util.Log.e("SupabaseError", "Products Plural Fetch Failed", t);
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Showing offline products", android.widget.Toast.LENGTH_SHORT).show();
-                }
-                setupHardcodedProducts(view);
-            }
-        });
-    }
-
-    private void setupHardcodedProducts(View view) {
-        List<ProductModel> dummyProducts = new ArrayList<>();
-        
-        ProductModel p1 = new ProductModel();
-        p1.setProductId("dummy1");
-        p1.setProductName("boAt Airdopes 141 Pro");
-        p1.setSellingPrice("1299");
-        p1.setMrp("1999");
-        p1.setProductImage("https://m.media-amazon.com/images/I/315vj6oj-FL._MCnd_AC_CEL_SR450,600_.jpg");
-        p1.setRating("4.3");
-        p1.setReviewsCount("12,456");
-        p1.setSoldCount("1.2L+");
-        p1.setDescription("Premium Bluetooth earbuds with 42 hours playtime and ASAP charge.");
-        dummyProducts.add(p1);
-
-        ProductModel p2 = new ProductModel();
-        p2.setProductId("dummy2");
-        p2.setProductName("Noise Pulse 2 Max");
-        p2.setSellingPrice("1799");
-        p2.setMrp("5999");
-        p2.setProductImage("https://m.media-amazon.com/images/I/71Scpa62s+L._SX679_.jpg");
-        p2.setRating("4.1");
-        p2.setReviewsCount("8,234");
-        p2.setSoldCount("50K+");
-        p2.setDescription("1.85'' Display, Bluetooth Calling, 10 Days Battery Smartwatch.");
-        dummyProducts.add(p2);
-
-        RecyclerView rvAll = view.findViewById(R.id.rv_all_products);
-        if (rvAll != null) {
-            rvAll.setLayoutManager(new GridLayoutManager(getContext(), 2));
-            allProductsAdapter = new ProductAdapter(dummyProducts, false);
-            rvAll.setAdapter(allProductsAdapter);
-            rvAll.setNestedScrollingEnabled(false);
-        }
     }
 
     private void setupClickListeners(View view) {
-        view.findViewById(R.id.tv_cat_view_all).setOnClickListener(v -> {
+        view.findViewById(R.id.home_cart_container).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(getContext(), CartActivity.class));
+        });
+
+        view.findViewById(R.id.tv_view_all_best).setOnClickListener(v -> {
             if (getActivity() instanceof HomeActivity) {
                 ((HomeActivity) getActivity()).switchToCategory();
             }
         });
 
-        view.findViewById(R.id.cart_button_card).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(getContext(), CartActivity.class));
-        });
 
-        view.findViewById(R.id.wishlist_card).setOnClickListener(v -> {
-            startActivity(new android.content.Intent(getContext(), WishlistActivity.class));
+        view.findViewById(R.id.iv_home_notification).setOnClickListener(v -> {
+            Toast.makeText(getContext(), "Notifications", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    // --- Deal Adapter ---
+    public class DealAdapter extends RecyclerView.Adapter<DealAdapter.ViewHolder> {
+        private List<ProductModel> items;
+
+        DealAdapter(List<ProductModel> items) {
+            this.items = items;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            TextView name, price, oldPrice, rating, reviews, discount;
+            ImageView image;
+
+            ViewHolder(View view) {
+                super(view);
+                name = view.findViewById(R.id.tv_deal_name);
+                price = view.findViewById(R.id.tv_deal_price);
+                oldPrice = view.findViewById(R.id.tv_deal_old_price);
+                rating = view.findViewById(R.id.tv_deal_rating);
+                reviews = view.findViewById(R.id.tv_deal_reviews);
+                discount = view.findViewById(R.id.tv_deal_discount);
+                image = view.findViewById(R.id.iv_deal_product);
+            }
+        }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_deal, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            ProductModel item = items.get(position);
+            holder.name.setText(item.getProductName());
+            
+            String priceStr = item.getSellingPrice() != null ? item.getSellingPrice() : (item.getPrice() != null ? item.getPrice() : "0");
+            String mrpStr = item.getMrp() != null ? item.getMrp() : (item.getMainPrice() != null ? item.getMainPrice() : priceStr);
+            
+            holder.price.setText("₹" + priceStr);
+            holder.oldPrice.setText("₹" + mrpStr);
+            holder.oldPrice.setPaintFlags(holder.oldPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.rating.setText(item.getRating() != null ? item.getRating() : "4.0");
+            holder.reviews.setText("(" + (item.getReviewsCount() != null ? item.getReviewsCount() : "0") + ")");
+            
+            // Calculate discount percentage
+            try {
+                double s = Double.parseDouble(priceStr.replaceAll("[^0-9.]", ""));
+                double m = Double.parseDouble(mrpStr.replaceAll("[^0-9.]", ""));
+                if (m > 0 && m > s) {
+                    int d = (int) (((m - s) / m) * 100);
+                    holder.discount.setText("-" + d + "%");
+                    holder.discount.setVisibility(View.VISIBLE);
+                } else {
+                    holder.discount.setVisibility(View.GONE);
+                }
+            } catch (Exception e) {
+                holder.discount.setVisibility(View.GONE);
+            }
+
+            Glide.with(getContext()).load(item.getProductImage()).into(holder.image);
+
+            holder.itemView.setOnClickListener(v -> {
+                if (getActivity() instanceof HomeActivity) {
+                    ((HomeActivity) getActivity()).openProductDetail(item);
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
     }
 
     // --- Adapters ---
@@ -461,8 +441,8 @@ public class HomeFragment extends Fragment {
             HomeActivity.HomeCategory item = items.get(position);
             holder.name.setText(item.name);
             holder.icon.setImageResource(item.iconRes);
-            if (holder.bg != null && holder.bg.getBackground() != null) {
-                holder.bg.getBackground().setTint(getContext().getColor(item.bgRes));
+            if (holder.bg != null && holder.bg.getBackground() != null && getContext() != null) {
+                holder.bg.getBackground().setTint(androidx.core.content.ContextCompat.getColor(getContext(), item.bgRes));
             }
 
             holder.itemView.setOnClickListener(v -> {
@@ -585,7 +565,7 @@ public class HomeFragment extends Fragment {
                     holder.wishlist.setColorFilter(null); // Use original color (#FF0000)
                 } else {
                     holder.wishlist.setImageResource(R.drawable.ic_heart_outline);
-                    holder.wishlist.setColorFilter(getResources().getColor(R.color.text_subtitle));
+                    holder.wishlist.setColorFilter(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_subtitle));
                 }
 
                 holder.wishlist.setOnClickListener(v -> {
@@ -730,9 +710,7 @@ public class HomeFragment extends Fragment {
                     if (response.isSuccessful()) {
                         wishlistProductIds.add(product.getProductId());
                         notifyDataSetChanged();
-                    } else if (response.code() == 409) {
-                        // Already handled by toggle logic
-                    } else {
+                    } else if (response.code() != 409) {
                         android.widget.Toast.makeText(getContext(), "Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
                     }
                 }

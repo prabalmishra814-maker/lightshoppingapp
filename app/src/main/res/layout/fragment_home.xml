@@ -4,300 +4,279 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/white">
+
+    <!-- Sticky Top Bar (Outside ScrollView) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/white"
+        android:paddingHorizontal="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/logo_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/_1786381850350" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="@string/app_name"
+                android:textColor="#2E5BFF"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/iv_home_notification"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="12dp"
+            android:src="@drawable/ic_notification"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/home_cart_container"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/text_primary" />
+
+        <FrameLayout
+            android:id="@+id/home_cart_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_margin="4dp"
+                android:src="@drawable/ic_cart"
+                app:tint="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/tv_home_cart_badge"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/bg_cart_badge"
+                android:gravity="center"
+                android:text="0"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_bar">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- Row 1: Welcome & Notification -->
-            <TextView
-                android:id="@+id/tv_welcome"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/welcome_message"
-                android:textColor="@color/text_primary"
-                android:textSize="28sp"
-                android:fontFamily="sans-serif-condensed-medium"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/notification_card"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
+            <!-- Search Bar -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/wishlist_card"
-                android:layout_width="50dp"
+                android:id="@+id/home_search_card"
+                android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_marginEnd="24dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#F3F4F6"
-                app:strokeWidth="1dp"
-                app:layout_constraintBottom_toBottomOf="@id/tv_welcome"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_welcome">
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:strokeColor="#E5E7EB"
+                app:strokeWidth="1dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_heart_outline"
-                    app:tint="@color/text_primary" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/notification_card"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginEnd="12dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="0dp"
-                app:strokeColor="#F3F4F6"
-                app:strokeWidth="1dp"
-                app:layout_constraintBottom_toBottomOf="@id/tv_welcome"
-                app:layout_constraintEnd_toStartOf="@id/wishlist_card"
-                app:layout_constraintTop_toTopOf="@id/tv_welcome">
-
-                <ImageView
-                    android:id="@+id/iv_notification"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="Notifications"
-                    android:src="@drawable/ic_notification"
-                    app:tint="@color/text_primary" />
-
-                <!-- Optional: Notification Red Dot Badge -->
-                <View
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_gravity="top|end"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginEnd="12dp"
-                    android:background="@drawable/bg_status_dot"
-                    android:backgroundTint="#EF4444" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Row 2: Search Bar & Cart Button -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/search_bar_card"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="20dp"
-                android:layout_marginEnd="12dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="1.2dp"
-                app:strokeColor="#EEF0F2"
-                app:cardBackgroundColor="@color/white"
-                app:layout_constraintEnd_toStartOf="@id/cart_button_card"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tv_welcome">
-
-                <RelativeLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp">
 
                     <ImageView
-                        android:id="@+id/iv_search_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="16dp"
                         android:src="@drawable/ic_search"
-                        app:tint="@color/primary_blue" />
+                        app:tint="#9CA3AF" />
 
                     <EditText
-                        android:layout_width="match_parent"
+                        android:id="@+id/et_home_search"
+                        android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_toEndOf="@id/iv_search_icon"
+                        android:layout_weight="1"
                         android:background="@android:color/transparent"
                         android:hint="@string/search_hint"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
-                        android:singleLine="true"
+                        android:paddingHorizontal="12dp"
                         android:textColor="@color/text_primary"
                         android:textColorHint="#9CA3AF"
                         android:textSize="14sp" />
 
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <FrameLayout
-                android:id="@+id/cart_button_card"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                app:layout_constraintBottom_toBottomOf="@id/search_bar_card"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/search_bar_card">
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    app:cardBackgroundColor="@color/white"
-                    app:cardCornerRadius="14dp"
-                    app:cardElevation="0dp"
-                    app:strokeColor="#F3F4F6"
-                    app:strokeWidth="1dp">
+                    <ImageView
+                        android:id="@+id/iv_camera_search"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_marginEnd="12dp"
+                        android:src="@drawable/ic_camera"
+                        app:tint="#4B5563" />
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_cart"
-                        app:backgroundTint="@color/primary_blue"
-                        app:tint="@color/primary_blue" />
-                </com.google.android.material.card.MaterialCardView>
+                        android:id="@+id/iv_mic_search"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_mic"
+                        app:tint="#4B5563" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- Professional Badge for Cart Items -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cart_badge_card"
+            <!-- Delivery Bar -->
+            <LinearLayout
+                android:id="@+id/delivery_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp">
+
+                <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:layout_gravity="top|end"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginEnd="2dp"
-                    app:cardBackgroundColor="@color/primary_blue"
-                    app:cardCornerRadius="9dp"
-                    app:cardElevation="4dp"
-                    app:strokeColor="@color/white"
-                    app:strokeWidth="1.2dp">
+                    android:src="@drawable/ic_location"
+                    app:tint="#2E5BFF" />
 
-                    <TextView
-                        android:id="@+id/tv_cart_count"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="3"
-                        android:textColor="@color/white"
-                        android:textSize="9sp"
-                        android:textStyle="bold" />
-                </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/tv_delivery_address"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="Deliver to Mau 275101"
+                    android:textColor="#4B5563"
+                    android:textSize="13sp" />
 
-            </FrameLayout>
+                <TextView
+                    android:id="@+id/tv_change_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/change"
+                    android:textColor="#2E5BFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-            <!-- Offer Banner / Image Slider -->
+            <!-- Image Slider -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/offer_banner_card"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp"
-                app:layout_constraintTop_toBottomOf="@id/search_bar_card">
+                android:layout_marginHorizontal="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
                 <com.denzcoskun.imageslider.ImageSlider
-                    android:id="@+id/image_slider"
+                    android:id="@+id/home_image_slider"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:iss_auto_cycle="true"
-
-                    app:iss_delay="1000"
-                    app:iss_period="3000"
-                    app:iss_text_align="CENTER" />
-
+                    app:iss_period="3000" />
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Categories Section -->
-            <TextView
-                android:id="@+id/tv_cat_title"
-                android:layout_width="wrap_content"
+            <!-- Categories -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_home_categories"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="8dp" />
+
+            <!-- Deals of the Day -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:fontFamily="sans-serif-condensed-medium"
-                android:text="@string/categories"
-                android:textColor="@color/text_primary"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/offer_banner_card" />
-
-            <TextView
-                android:id="@+id/tv_cat_view_all"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="24dp"
-                android:text="@string/view_all"
-                android:textColor="@color/primary_blue"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="@id/tv_cat_title"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@id/tv_cat_title" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_categories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clipToPadding="false"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@id/tv_cat_title"
-                tools:listitem="@layout/item_category" />
+                android:paddingHorizontal="16dp">
 
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Explore Products"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-            <!-- All Products Section -->
-            <TextView
-                android:id="@+id/tv_all_products_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="25dp"
-                android:text="Explore Products"
-                android:textColor="@color/text_primary"
-                android:textSize="24sp"
-                android:fontFamily="sans-serif-condensed-medium"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rv_categories" />
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_all_products"
+                android:id="@+id/rv_deals"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:clipToPadding="false"
-                android:paddingHorizontal="14dp"
-                app:layout_constraintTop_toBottomOf="@id/tv_all_products_title"
-                tools:listitem="@layout/item_product"
-                tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                tools:spanCount="2"/>
+                android:paddingHorizontal="8dp" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- Best Selling Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/best_selling"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_view_all_best"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/view_all"
+                    android:textColor="#2E5BFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_best_selling"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="8dp" />
+
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

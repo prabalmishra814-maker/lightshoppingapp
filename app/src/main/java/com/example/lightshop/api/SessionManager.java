@@ -40,10 +40,12 @@ public class SessionManager {
     }
 
     public void addToRecentlyViewed(com.example.lightshop.models.ProductModel product) {
+        if (product == null || product.getProductId() == null) return;
+        
         java.util.List<com.example.lightshop.models.ProductModel> list = getRecentlyViewed();
         // Remove if already exists to move it to top
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getProductId().equals(product.getProductId())) {
+            if (product.getProductId().equals(list.get(i).getProductId())) {
                 list.remove(i);
                 break;
             }

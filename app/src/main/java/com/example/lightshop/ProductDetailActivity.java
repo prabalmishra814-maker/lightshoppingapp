@@ -1,5 +1,6 @@
 package com.example.lightshop;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -60,15 +61,18 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void setupUI() {
-        binding.tvProductTitle.setText(product.getProductName());
-        binding.tvProductDescription.setText(product.getDescription() != null ? product.getDescription() : product.getShortDescription());
+        binding.tvProductTitle.setText(product.getProductName() != null ? product.getProductName() : "Unknown Product");
+        binding.tvProductDescription.setText(product.getDescription() != null ? product.getDescription() : (product.getShortDescription() != null ? product.getShortDescription() : "No description available"));
         
-        String sellingPriceStr = product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice();
-        String mrpStr = product.getMrp() != null ? product.getMrp() : product.getMainPrice();
+        String sellingPriceStr = product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0");
+        String mrpStr = product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : sellingPriceStr);
 
         try {
             String sClean = sellingPriceStr != null ? sellingPriceStr.replaceAll("[^0-9.]", "") : "0";
             String mClean = mrpStr != null ? mrpStr.replaceAll("[^0-9.]", "") : "0";
+
+            if (sClean.isEmpty()) sClean = "0";
+            if (mClean.isEmpty()) mClean = sClean;
 
             double sPrice = Double.parseDouble(sClean);
             double mPrice = Double.parseDouble(mClean);
@@ -80,13 +84,17 @@ public class ProductDetailActivity extends AppCompatActivity {
             if (mPrice > sPrice && mPrice > 0) {
                 int discount = (int) Math.round(((mPrice - sPrice) / mPrice) * 100);
                 binding.tvDiscountPercent.setText(discount + "% off");
+                binding.tvDiscountPercent.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvDiscountPercent.setVisibility(View.GONE);
             }
         } catch (Exception e) {
             binding.tvPrice.setText("₹" + sellingPriceStr);
             binding.tvMrp.setText("₹" + mrpStr);
+            binding.tvDiscountPercent.setVisibility(View.GONE);
         }
 
-        binding.tvRatingBadge.setText(product.getRating() + " ★");
+        binding.tvRatingBadge.setText((product.getRating() != null ? product.getRating() : "4.0") + " ★");
         binding.tvReviewCount.setText("(" + (product.getReviewsCount() != null ? product.getReviewsCount() : "0") + ")");
         binding.tvSoldCount.setText((product.getSoldCount() != null ? product.getSoldCount() : "0") + " Sold");
         binding.tvStockStatus.setText(product.getStock() != null ? product.getStock() : "In Stock");
@@ -235,34 +243,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     private void updateCartBadge() {
-        String userId = sessionManager.getUserId();
-        if (userId.isEmpty()) {
-            binding.tvCartBadge.setVisibility(View.GONE);
-            return;
-        }
-
-        String authHeader = "Bearer " + sessionManager.getToken();
-        SupabaseClient.getApiService().fetchCart(
-                SupabaseClient.SUPABASE_ANON_KEY,
-                authHeader,
-                "eq." + userId,
-                "product_id"
-        ).enqueue(new Callback<List<Map<String, Object>>>() {
-            @Override
-            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    int count = response.body().size();
-                    if (count > 0) {
-                        binding.tvCartBadge.setText(String.valueOf(count));
-                        binding.tvCartBadge.setVisibility(View.VISIBLE);
-                    } else {
-                        binding.tvCartBadge.setVisibility(View.GONE);
-                    }
-                }
-            }
-            @Override
-            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
-        });
+        // Method kept for potential future use, but UI elements removed from header
     }
 
     private void setupClickListeners() {
@@ -283,15 +264,26 @@ public class ProductDetailActivity extends AppCompatActivity {
         binding.btnAddToCart.setOnClickListener(v -> addToCart());
         binding.btnWishlist.setOnClickListener(v -> toggleWishlist());
         binding.ivHeaderWishlist.setOnClickListener(v -> toggleWishlist());
-        
+        /*
+        binding.ivCart.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
+        });
+        */
+
         binding.btnBuyNow.setOnClickListener(v -> {
             // Navigate to CheckoutActivity
-            android.content.Intent intent = new android.content.Intent(this, CheckoutActivity.class);
+            Intent intent = new Intent(this, CheckoutActivity.class);
             startActivity(intent);
         });
     }
 
     private void addToCart() {
+        if (product == null || product.getProductId() == null) {
+            Toast.makeText(this, "Error: Invalid product", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String userId = sessionManager.getUserId();
         if (userId.isEmpty()) {
             Toast.makeText(this, "Please login to add to cart", Toast.LENGTH_SHORT).show();
@@ -301,10 +293,14 @@ public class ProductDetailActivity extends AppCompatActivity {
         Map<String, Object> data = new HashMap<>();
         data.put("user_id", userId);
         data.put("product_id", product.getProductId());
-        data.put("product_name", product.getProductName());
-        data.put("product_price", product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice());
-        data.put("product_mrp", product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : product.getPrice()));
-        data.put("product_image", product.getProductImage());
+        data.put("product_name", product.getProductName() != null ? product.getProductName() : "Unknown Product");
+        
+        String price = product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0");
+        String mrp = product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : price);
+        
+        data.put("product_price", price);
+        data.put("product_mrp", mrp);
+        data.put("product_image", product.getProductImage() != null ? product.getProductImage() : "");
         data.put("quantity", quantity);
 
         String authHeader = "Bearer " + sessionManager.getToken();
