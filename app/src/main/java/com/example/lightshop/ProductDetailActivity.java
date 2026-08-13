@@ -30,8 +30,9 @@ public class ProductDetailActivity extends AppCompatActivity {
     private int quantity = 1;
     private SessionManager sessionManager;
     private boolean isWishlisted = false;
+    private boolean isAlreadyInCart = false;
     private java.util.Set<String> wishlistProductIds = new java.util.HashSet<>();
-    private RecommendationAdapter youMayLikeAdapter, similarAdapter, recentlyViewedAdapter, moreAdapter;
+    private RecommendationAdapter youMayLikeAdapter, moreAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         if (product != null) {
             setupUI();
             checkWishlistStatus();
+            checkCartStatus();
             fetchWishlistProductIds();
             setupRecommendations();
             sessionManager.addToRecentlyViewed(product);
@@ -94,9 +96,6 @@ public class ProductDetailActivity extends AppCompatActivity {
             binding.tvDiscountPercent.setVisibility(View.GONE);
         }
 
-        binding.tvRatingBadge.setText((product.getRating() != null ? product.getRating() : "4.0") + " ★");
-        binding.tvReviewCount.setText("(" + (product.getReviewsCount() != null ? product.getReviewsCount() : "0") + ")");
-        binding.tvSoldCount.setText((product.getSoldCount() != null ? product.getSoldCount() : "0") + " Sold");
         binding.tvStockStatus.setText(product.getStock() != null ? product.getStock() : "In Stock");
 
         setupImageSlider();
@@ -164,12 +163,9 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void setupRecommendations() {
         binding.rvYouMayAlsoLike.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
-        binding.rvSimilarProducts.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
-        binding.rvRecentlyViewed.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
         binding.rvMoreProducts.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false));
 
         fetchRecommendations();
-        loadRecentlyViewed();
     }
 
     private void fetchWishlistProductIds() {
@@ -192,8 +188,6 @@ public class ProductDetailActivity extends AppCompatActivity {
                         }
                     }
                     if (youMayLikeAdapter != null) youMayLikeAdapter.notifyDataSetChanged();
-                    if (similarAdapter != null) similarAdapter.notifyDataSetChanged();
-                    if (recentlyViewedAdapter != null) recentlyViewedAdapter.notifyDataSetChanged();
                     if (moreAdapter != null) moreAdapter.notifyDataSetChanged();
                 }
             }
@@ -204,24 +198,68 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void fetchRecommendations() {
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        String subCat = product.getSubCategory();
+
+        if (subCat != null && !subCat.isEmpty()) {
+            Map<String, String> filters = new HashMap<>();
+            filters.put("product_sub_category", "eq." + subCat);
+            
+            SupabaseClient.getApiService().fetchProductsWithFilter(
+                    SupabaseClient.SUPABASE_ANON_KEY,
+                    authHeader,
+                    "*",
+                    filters
+            ).enqueue(new Callback<List<ProductModel>>() {
+                @Override
+                public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<ProductModel> products = new ArrayList<>(response.body());
+                        // Remove current product from recommendations
+                        for (int i = 0; i < products.size(); i++) {
+                            if (products.get(i).getProductId().equals(product.getProductId())) {
+                                products.remove(i);
+                                break;
+                            }
+                        }
+                        
+                        if (!products.isEmpty()) {
+                            youMayLikeAdapter = new RecommendationAdapter(ProductDetailActivity.this, products, wishlistProductIds);
+                            binding.rvYouMayAlsoLike.setAdapter(youMayLikeAdapter);
+                        }
+                    }
+                    // Fetch other generic recommendations if needed, or just stop here.
+                    // For now, let's also fetch general products for "More Products"
+                    fetchMoreProducts();
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {
+                    fetchMoreProducts();
+                }
+            });
+        } else {
+            fetchMoreProducts();
+        }
+    }
+
+    private void fetchMoreProducts() {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
         SupabaseClient.getApiService().fetchProducts(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
                 "*"
         ).enqueue(new Callback<List<ProductModel>>() {
             @Override
-            public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
+            public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ProductModel> products = response.body();
-                    
                     int size = products.size();
+                    
                     if (size > 0) {
-                        youMayLikeAdapter = new RecommendationAdapter(ProductDetailActivity.this, products.subList(0, Math.min(size, 8)), wishlistProductIds);
-                        binding.rvYouMayAlsoLike.setAdapter(youMayLikeAdapter);
-                        
-                        if (size > 4) {
-                            similarAdapter = new RecommendationAdapter(ProductDetailActivity.this, products.subList(Math.min(4, size), Math.min(size, 12)), wishlistProductIds);
-                            binding.rvSimilarProducts.setAdapter(similarAdapter);
+                        // If youMayLikeAdapter is still null (maybe subCat was empty or fetch failed)
+                        if (youMayLikeAdapter == null) {
+                            youMayLikeAdapter = new RecommendationAdapter(ProductDetailActivity.this, products.subList(0, Math.min(size, 8)), wishlistProductIds);
+                            binding.rvYouMayAlsoLike.setAdapter(youMayLikeAdapter);
                         }
                         
                         moreAdapter = new RecommendationAdapter(ProductDetailActivity.this, products, wishlistProductIds);
@@ -230,17 +268,10 @@ public class ProductDetailActivity extends AppCompatActivity {
                 }
             }
             @Override
-            public void onFailure(Call<List<ProductModel>> call, Throwable t) {}
+            public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {}
         });
     }
 
-    private void loadRecentlyViewed() {
-        List<ProductModel> recent = sessionManager.getRecentlyViewed();
-        if (!recent.isEmpty()) {
-            recentlyViewedAdapter = new RecommendationAdapter(this, recent, wishlistProductIds);
-            binding.rvRecentlyViewed.setAdapter(recentlyViewedAdapter);
-        }
-    }
 
     private void updateCartBadge() {
         // Method kept for potential future use, but UI elements removed from header
@@ -261,9 +292,24 @@ public class ProductDetailActivity extends AppCompatActivity {
             }
         });
 
-        binding.btnAddToCart.setOnClickListener(v -> addToCart());
+        binding.btnAddToCart.setOnClickListener(v -> {
+            if (isAlreadyInCart) {
+                removeFromCart();
+            } else {
+                addToCart();
+            }
+        });
+
         binding.btnWishlist.setOnClickListener(v -> toggleWishlist());
-        binding.ivHeaderWishlist.setOnClickListener(v -> toggleWishlist());
+        binding.ivSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(this, SearchActivity.class);
+            startActivity(intent);
+        });
+
+        binding.ivCart.setOnClickListener(v -> {
+            Intent intent = new Intent(this, CartActivity.class);
+            startActivity(intent);
+        });
         /*
         binding.ivCart.setOnClickListener(v -> {
             Intent intent = new Intent(this, CartActivity.class);
@@ -272,9 +318,44 @@ public class ProductDetailActivity extends AppCompatActivity {
         */
 
         binding.btnBuyNow.setOnClickListener(v -> {
-            // Navigate to CheckoutActivity
-            Intent intent = new Intent(this, CheckoutActivity.class);
+            addToCartAndGoToCart();
+        });
+    }
+
+    private void addToCartAndGoToCart() {
+        if (product == null || product.getProductId() == null) {
+            Toast.makeText(this, "Error: Invalid product", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (isAlreadyInCart) {
+            Intent intent = new Intent(ProductDetailActivity.this, CartActivity.class);
             startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            return;
+        }
+
+        binding.btnBuyNow.setEnabled(false);
+        binding.btnBuyNow.setText("Processing...");
+
+        com.example.lightshop.utils.CartHelper.addToCart(this, product, quantity, new com.example.lightshop.utils.CartHelper.CartCallback() {
+            @Override
+            public void onSuccess() {
+                binding.btnBuyNow.setEnabled(true);
+                binding.btnBuyNow.setText("Buy Now");
+                isAlreadyInCart = true;
+                updateCartUI();
+                Intent intent = new Intent(ProductDetailActivity.this, CartActivity.class);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                binding.btnBuyNow.setEnabled(true);
+                binding.btnBuyNow.setText("Buy Now");
+                Toast.makeText(ProductDetailActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -284,46 +365,109 @@ public class ProductDetailActivity extends AppCompatActivity {
             return;
         }
 
-        String userId = sessionManager.getUserId();
-        if (userId.isEmpty()) {
-            Toast.makeText(this, "Please login to add to cart", Toast.LENGTH_SHORT).show();
+        if (isAlreadyInCart) {
+            removeFromCart();
             return;
         }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("user_id", userId);
-        data.put("product_id", product.getProductId());
-        data.put("product_name", product.getProductName() != null ? product.getProductName() : "Unknown Product");
-        
-        String price = product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0");
-        String mrp = product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : price);
-        
-        data.put("product_price", price);
-        data.put("product_mrp", mrp);
-        data.put("product_image", product.getProductImage() != null ? product.getProductImage() : "");
-        data.put("quantity", quantity);
+        binding.btnAddToCart.setEnabled(false);
+        binding.btnAddToCart.setText("Adding...");
+
+        com.example.lightshop.utils.CartHelper.addToCart(this, product, quantity, new com.example.lightshop.utils.CartHelper.CartCallback() {
+            @Override
+            public void onSuccess() {
+                binding.btnAddToCart.setEnabled(true);
+                Toast.makeText(ProductDetailActivity.this, "Added to Cart", Toast.LENGTH_SHORT).show();
+                isAlreadyInCart = true;
+                updateCartUI();
+                updateCartBadge();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                binding.btnAddToCart.setEnabled(true);
+                updateCartUI();
+                Toast.makeText(ProductDetailActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void checkCartStatus() {
+        String userId = sessionManager.getUserId();
+        if (userId.isEmpty()) return;
 
         String authHeader = "Bearer " + sessionManager.getToken();
-
-        SupabaseClient.getApiService().addData(
-                "cart",
+        SupabaseClient.getApiService().fetchCart(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
-                "resolution=merge-duplicates,return=representation",
-                data
+                "eq." + userId,
+                "product_id"
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
             public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
-                if (response.isSuccessful()) {
-                    Toast.makeText(ProductDetailActivity.this, "Added to Cart", Toast.LENGTH_SHORT).show();
-                    updateCartBadge();
-                } else {
-                    Toast.makeText(ProductDetailActivity.this, "Failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful() && response.body() != null) {
+                    for (Map<String, Object> item : response.body()) {
+                        Object pid = item.get("product_id") != null ? item.get("product_id") : item.get("PRODUCT_ID");
+                        if (String.valueOf(pid).equals(product.getProductId())) {
+                            isAlreadyInCart = true;
+                            updateCartUI();
+                            break;
+                        }
+                    }
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {}
+        });
+    }
+
+    private void updateCartUI() {
+        if (isAlreadyInCart) {
+            binding.btnAddToCart.setText("Remove from Cart");
+            binding.btnAddToCart.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.color_logout)));
+        } else {
+            binding.btnAddToCart.setText("🛒 Add to Cart");
+            binding.btnAddToCart.setBackgroundTintList(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
+        }
+    }
+
+    private void removeFromCart() {
+        String userId = sessionManager.getUserId();
+        if (userId.isEmpty()) return;
+
+        String authHeader = "Bearer " + sessionManager.getToken();
+        Map<String, String> filters = new HashMap<>();
+        filters.put("user_id", "eq." + userId);
+        filters.put("product_id", "eq." + product.getProductId());
+
+        binding.btnAddToCart.setEnabled(false);
+        binding.btnAddToCart.setText("Removing...");
+
+        SupabaseClient.getApiService().deleteDataByFilters(
+                "cart",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters
+        ).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
+                binding.btnAddToCart.setEnabled(true);
+                if (response.isSuccessful()) {
+                    isAlreadyInCart = false;
+                    updateCartUI();
+                    updateCartBadge();
+                    Toast.makeText(ProductDetailActivity.this, "Removed from Cart", Toast.LENGTH_SHORT).show();
+                } else {
+                    updateCartUI();
+                    Toast.makeText(ProductDetailActivity.this, "Failed to remove: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                binding.btnAddToCart.setEnabled(true);
+                updateCartUI();
                 Toast.makeText(ProductDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -376,7 +520,11 @@ public class ProductDetailActivity extends AppCompatActivity {
         data.put("user_id", userId);
         data.put("product_id", product.getProductId());
         data.put("product_name", product.getProductName());
-        data.put("product_price", product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice());
+        
+        String rawPrice = product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0");
+        double priceValue = com.example.lightshop.utils.PriceUtils.parsePrice(rawPrice);
+        data.put("product_price", String.valueOf(priceValue));
+        
         data.put("product_image", product.getProductImage());
 
         String authHeader = "Bearer " + sessionManager.getToken();
@@ -430,15 +578,17 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void updateWishlistUI() {
         if (isWishlisted) {
-            binding.ivHeaderWishlist.setImageResource(R.drawable.ic_heart_filled);
-            binding.ivHeaderWishlist.setColorFilter(getResources().getColor(R.color.color_logout));
             binding.btnWishlist.setIconResource(R.drawable.ic_heart_filled);
             binding.btnWishlist.setIconTintResource(R.color.color_logout);
+            binding.btnWishlist.setText("Wishlisted");
+            binding.btnWishlist.setTextColor(getResources().getColor(R.color.color_logout));
+            binding.btnWishlist.setStrokeColor(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.color_logout)));
         } else {
-            binding.ivHeaderWishlist.setImageResource(R.drawable.ic_heart_outline);
-            binding.ivHeaderWishlist.setColorFilter(getResources().getColor(R.color.dark_navy));
             binding.btnWishlist.setIconResource(R.drawable.ic_heart_outline);
             binding.btnWishlist.setIconTintResource(R.color.primary_blue);
+            binding.btnWishlist.setText("Wishlist");
+            binding.btnWishlist.setTextColor(getResources().getColor(R.color.primary_blue));
+            binding.btnWishlist.setStrokeColor(android.content.res.ColorStateList.valueOf(getResources().getColor(R.color.primary_blue)));
         }
     }
 }

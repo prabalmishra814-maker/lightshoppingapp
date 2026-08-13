@@ -181,16 +181,6 @@
                     android:background="@color/divider_color" />
 
                 <include
-                    android:id="@+id/row_track_orders"
-                    layout="@layout/item_profile_row" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="56dp"
-                    android:background="@color/divider_color" />
-
-                <include
                     android:id="@+id/row_wishlist"
                     layout="@layout/item_profile_row" />
 

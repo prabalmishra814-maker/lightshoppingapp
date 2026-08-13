@@ -66,7 +66,6 @@
             app:layout_constraintTop_toTopOf="@id/image_container"
             app:tint="@color/text_subtitle" />
 
-        <!-- Product Details -->
         <TextView
             android:id="@+id/tv_product_name"
             android:layout_width="0dp"
@@ -75,7 +74,6 @@
             android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:minLines="2"
             android:text="Product Name"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
@@ -89,7 +87,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="0dp"
             android:layout_marginBottom="12dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"

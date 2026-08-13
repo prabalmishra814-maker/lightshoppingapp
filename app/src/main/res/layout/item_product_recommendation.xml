@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="140dp"
-    android:layout_height="215dp"
+    android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="16dp"
@@ -55,48 +55,15 @@
             android:textStyle="bold"
             app:layout_constraintTop_toBottomOf="@id/iv_product" />
 
-        <!-- Rating Badge -->
-        <LinearLayout
-            android:id="@+id/rating_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_product_name">
-
-            <TextView
-                android:id="@+id/tv_rating"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_pill_green"
-                android:paddingHorizontal="6dp"
-                android:paddingVertical="1dp"
-                android:text="4.3 ★"
-                android:textColor="@color/white"
-                android:textSize="10sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_review_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="(2,345)"
-                android:textColor="@color/secondary_gray"
-                android:textSize="10sp" />
-        </LinearLayout>
-
         <!-- Price Section -->
         <LinearLayout
             android:id="@+id/price_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintTop_toBottomOf="@id/rating_container">
+            app:layout_constraintTop_toBottomOf="@id/tv_product_name">
 
             <TextView
                 android:id="@+id/tv_price"

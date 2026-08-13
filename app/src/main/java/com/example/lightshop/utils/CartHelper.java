@@ -21,6 +21,10 @@ public class CartHelper {
     }
 
     public static void addToCart(Context context, ProductModel product, CartCallback callback) {
+        addToCart(context, product, 1, callback);
+    }
+
+    public static void addToCart(Context context, ProductModel product, int quantity, CartCallback callback) {
         SessionManager sessionManager = new SessionManager(context);
         String userId = sessionManager.getUserId();
 
@@ -30,24 +34,17 @@ public class CartHelper {
             return;
         }
 
-        // Map to DB columns in 'cart' table as per requirement:
-        // product_price (Cart) = product_price (Product) -> product.getPrice()
-        // product_mrp (Cart) = product_main_price (Product) -> product.getMainPrice()
-        
-        String rawPrice = product.getPrice(); 
-        String rawMrp = product.getMainPrice();
-        
-        if (rawPrice == null || rawPrice.isEmpty()) rawPrice = "0";
-        if (rawMrp == null || rawMrp.isEmpty()) rawMrp = rawPrice;
+        String rawPrice = product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0");
+        String rawMrp = product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : rawPrice);
         
         double priceValue = PriceUtils.parsePrice(rawPrice);
         double mrpValue = PriceUtils.parsePrice(rawMrp);
 
-        // Ensure we send valid strings for required text columns
         String pid = product.getProductId();
         if (pid == null || pid.isEmpty()) {
             android.util.Log.e("CartHelper", "CRITICAL: Product ID is null for " + product.getProductName());
-            pid = "00000000-0000-0000-0000-000000000000"; 
+            if (callback != null) callback.onFailure("Invalid Product ID");
+            return;
         }
 
         Map<String, Object> cartData = new HashMap<>();
@@ -57,13 +54,12 @@ public class CartHelper {
         cartData.put("product_price", String.valueOf(priceValue));
         cartData.put("product_mrp", String.valueOf(mrpValue)); 
         cartData.put("product_image", product.getProductImage() != null ? product.getProductImage() : "");
-        cartData.put("quantity", 1);
+        cartData.put("quantity", quantity);
 
         android.util.Log.d("CartHelper", "Sending Cart Data: " + cartData.toString());
 
         String authHeader = "Bearer " + sessionManager.getToken();
 
-        // Perform insertion with UPSERT logic
         SupabaseClient.getApiService().addData(
                 "cart",
                 SupabaseClient.SUPABASE_ANON_KEY,
@@ -74,17 +70,14 @@ public class CartHelper {
             @Override
             public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful()) {
-                    // Update Local CartManager
-                    CartManager.getInstance().addItem(product, 1);
+                    CartManager.getInstance().addItem(product, quantity);
                     if (callback != null) callback.onSuccess();
                 } else {
                     String error = "Error " + response.code();
                     try {
                         if (response.errorBody() != null) {
                             String errorBody = response.errorBody().string();
-                            // Supabase usually returns {"message": "...", "hint": "...", "details": "..."}
                             if (errorBody.contains("message")) {
-                                // Simple extraction if GSON isn't handy or to keep it light
                                 error += ": " + errorBody;
                             }
                         }

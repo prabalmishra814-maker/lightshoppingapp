@@ -43,7 +43,6 @@ public class ProfileFragment extends Fragment {
 
         // My Orders Rows
         setupRow(view.findViewById(R.id.row_my_orders), "My Cart", "View and manage your cart", R.drawable.ic_cart, R.color.cat_electronics_bg, R.color.accent_blue);
-        setupRow(view.findViewById(R.id.row_track_orders), "Track Orders", "Track your current deliveries", R.drawable.ic_car, R.color.cat_beauty_bg, R.color.secondary);
         setupRow(view.findViewById(R.id.row_wishlist), "Wishlist", "Your saved products", R.drawable.ic_heart_outline, R.color.cat_women_bg, R.color.status_cancelled);
 
         // Support Section

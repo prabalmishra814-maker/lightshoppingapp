@@ -44,7 +44,7 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, price, mrp, discount, rating, reviewCount;
+        TextView name, price, mrp, discount;
         ImageView image, wishlist;
 
         public ViewHolder(View view) {
@@ -53,8 +53,6 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             price = view.findViewById(R.id.tv_price);
             mrp = view.findViewById(R.id.tv_mrp);
             discount = view.findViewById(R.id.tv_discount);
-            rating = view.findViewById(R.id.tv_rating);
-            reviewCount = view.findViewById(R.id.tv_review_count);
             
             image = view.findViewById(R.id.iv_product);
             wishlist = view.findViewById(R.id.iv_wishlist);
@@ -98,9 +96,6 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             holder.price.setText("₹" + sellingPriceStr);
             holder.mrp.setText("₹" + mrpStr);
         }
-
-        holder.rating.setText(item.getRating() + " ★");
-        holder.reviewCount.setText("(" + (item.getReviewsCount() != null ? item.getReviewsCount() : "0") + ")");
 
         loadImage(item.getProductImage(), holder.image);
 

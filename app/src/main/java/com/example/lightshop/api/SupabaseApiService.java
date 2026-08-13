@@ -50,6 +50,22 @@ public interface SupabaseApiService {
         @Query("select") String select
     );
 
+    @GET("rest/v1/Product")
+    Call<List<ProductModel>> fetchProductsWithFilter(
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @Query("select") String select,
+        @QueryMap Map<String, String> filters
+    );
+
+    @GET("rest/v1/Product")
+    Call<List<ProductModel>> searchProducts(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("select") String select,
+            @Query("product_name") String ilikeFilter // e.g. "ilike.*query*"
+    );
+
     @GET("rest/v1/products")
     Call<List<ProductModel>> fetchProductsPlural(
             @Header("apikey") String apiKey,

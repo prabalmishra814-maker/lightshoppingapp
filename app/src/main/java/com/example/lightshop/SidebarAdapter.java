@@ -60,6 +60,8 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
         CategoryModel category = categories.get(position);
         holder.name.setText(category.getCategoryName());
         
+        holder.icon.clearColorFilter();
+        
         // Handle local resource images or URL
         String imgUrl = category.getCategoryImage();
         if (imgUrl != null && !imgUrl.isEmpty()) {
@@ -87,14 +89,12 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
             holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_blue));
             holder.name.setTypeface(null, Typeface.BOLD);
             holder.iconContainer.setCardBackgroundColor(android.content.res.ColorStateList.valueOf(Color.WHITE));
-            holder.icon.setColorFilter(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_blue));
         } else {
             holder.container.setBackgroundColor(Color.TRANSPARENT);
             holder.selectionIndicator.setVisibility(View.GONE);
             holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.secondary_gray));
             holder.name.setTypeface(null, Typeface.NORMAL);
             holder.iconContainer.setCardBackgroundColor(android.content.res.ColorStateList.valueOf(Color.WHITE));
-            holder.icon.clearColorFilter();
         }
 
         holder.itemView.setOnClickListener(v -> {

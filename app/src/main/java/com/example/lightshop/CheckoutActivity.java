@@ -46,7 +46,6 @@ public class CheckoutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         StatusBarUtils.applyWhiteStatusBar(this);
         setContentView(R.layout.activity_checkout);
 

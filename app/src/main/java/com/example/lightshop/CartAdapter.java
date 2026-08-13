@@ -40,9 +40,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         CartItem cartItem = cartItems.get(position);
         ProductModel product = cartItem.getProduct();
 
-        holder.tvProductName.setText(product.getProductName());
-        holder.tvProductDesc.setText(product.getShortDescription());
-        holder.tvStockStatus.setText(product.getStock());
+        holder.tvProductName.setText(product.getProductName() != null ? product.getProductName() : "Product");
+        holder.tvProductDesc.setText(product.getShortDescription() != null ? product.getShortDescription() : "");
+        holder.tvStockStatus.setText(product.getStock() != null ? product.getStock() : "In Stock");
         
         double sellingPrice = com.example.lightshop.utils.PriceUtils.parsePrice(product.getSellingPrice());
         double mrp = com.example.lightshop.utils.PriceUtils.parsePrice(product.getMrp());

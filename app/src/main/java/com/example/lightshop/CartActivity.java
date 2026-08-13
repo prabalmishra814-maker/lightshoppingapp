@@ -37,7 +37,6 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         StatusBarUtils.applyWhiteStatusBar(this);
         setContentView(R.layout.activity_cart);
 
@@ -110,6 +109,9 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                             android.util.Log.e("CartActivity", "Error parsing item", e);
                         }
                     }
+
+                    // Reverse the list to show latest items at the top
+                    java.util.Collections.reverse(fetchedItems);
                     
                     // Sync with Manager
                     CartManager.getInstance().setCartItems(fetchedItems);

@@ -4,11 +4,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,71 +59,77 @@ public class HomeFragment extends Fragment {
         populateProfessionalHome(view);
         fetchCartProductIds();
         fetchWishlistProductIds();
+        fetchUserAddress(view);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() != null) {
+            fetchUserAddress(getView());
+            fetchCartProductIds();
+        }
+    }
+
+    private void fetchUserAddress(View view) {
+        String userId = sessionManager.getUserId();
+        if (userId.isEmpty()) return;
+
+        String authHeader = "Bearer " + sessionManager.getToken();
+        java.util.Map<String, String> filters = new java.util.HashMap<>();
+        filters.put("uid", "eq." + userId);
+        filters.put("select", "address");
+
+        SupabaseClient.getApiService().fetchDataWithFilters(
+                "Users",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters
+        ).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    Object addressObj = response.body().get(0).get("address");
+                    if (addressObj instanceof java.util.Map) {
+                        java.util.Map<String, Object> address = (java.util.Map<String, Object>) addressObj;
+                        String city = (String) address.get("city");
+                        String pincode = (String) address.get("pincode");
+                        
+                        TextView tvAddress = view.findViewById(R.id.tv_delivery_address);
+                        if (tvAddress != null) {
+                            if (city != null && pincode != null) {
+                                tvAddress.setText("Deliver to " + city + " " + pincode);
+                            } else if (pincode != null) {
+                                tvAddress.setText("Deliver to " + pincode);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {}
+        });
     }
 
 
 
     private void populateProfessionalHome(View view) {
-        // 1. Professional Categories
+        // 1. Categories
         RecyclerView rvCat = view.findViewById(R.id.rv_home_categories);
-        List<HomeActivity.HomeCategory> catList = new ArrayList<>();
-        catList.add(new HomeActivity.HomeCategory("Top Offers", R.drawable.ic_all_categories, R.color.white));
-        catList.add(new HomeActivity.HomeCategory("Mobiles", R.drawable.ic_electronics, R.color.white));
-        catList.add(new HomeActivity.HomeCategory("Fashion", R.drawable.ic_men, R.color.white));
-        catList.add(new HomeActivity.HomeCategory("Electronics", R.drawable.ic_headphones, R.color.white));
-        catList.add(new HomeActivity.HomeCategory("Home", R.drawable.ic_home_cat, R.color.white));
-        catList.add(new HomeActivity.HomeCategory("Beauty", R.drawable.ic_beauty, R.color.white));
-        
-        rvCat.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvCat.setAdapter(new HomeCategoryAdapter(catList));
+        if (rvCat != null) {
+            rvCat.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+            fetchCategoriesFromSupabase(view);
+        }
 
-        // 2. Sample Deals of the Day (to match image)
-        RecyclerView rvDeals = view.findViewById(R.id.rv_deals);
-        List<ProductModel> dealList = new ArrayList<>();
-        
-        ProductModel d1 = new ProductModel();
-        d1.setProductId("deal1");
-        d1.setProductName("Noise ColorFit Pulse 2 Max");
-        d1.setSellingPrice("1799");
-        d1.setPrice("1799");
-        d1.setMrp("2499");
-        d1.setMainPrice("2499");
-        d1.setRating("4.4");
-        d1.setReviewsCount("5.6K");
-        d1.setProductImage("https://m.media-amazon.com/images/I/61X-u4fX1yL._SX679_.jpg");
-        dealList.add(d1);
-
-        ProductModel d2 = new ProductModel();
-        d2.setProductId("deal2");
-        d2.setProductName("boAt Airdopes 141 Pro");
-        d2.setSellingPrice("1299");
-        d2.setPrice("1299");
-        d2.setMrp("1999");
-        d2.setMainPrice("1999");
-        d2.setRating("4.3");
-        d2.setReviewsCount("2.3K");
-        d2.setProductImage("https://m.media-amazon.com/images/I/315vj6oj-FL._MCnd_AC_CEL_SR450,600_.jpg");
-        dealList.add(d2);
-
-        ProductModel d3 = new ProductModel();
-        d3.setProductId("deal3");
-        d3.setProductName("Campus Running Shoes");
-        d3.setSellingPrice("1499");
-        d3.setPrice("1499");
-        d3.setMrp("1999");
-        d3.setMainPrice("1999");
-        d3.setRating("4.2");
-        d3.setReviewsCount("1.2K");
-        d3.setProductImage("https://m.media-amazon.com/images/I/61+9EwG96VL._SY695_.jpg");
-        dealList.add(d3);
-
-        rvDeals.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvDeals.setAdapter(new DealAdapter(dealList));
-
-        // 3. Best Selling
+        // 2. Best Selling (Now Explore Products Grid)
         RecyclerView rvBest = view.findViewById(R.id.rv_best_selling);
-        rvBest.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        fetchProductsFromSupabase(view); // Reusing existing fetch for Best Selling
+        if (rvBest != null) {
+            rvBest.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(getContext(), 2));
+            rvBest.setNestedScrollingEnabled(false);
+        }
+        
+        fetchProductsFromSupabase(view); // Reusing existing fetch for both sections
     }
 
     private void fetchWishlistProductIds() {
@@ -143,9 +151,7 @@ public class HomeFragment extends Fragment {
                             wishlistProductIds.add(String.valueOf(item.getProductId()));
                         }
                     }
-                    if (allProductsAdapter != null) {
-                        allProductsAdapter.notifyDataSetChanged();
-                    }
+                    notifyAdapters();
                 }
             }
 
@@ -203,15 +209,47 @@ public class HomeFragment extends Fragment {
 
     private void setupImageSlider(View view) {
         ImageSlider imageSlider = view.findViewById(R.id.home_image_slider);
-        if (imageSlider != null) {
-            ArrayList<SlideModel> imageList = new ArrayList<>();
-            // High quality professional banners
-            imageList.add(new SlideModel("https://img.freepik.com/free-vector/shopping-day-banner-with-realistic-bags-shopping-cart-gifts-boxes_1361-2983.jpg", ScaleTypes.FIT));
-            imageList.add(new SlideModel("https://img.freepik.com/free-vector/flat-shopping-background-with-sales_23-2149363065.jpg", ScaleTypes.FIT));
-            imageList.add(new SlideModel("https://img.freepik.com/free-vector/gradient-sale-background_23-2148817454.jpg", ScaleTypes.FIT));
-            
-            imageSlider.setImageList(imageList, ScaleTypes.FIT);
-        }
+        if (imageSlider == null) return;
+
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchData(
+                "banners",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    ArrayList<SlideModel> imageList = new ArrayList<>();
+                    for (Map<String, Object> map : response.body()) {
+                        Object url = map.get("image_url");
+                        if (url != null) {
+                            imageList.add(new SlideModel(String.valueOf(url), ScaleTypes.FIT));
+                        }
+                    }
+                    if (!imageList.isEmpty()) {
+                        imageSlider.setImageList(imageList, ScaleTypes.FIT);
+                    }
+                } else {
+                    // Fallback if table is empty
+                    showDefaultBanners(imageSlider);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                showDefaultBanners(imageSlider);
+            }
+        });
+    }
+
+    private void showDefaultBanners(ImageSlider imageSlider) {
+        ArrayList<SlideModel> imageList = new ArrayList<>();
+        imageList.add(new SlideModel("https://img.freepik.com/free-vector/shopping-day-banner-with-realistic-bags-shopping-cart-gifts-boxes_1361-2983.jpg", ScaleTypes.FIT));
+        imageList.add(new SlideModel("https://img.freepik.com/free-vector/flat-shopping-background-with-sales_23-2149363065.jpg", ScaleTypes.FIT));
+        imageList.add(new SlideModel("https://img.freepik.com/free-vector/gradient-sale-background_23-2148817454.jpg", ScaleTypes.FIT));
+        imageSlider.setImageList(imageList, ScaleTypes.FIT);
     }
 
     private void fetchProductsFromSupabase(View view) {
@@ -225,11 +263,12 @@ public class HomeFragment extends Fragment {
             public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<ProductModel> products = response.body();
+                    
+                    // Best Selling
                     RecyclerView rvBest = view.findViewById(R.id.rv_best_selling);
                     if (rvBest != null && getContext() != null) {
-                        // Horizontal scroll for Best Selling
-                        rvBest.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-                        allProductsAdapter = new ProductAdapter(products, true);
+                        allProductsAdapter = new ProductAdapter(getContext(), products, false, 
+                            cartProductIds, wishlistProductIds, sessionManager, () -> updateHomeCartBadge(cartProductIds.size()));
                         rvBest.setAdapter(allProductsAdapter);
                     }
                 }
@@ -240,97 +279,75 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void fetchCategoriesFromSupabase(View view) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        SupabaseClient.getApiService().fetchCategories(
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "*"
+        ).enqueue(new Callback<List<CategoryModel>>() {
+            @Override
+            public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    RecyclerView rvCat = view.findViewById(R.id.rv_home_categories);
+                    if (rvCat != null && getContext() != null) {
+                        rvCat.setAdapter(new CategoryAdapter(response.body()));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                Toast.makeText(getContext(), "Failed to load categories", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void notifyAdapters() {
+        if (allProductsAdapter != null) allProductsAdapter.notifyDataSetChanged();
+    }
+
     private void setupClickListeners(View view) {
+        View searchCard = view.findViewById(R.id.home_search_card);
+        searchCard.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(getContext(), SearchActivity.class);
+            if (getActivity() != null) {
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        getActivity(), searchCard, "search_bar_transition");
+                startActivity(intent, options.toBundle());
+            } else {
+                startActivity(intent);
+            }
+        });
+
+        // Disable direct typing on home screen search bar to force move to SearchActivity
+        EditText etHomeSearch = view.findViewById(R.id.et_home_search);
+        if (etHomeSearch != null) {
+            etHomeSearch.setFocusable(false);
+            etHomeSearch.setClickable(true);
+            etHomeSearch.setOnClickListener(v -> view.findViewById(R.id.home_search_card).performClick());
+        }
+
         view.findViewById(R.id.home_cart_container).setOnClickListener(v -> {
             startActivity(new android.content.Intent(getContext(), CartActivity.class));
         });
 
         view.findViewById(R.id.tv_view_all_best).setOnClickListener(v -> {
-            if (getActivity() instanceof HomeActivity) {
-                ((HomeActivity) getActivity()).switchToCategory();
-            }
+            android.content.Intent intent = new android.content.Intent(getContext(), ProductListActivity.class);
+            intent.putExtra("title", "Explore Product");
+            startActivity(intent);
         });
 
+
+        view.findViewById(R.id.tv_change_address).setOnClickListener(v -> {
+            startActivity(new android.content.Intent(getContext(), AddAddressActivity.class));
+        });
 
         view.findViewById(R.id.iv_home_notification).setOnClickListener(v -> {
             Toast.makeText(getContext(), "Notifications", Toast.LENGTH_SHORT).show();
         });
     }
 
-    // --- Deal Adapter ---
-    public class DealAdapter extends RecyclerView.Adapter<DealAdapter.ViewHolder> {
-        private List<ProductModel> items;
-
-        DealAdapter(List<ProductModel> items) {
-            this.items = items;
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            TextView name, price, oldPrice, rating, reviews, discount;
-            ImageView image;
-
-            ViewHolder(View view) {
-                super(view);
-                name = view.findViewById(R.id.tv_deal_name);
-                price = view.findViewById(R.id.tv_deal_price);
-                oldPrice = view.findViewById(R.id.tv_deal_old_price);
-                rating = view.findViewById(R.id.tv_deal_rating);
-                reviews = view.findViewById(R.id.tv_deal_reviews);
-                discount = view.findViewById(R.id.tv_deal_discount);
-                image = view.findViewById(R.id.iv_deal_product);
-            }
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_deal, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            ProductModel item = items.get(position);
-            holder.name.setText(item.getProductName());
-            
-            String priceStr = item.getSellingPrice() != null ? item.getSellingPrice() : (item.getPrice() != null ? item.getPrice() : "0");
-            String mrpStr = item.getMrp() != null ? item.getMrp() : (item.getMainPrice() != null ? item.getMainPrice() : priceStr);
-            
-            holder.price.setText("₹" + priceStr);
-            holder.oldPrice.setText("₹" + mrpStr);
-            holder.oldPrice.setPaintFlags(holder.oldPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-            holder.rating.setText(item.getRating() != null ? item.getRating() : "4.0");
-            holder.reviews.setText("(" + (item.getReviewsCount() != null ? item.getReviewsCount() : "0") + ")");
-            
-            // Calculate discount percentage
-            try {
-                double s = Double.parseDouble(priceStr.replaceAll("[^0-9.]", ""));
-                double m = Double.parseDouble(mrpStr.replaceAll("[^0-9.]", ""));
-                if (m > 0 && m > s) {
-                    int d = (int) (((m - s) / m) * 100);
-                    holder.discount.setText("-" + d + "%");
-                    holder.discount.setVisibility(View.VISIBLE);
-                } else {
-                    holder.discount.setVisibility(View.GONE);
-                }
-            } catch (Exception e) {
-                holder.discount.setVisibility(View.GONE);
-            }
-
-            Glide.with(getContext()).load(item.getProductImage()).into(holder.image);
-
-            holder.itemView.setOnClickListener(v -> {
-                if (getActivity() instanceof HomeActivity) {
-                    ((HomeActivity) getActivity()).openProductDetail(item);
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-    }
 
     // --- Adapters ---
     public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
@@ -368,9 +385,10 @@ public class HomeFragment extends Fragment {
             loadImage(item.getCategoryImage(), holder.icon);
 
             holder.itemView.setOnClickListener(v -> {
-                if (getActivity() instanceof HomeActivity) {
-                    ((HomeActivity) getActivity()).switchToCategory();
-                }
+                android.content.Intent intent = new android.content.Intent(getContext(), ProductListActivity.class);
+                intent.putExtra("category", item.getCategoryName());
+                intent.putExtra("title", item.getCategoryName());
+                startActivity(intent);
             });
         }
 
@@ -458,303 +476,4 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
-        private final List<ProductModel> items;
-        private final boolean isHorizontal;
-
-        ProductAdapter(List<ProductModel> items, boolean isHorizontal) {
-            this.items = items;
-            this.isHorizontal = isHorizontal;
-        }
-
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            TextView name;
-            TextView price;
-            TextView oldPrice;
-            TextView discount;
-            ImageView image;
-            ImageView wishlist;
-            ImageView ivAddIcon;
-            View btnAdd;
-
-            ViewHolder(View view) {
-                super(view);
-                name = view.findViewById(R.id.tv_product_name);
-                price = view.findViewById(R.id.tv_price);
-                oldPrice = view.findViewById(R.id.tv_old_price);
-                discount = view.findViewById(R.id.tv_discount);
-                image = view.findViewById(R.id.iv_product);
-                wishlist = view.findViewById(R.id.iv_wishlist);
-                btnAdd = view.findViewById(R.id.btn_add_to_cart);
-                ivAddIcon = view.findViewById(R.id.iv_add_icon);
-                
-                // Adjust layout for grid if needed
-                if (!isHorizontal) {
-                    ViewGroup.LayoutParams params = itemView.getLayoutParams();
-                    params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-                    itemView.setLayoutParams(params);
-                }
-            }
-        }
-
-        @NonNull
-        @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
-            return new ViewHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            ProductModel item = items.get(position);
-            holder.name.setText(item.getProductName());
-            
-            // product_price is the selling price (to buy)
-            String sellingPriceStr = item.getPrice();
-            // product_main_price is the previous price (original/MRP)
-            String mrpStr = item.getMainPrice();
-            
-            // Fallback if null
-            if (sellingPriceStr == null) sellingPriceStr = "0";
-            if (mrpStr == null) mrpStr = sellingPriceStr;
-
-            // Format prices as integers and calculate discount
-            try {
-                String sClean = sellingPriceStr != null ? sellingPriceStr.replaceAll("[^0-9.]", "") : "";
-                String mClean = mrpStr != null ? mrpStr.replaceAll("[^0-9.]", "") : "";
-
-                if (!sClean.isEmpty() && !mClean.isEmpty()) {
-                    double sPrice = Double.parseDouble(sClean);
-                    double mPrice = Double.parseDouble(mClean);
-                    
-                    // Show only Integer value (no decimals)
-                    holder.price.setText("₹" + (int) sPrice);
-                    holder.oldPrice.setText("₹" + (int) mPrice);
-                    holder.oldPrice.setPaintFlags(holder.oldPrice.getPaintFlags() | android.graphics.Paint.STRIKE_THRU_TEXT_FLAG);
-
-                    // Discount Formula: ((MRP - SellingPrice) / MRP) * 100
-                    if (mPrice > sPrice && mPrice > 0) {
-                        double discount = ((mPrice - sPrice) / mPrice) * 100;
-                        int discountPercent = (int) Math.round(discount);
-                        
-                        if (discountPercent > 0) {
-                            holder.discount.setText(discountPercent + "% OFF");
-                            holder.discount.setVisibility(View.VISIBLE);
-                        } else {
-                            holder.discount.setVisibility(View.GONE);
-                        }
-                    } else {
-                        holder.discount.setVisibility(View.GONE);
-                    }
-                } else {
-                    holder.price.setText("₹" + (sellingPriceStr != null && !sellingPriceStr.isEmpty() ? sellingPriceStr : "0"));
-                    holder.oldPrice.setText("₹" + (mrpStr != null && !mrpStr.isEmpty() ? mrpStr : "0"));
-                    holder.discount.setVisibility(View.GONE);
-                }
-            } catch (Exception e) {
-                holder.price.setText("₹" + (sellingPriceStr != null ? sellingPriceStr : "0"));
-                holder.oldPrice.setText("₹" + (mrpStr != null ? mrpStr : "0"));
-                holder.discount.setVisibility(View.GONE);
-            }
-
-            loadImage(item.getProductImage(), holder.image);
-
-            if (holder.wishlist != null) {
-                if (wishlistProductIds.contains(item.getProductId())) {
-                    holder.wishlist.setImageResource(R.drawable.ic_heart_filled);
-                    holder.wishlist.setColorFilter(null); // Use original color (#FF0000)
-                } else {
-                    holder.wishlist.setImageResource(R.drawable.ic_heart_outline);
-                    holder.wishlist.setColorFilter(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_subtitle));
-                }
-
-                holder.wishlist.setOnClickListener(v -> {
-                    if (wishlistProductIds.contains(item.getProductId())) {
-                        removeFromWishlist(item);
-                    } else {
-                        addToWishlist(item);
-                    }
-                });
-            }
-
-            if (holder.btnAdd != null) {
-                if (cartProductIds.contains(item.getProductId())) {
-                    holder.ivAddIcon.setImageResource(R.drawable.ic_check);
-                } else {
-                    holder.ivAddIcon.setImageResource(R.drawable.ic_add);
-                }
-                holder.btnAdd.setOnClickListener(v -> {
-                    if (cartProductIds.contains(item.getProductId())) {
-                        removeFromCart(item);
-                    } else {
-                        addToCart(item);
-                    }
-                });
-            }
-
-            holder.itemView.setOnClickListener(v -> {
-                if (getActivity() instanceof HomeActivity) {
-                    ((HomeActivity) getActivity()).openProductDetail(item);
-                }
-            });
-        }
-
-        private void loadImage(String imageSource, ImageView imageView) {
-            if (imageSource == null || imageSource.isEmpty()) {
-                imageView.setImageResource(R.drawable.ic_category);
-                return;
-            }
-
-            if (imageSource.startsWith("http")) {
-                Glide.with(getContext())
-                        .load(imageSource)
-                        .placeholder(R.drawable.ic_category)
-                        .error(R.drawable.ic_category)
-                        .into(imageView);
-            } else {
-                int resId = getResources().getIdentifier(imageSource, "drawable", requireContext().getPackageName());
-                if (resId != 0) {
-                    Glide.with(getContext())
-                            .load(resId)
-                            .placeholder(R.drawable.ic_category)
-                            .into(imageView);
-                } else {
-                    Glide.with(getContext())
-                            .load(imageSource)
-                            .placeholder(R.drawable.ic_category)
-                            .error(R.drawable.ic_category)
-                            .into(imageView);
-                }
-            }
-        }
-
-        private void removeFromCart(ProductModel product) {
-            String userId = sessionManager.getUserId();
-            if (userId.isEmpty()) return;
-
-            String authHeader = "Bearer " + sessionManager.getToken();
-            Map<String, String> filters = new HashMap<>();
-            filters.put("user_id", "eq." + userId);
-            filters.put("product_id", "eq." + product.getProductId());
-
-            SupabaseClient.getApiService().deleteDataByFilters(
-                    "cart",
-                    SupabaseClient.SUPABASE_ANON_KEY,
-                    authHeader,
-                    filters
-            ).enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        cartProductIds.remove(product.getProductId());
-                        // Sync with CartManager
-                        for (int i = 0; i < CartManager.getInstance().getCartItems().size(); i++) {
-                            if (CartManager.getInstance().getCartItems().get(i).getProduct().getProductId().equals(product.getProductId())) {
-                                CartManager.getInstance().removeItem(i);
-                                break;
-                            }
-                        }
-                        notifyDataSetChanged();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    android.widget.Toast.makeText(getContext(), "Failed to remove: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        private void addToCart(ProductModel product) {
-            CartHelper.addToCart(getContext(), product, new CartHelper.CartCallback() {
-                @Override
-                public void onSuccess() {
-                    cartProductIds.add(product.getProductId());
-                    notifyDataSetChanged();
-                    Toast.makeText(getContext(), "Added to Cart", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public void onFailure(String error) {
-                    Toast.makeText(getContext(), "Failed: " + error, Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        private void addToWishlist(ProductModel product) {
-            String userId = sessionManager.getUserId();
-            if (userId.isEmpty()) {
-                android.widget.Toast.makeText(getContext(), "Please login to add to wishlist", android.widget.Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            Map<String, Object> data = new HashMap<>();
-            data.put("user_id", userId);
-            data.put("product_id", product.getProductId());
-            data.put("product_name", product.getProductName());
-            data.put("product_price", product.getSellingPrice() != null ? product.getSellingPrice() : product.getPrice());
-            data.put("product_image", product.getProductImage());
-
-            String userToken = sessionManager.getToken();
-            String authHeader = "Bearer " + (userToken != null && !userToken.isEmpty() ? userToken : SupabaseClient.SUPABASE_ANON_KEY);
-            
-            SupabaseClient.getApiService().addData(
-                    "wishlist",
-                    SupabaseClient.SUPABASE_ANON_KEY,
-                    authHeader,
-                    "return=representation",
-                    data
-            ).enqueue(new Callback<List<Map<String, Object>>>() {
-                @Override
-                public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
-                    if (response.isSuccessful()) {
-                        wishlistProductIds.add(product.getProductId());
-                        notifyDataSetChanged();
-                    } else if (response.code() != 409) {
-                        android.widget.Toast.makeText(getContext(), "Error: " + response.code(), android.widget.Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
-                    android.widget.Toast.makeText(getContext(), "Error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        private void removeFromWishlist(ProductModel product) {
-            String userId = sessionManager.getUserId();
-            if (userId.isEmpty()) return;
-
-            String authHeader = "Bearer " + sessionManager.getToken();
-            Map<String, String> filters = new HashMap<>();
-            filters.put("user_id", "eq." + userId);
-            filters.put("product_id", "eq." + product.getProductId());
-
-            SupabaseClient.getApiService().deleteDataByFilters(
-                    "wishlist",
-                    SupabaseClient.SUPABASE_ANON_KEY,
-                    authHeader,
-                    filters
-            ).enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(@NonNull Call<ResponseBody> call, @NonNull Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        wishlistProductIds.remove(product.getProductId());
-                        notifyDataSetChanged();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    android.widget.Toast.makeText(getContext(), "Failed to remove: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-
-        @Override
-        public int getItemCount() {
-            return items.size();
-        }
-    }
 }

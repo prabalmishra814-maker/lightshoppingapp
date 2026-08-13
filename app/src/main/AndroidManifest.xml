@@ -82,6 +82,19 @@
             android:theme="@style/Theme.LightShop" />
 
         <activity
+            android:name=".ProductListActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LightShop" />
+
+        <activity
+            android:name=".SearchActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LightShop"
+            android:windowSoftInputMode="stateVisible" />
+
+        <activity
             android:name=".FullScreenImageActivity"
             android:exported="false"
             android:theme="@style/Theme.LightShop" />

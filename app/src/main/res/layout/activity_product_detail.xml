@@ -26,29 +26,24 @@
             android:src="@drawable/ic_arrow_back"
             app:tint="@color/dark_navy" />
 
-        <TextView
+        <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:text="Item View"
-            android:textColor="@color/dark_navy"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:layout_weight="1" />
 
         <ImageView
-            android:id="@+id/iv_share"
+            android:id="@+id/iv_search"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_share"
+            android:layout_marginEnd="20dp"
+            android:src="@drawable/ic_search"
             app:tint="@color/dark_navy" />
 
         <ImageView
-            android:id="@+id/iv_header_wishlist"
-            android:layout_width="19dp"
+            android:id="@+id/iv_cart"
+            android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_heart_outline"
+            android:src="@drawable/ic_cart"
             app:tint="@color/dark_navy" />
     </LinearLayout>
 
@@ -109,48 +104,6 @@
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/tv_rating_badge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_pill_green"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="2dp"
-                        android:text="4.3 ★"
-                        android:textColor="@color/white"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_review_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:text="(12,456)"
-                        android:textColor="@color/secondary_gray"
-                        android:textSize="14sp" />
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="12dp"
-                        android:layout_marginHorizontal="8dp"
-                        android:background="@color/divider_color" />
-
-                    <TextView
-                        android:id="@+id/tv_sold_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.2L+ Sold"
-                        android:textColor="@color/secondary_gray"
-                        android:textSize="14sp" />
-                </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -417,62 +370,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Offers Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/divider_color"
-                app:strokeWidth="1dp">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <ImageView
-                        android:id="@+id/iv_offer_tag"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_description"
-                        app:tint="@color/primary_blue" />
-
-                    <TextView
-                        android:id="@+id/tv_offers_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_toEndOf="@id/iv_offer_tag"
-                        android:text="Offers:"
-                        android:textColor="@color/dark_navy"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/tv_offers_label"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_toEndOf="@id/iv_offer_tag"
-                        android:lineSpacingExtra="4dp"
-                        android:text="• 5% Instant Discount on ICICI Bank Cards.\n• Get 10% off up to ₹500 with Amazon Pay."
-                        android:textColor="@color/secondary_gray"
-                        android:textSize="14sp" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/dark_navy" />
-                </RelativeLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <!-- Product Details Section -->
             <com.google.android.material.card.MaterialCardView
@@ -522,13 +419,6 @@
                         android:textColor="@color/secondary_gray"
                         android:textSize="14sp" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/dark_navy" />
                 </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -555,47 +445,7 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_product_recommendation" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="24dp"
-                android:text="Similar Products"
-                android:textColor="@color/dark_navy"
-                android:textSize="20sp"
-                android:textStyle="bold" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_similar_products"
-                android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:layout_marginTop="8dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_product_recommendation" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="24dp"
-                android:text="Recently Viewed"
-                android:textColor="@color/dark_navy"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_recently_viewed"
-                android:layout_width="match_parent"
-                android:layout_height="240dp"
-                android:layout_marginTop="8dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:paddingHorizontal="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_product_recommendation" />
 
             <TextView
                 android:layout_width="match_parent"
@@ -638,7 +488,7 @@
             android:layout_height="56dp"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="Add to Wishlist"
+            android:text="Wishlist"
             android:textAllCaps="false"
             android:textColor="@color/primary_blue"
             android:textSize="14sp"
@@ -646,6 +496,7 @@
             app:cornerRadius="12dp"
             app:icon="@drawable/ic_heart_outline"
             app:iconGravity="textStart"
+            app:iconPadding="8dp"
             app:iconTint="@color/primary_blue"
             app:strokeColor="@color/primary_blue"
             app:strokeWidth="1dp" />

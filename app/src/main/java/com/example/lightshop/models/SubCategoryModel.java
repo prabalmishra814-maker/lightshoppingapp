@@ -12,6 +12,9 @@ public class SubCategoryModel {
     @SerializedName("sub_category_name")
     private String subCategoryName;
 
+    @SerializedName("sub_category_image")
+    private String subCategoryImage;
+
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
@@ -20,4 +23,7 @@ public class SubCategoryModel {
 
     public String getSubCategoryName() { return subCategoryName; }
     public void setSubCategoryName(String subCategoryName) { this.subCategoryName = subCategoryName; }
+
+    public String getSubCategoryImage() { return subCategoryImage; }
+    public void setSubCategoryImage(String subCategoryImage) { this.subCategoryImage = subCategoryImage; }
 }

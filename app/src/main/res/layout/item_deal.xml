@@ -81,38 +81,5 @@
                 android:textSize="11sp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/tv_deal_rating"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="4.4"
-                android:textColor="@color/dark_navy"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginStart="2dp"
-                android:src="@drawable/bg_status_dot"
-                app:tint="#FFC107" />
-
-            <TextView
-                android:id="@+id/tv_deal_reviews"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="(5.6K)"
-                android:textColor="@color/secondary_gray"
-                android:textSize="11sp" />
-        </LinearLayout>
-
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

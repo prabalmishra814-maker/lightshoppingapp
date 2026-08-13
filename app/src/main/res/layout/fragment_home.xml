@@ -102,6 +102,7 @@
                 android:layout_height="50dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="8dp"
+                android:transitionName="search_bar_transition"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp"
                 app:strokeColor="#E5E7EB"
@@ -133,14 +134,6 @@
                         android:textColor="@color/text_primary"
                         android:textColorHint="#9CA3AF"
                         android:textSize="14sp" />
-
-                    <ImageView
-                        android:id="@+id/iv_camera_search"
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_camera"
-                        app:tint="#4B5563" />
 
                     <ImageView
                         android:id="@+id/iv_mic_search"
@@ -212,33 +205,6 @@
                 android:clipToPadding="false"
                 android:paddingHorizontal="8dp" />
 
-            <!-- Deals of the Day -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="16dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Explore Products"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_deals"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:clipToPadding="false"
-                android:paddingHorizontal="8dp" />
 
             <!-- Best Selling Section -->
             <LinearLayout
@@ -253,7 +219,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/best_selling"
+                    android:text="Explore Product"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
