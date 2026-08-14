@@ -35,6 +35,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
+
 public class HomeFragment extends Fragment {
 
     private SessionManager sessionManager;
@@ -88,27 +90,44 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
             public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                TextView tvAddress = view.findViewById(R.id.tv_delivery_address);
+                TextView tvChange = view.findViewById(R.id.tv_change_address);
+                if (tvAddress == null) return;
+
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     Object addressObj = response.body().get(0).get("address");
-                    if (addressObj instanceof java.util.Map) {
+                    if (addressObj instanceof java.util.Map && !((java.util.Map) addressObj).isEmpty()) {
                         java.util.Map<String, Object> address = (java.util.Map<String, Object>) addressObj;
                         String city = (String) address.get("city");
                         String pincode = (String) address.get("pincode");
                         
-                        TextView tvAddress = view.findViewById(R.id.tv_delivery_address);
-                        if (tvAddress != null) {
-                            if (city != null && pincode != null) {
-                                tvAddress.setText("Deliver to " + city + " " + pincode);
-                            } else if (pincode != null) {
-                                tvAddress.setText("Deliver to " + pincode);
-                            }
+                        if (city != null && pincode != null) {
+                            tvAddress.setText("Deliver to " + city + " " + pincode);
+                        } else if (pincode != null) {
+                            tvAddress.setText("Deliver to " + pincode);
+                        } else {
+                            tvAddress.setText("Add your address");
                         }
+                        if (tvChange != null) tvChange.setText(getString(R.string.change));
+                    } else {
+                        tvAddress.setText("Add your address");
+                        if (tvChange != null) tvChange.setText("Add");
                     }
+                } else {
+                    tvAddress.setText("Add your address");
+                    if (tvChange != null) tvChange.setText("Add");
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                TextView tvAddress = view.findViewById(R.id.tv_delivery_address);
+                TextView tvChange = view.findViewById(R.id.tv_change_address);
+                if (tvAddress != null) {
+                    tvAddress.setText("Add your address");
+                }
+                if (tvChange != null) tvChange.setText("Add");
+            }
         });
     }
 
@@ -254,6 +273,8 @@ public class HomeFragment extends Fragment {
 
     private void fetchProductsFromSupabase(View view) {
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        ShimmerFrameLayout shimmer = view.findViewById(R.id.shimmer_best_selling);
+        
         SupabaseClient.getApiService().fetchProducts(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
@@ -261,12 +282,18 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<ProductModel>>() {
             @Override
             public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                
                 if (response.isSuccessful() && response.body() != null) {
                     List<ProductModel> products = response.body();
                     
                     // Best Selling
                     RecyclerView rvBest = view.findViewById(R.id.rv_best_selling);
                     if (rvBest != null && getContext() != null) {
+                        rvBest.setVisibility(View.VISIBLE);
                         allProductsAdapter = new ProductAdapter(getContext(), products, false, 
                             cartProductIds, wishlistProductIds, sessionManager, () -> updateHomeCartBadge(cartProductIds.size()));
                         rvBest.setAdapter(allProductsAdapter);
@@ -275,12 +302,19 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<ProductModel>> call, Throwable t) {}
+            public void onFailure(Call<List<ProductModel>> call, Throwable t) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+            }
         });
     }
 
     private void fetchCategoriesFromSupabase(View view) {
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        ShimmerFrameLayout shimmer = view.findViewById(R.id.shimmer_categories);
+        
         SupabaseClient.getApiService().fetchCategories(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
@@ -288,9 +322,15 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<CategoryModel>>() {
             @Override
             public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                
                 if (response.isSuccessful() && response.body() != null) {
                     RecyclerView rvCat = view.findViewById(R.id.rv_home_categories);
                     if (rvCat != null && getContext() != null) {
+                        rvCat.setVisibility(View.VISIBLE);
                         rvCat.setAdapter(new CategoryAdapter(response.body()));
                     }
                 }
@@ -298,6 +338,10 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
                 Toast.makeText(getContext(), "Failed to load categories", Toast.LENGTH_SHORT).show();
             }
         });

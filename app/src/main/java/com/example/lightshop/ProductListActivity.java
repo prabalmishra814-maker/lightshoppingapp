@@ -1,6 +1,7 @@
 package com.example.lightshop;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +12,7 @@ import com.example.lightshop.api.SessionManager;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.utils.StatusBarUtils;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,6 +68,7 @@ public class ProductListActivity extends AppCompatActivity {
 
     private void fetchProducts() {
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        ShimmerFrameLayout shimmer = findViewById(R.id.shimmer_product_list);
         
         Call<List<ProductModel>> call;
         if (subCategoryName != null && !subCategoryName.isEmpty()) {
@@ -97,6 +100,12 @@ public class ProductListActivity extends AppCompatActivity {
         call.enqueue(new Callback<List<ProductModel>>() {
             @Override
             public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                rvProducts.setVisibility(View.VISIBLE);
+
                 if (response.isSuccessful() && response.body() != null) {
                     productList.clear();
                     productList.addAll(response.body());
@@ -106,6 +115,10 @@ public class ProductListActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
                 Toast.makeText(ProductListActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

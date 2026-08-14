@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.photoview)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation(libs.shimmer)
+    implementation("com.airbnb.android:lottie:6.4.0")
     implementation("com.github.denzcoskun:ImageSlideshow:0.1.2")
     annotationProcessor(libs.glide.compiler)
     testImplementation(libs.junit)

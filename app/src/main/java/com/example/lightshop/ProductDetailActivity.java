@@ -14,6 +14,7 @@ import com.example.lightshop.api.SessionManager;
 import com.example.lightshop.databinding.ActivityProductDetailBinding;
 import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.utils.StatusBarUtils;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private boolean isWishlisted = false;
     private boolean isAlreadyInCart = false;
+    private boolean isDescriptionExpanded = false;
     private java.util.Set<String> wishlistProductIds = new java.util.HashSet<>();
     private RecommendationAdapter youMayLikeAdapter, moreAdapter;
 
@@ -98,7 +100,32 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         binding.tvStockStatus.setText(product.getStock() != null ? product.getStock() : "In Stock");
 
+        setupDescriptionExpand();
         setupImageSlider();
+    }
+
+    private void setupDescriptionExpand() {
+        binding.tvProductDescription.post(() -> {
+            if (binding.tvProductDescription.getLineCount() > 3) {
+                binding.tvReadMore.setVisibility(View.VISIBLE);
+            } else {
+                binding.tvReadMore.setVisibility(View.GONE);
+            }
+        });
+
+        View.OnClickListener toggleDescription = v -> {
+            if (isDescriptionExpanded) {
+                binding.tvProductDescription.setMaxLines(3);
+                binding.tvReadMore.setText("Read More");
+            } else {
+                binding.tvProductDescription.setMaxLines(Integer.MAX_VALUE);
+                binding.tvReadMore.setText("Read Less");
+            }
+            isDescriptionExpanded = !isDescriptionExpanded;
+        };
+
+        binding.tvReadMore.setOnClickListener(toggleDescription);
+        binding.tvProductDescription.setOnClickListener(toggleDescription);
     }
 
     private void setupImageSlider() {
@@ -212,6 +239,12 @@ public class ProductDetailActivity extends AppCompatActivity {
             ).enqueue(new Callback<List<ProductModel>>() {
                 @Override
                 public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
+                    if (binding.shimmerProductDetail != null) {
+                        binding.shimmerProductDetail.stopShimmer();
+                        binding.shimmerProductDetail.setVisibility(View.GONE);
+                    }
+                    binding.scrollViewContent.setVisibility(View.VISIBLE);
+
                     if (response.isSuccessful() && response.body() != null) {
                         List<ProductModel> products = new ArrayList<>(response.body());
                         // Remove current product from recommendations
@@ -234,10 +267,20 @@ public class ProductDetailActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {
+                    if (binding.shimmerProductDetail != null) {
+                        binding.shimmerProductDetail.stopShimmer();
+                        binding.shimmerProductDetail.setVisibility(View.GONE);
+                    }
+                    binding.scrollViewContent.setVisibility(View.VISIBLE);
                     fetchMoreProducts();
                 }
             });
         } else {
+            if (binding.shimmerProductDetail != null) {
+                binding.shimmerProductDetail.stopShimmer();
+                binding.shimmerProductDetail.setVisibility(View.GONE);
+            }
+            binding.scrollViewContent.setVisibility(View.VISIBLE);
             fetchMoreProducts();
         }
     }
@@ -318,7 +361,15 @@ public class ProductDetailActivity extends AppCompatActivity {
         */
 
         binding.btnBuyNow.setOnClickListener(v -> {
-            addToCartAndGoToCart();
+            com.example.lightshop.utils.UserUtils.checkUserAddress(this, hasAddress -> {
+                if (hasAddress) {
+                    addToCartAndGoToCart();
+                } else {
+                    Toast.makeText(this, "Please add your delivery address first", Toast.LENGTH_LONG).show();
+                    Intent intent = new Intent(this, AddAddressActivity.class);
+                    startActivity(intent);
+                }
+            });
         });
     }
 

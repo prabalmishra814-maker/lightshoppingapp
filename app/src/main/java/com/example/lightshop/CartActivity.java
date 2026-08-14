@@ -52,7 +52,14 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         });
 
         btnPlaceOrder.setOnClickListener(v -> {
-            startActivity(new Intent(this, CheckoutActivity.class));
+            com.example.lightshop.utils.UserUtils.checkUserAddress(this, hasAddress -> {
+                if (hasAddress) {
+                    startActivity(new Intent(this, CheckoutActivity.class));
+                } else {
+                    Toast.makeText(this, "Please add your delivery address first", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(this, AddAddressActivity.class));
+                }
+            });
         });
     }
 

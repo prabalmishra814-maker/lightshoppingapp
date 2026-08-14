@@ -22,6 +22,7 @@ import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.ProductModel;
 import com.example.lightshop.models.WishlistModel;
 import com.example.lightshop.utils.StatusBarUtils;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -142,6 +143,14 @@ public class SearchActivity extends AppCompatActivity {
 
     private void fetchSuggestions() {
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        ShimmerFrameLayout shimmer = findViewById(R.id.shimmer_search);
+        
+        if (shimmer != null) {
+            shimmer.setVisibility(View.VISIBLE);
+            shimmer.startShimmer();
+        }
+        rvResults.setVisibility(View.GONE);
+
         SupabaseClient.getApiService().fetchProducts(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
@@ -149,6 +158,12 @@ public class SearchActivity extends AppCompatActivity {
         ).enqueue(new Callback<List<ProductModel>>() {
             @Override
             public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                rvResults.setVisibility(View.VISIBLE);
+
                 if (response.isSuccessful() && response.body() != null) {
                     suggestionList.clear();
                     suggestionList.addAll(response.body());
@@ -158,7 +173,13 @@ public class SearchActivity extends AppCompatActivity {
                 }
             }
             @Override
-            public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                rvResults.setVisibility(View.VISIBLE);
+            }
         });
     }
 
@@ -178,6 +199,14 @@ public class SearchActivity extends AppCompatActivity {
 
     private void searchProducts(String query) {
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        ShimmerFrameLayout shimmer = findViewById(R.id.shimmer_search);
+        
+        if (shimmer != null) {
+            shimmer.setVisibility(View.VISIBLE);
+            shimmer.startShimmer();
+        }
+        rvResults.setVisibility(View.GONE);
+        
         SupabaseClient.getApiService().searchProducts(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
@@ -186,14 +215,31 @@ public class SearchActivity extends AppCompatActivity {
         ).enqueue(new Callback<List<ProductModel>>() {
             @Override
             public void onResponse(@NonNull Call<List<ProductModel>> call, @NonNull Response<List<ProductModel>> response) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                rvResults.setVisibility(View.VISIBLE);
+                
                 if (response.isSuccessful() && response.body() != null) {
                     productList.clear();
                     productList.addAll(response.body());
                     adapter.notifyDataSetChanged();
+                    
+                    if (productList.isEmpty()) {
+                        emptyState.setVisibility(View.VISIBLE);
+                        tvSearchTitle.setVisibility(View.GONE);
+                    }
                 }
             }
             @Override
-            public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<List<ProductModel>> call, @NonNull Throwable t) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+                rvResults.setVisibility(View.VISIBLE);
+            }
         });
     }
 

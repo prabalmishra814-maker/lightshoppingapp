@@ -17,7 +17,12 @@ public class HomeActivity extends AppCompatActivity {
         setupBottomNavigation();
 
         if (savedInstanceState == null) {
-            loadFragment(new HomeFragment());
+            String navigateTo = getIntent().getStringExtra("navigate_to");
+            if ("orders".equals(navigateTo)) {
+                switchToOrders();
+            } else {
+                loadFragment(new HomeFragment());
+            }
         }
     }
 

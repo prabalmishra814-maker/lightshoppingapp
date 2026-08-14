@@ -13,6 +13,7 @@ import com.example.lightshop.models.WishlistModel;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.api.SessionManager;
 import com.example.lightshop.utils.CartHelper;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,13 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
 
     private void fetchWishlist() {
         String userId = sessionManager.getUserId();
+        ShimmerFrameLayout shimmer = findViewById(R.id.shimmer_wishlist);
+
         if (userId.isEmpty()) {
+            if (shimmer != null) {
+                shimmer.stopShimmer();
+                shimmer.setVisibility(View.GONE);
+            }
             updateUI();
             return;
         }
@@ -76,6 +83,11 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
         ).enqueue(new Callback<List<WishlistModel>>() {
             @Override
             public void onResponse(@NonNull Call<List<WishlistModel>> call, @NonNull Response<List<WishlistModel>> response) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
+
                 if (response.isSuccessful() && response.body() != null) {
                     wishlistList.clear();
                     for (WishlistModel item : response.body()) {
@@ -106,6 +118,10 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
 
             @Override
             public void onFailure(@NonNull Call<List<WishlistModel>> call, @NonNull Throwable t) {
+                if (shimmer != null) {
+                    shimmer.stopShimmer();
+                    shimmer.setVisibility(View.GONE);
+                }
                 updateUI();
                 Toast.makeText(WishlistActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }

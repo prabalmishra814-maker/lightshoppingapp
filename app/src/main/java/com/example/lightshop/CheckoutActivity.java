@@ -127,7 +127,8 @@ public class CheckoutActivity extends AppCompatActivity {
 
         Map<String, Object> orderData = new HashMap<>();
         orderData.put("user_id", userId);
-        orderData.put("order_number", "#LS-" + (1000 + new Random().nextInt(9000)));
+        String orderNumber = "#LS-" + (1000 + new Random().nextInt(9000));
+        orderData.put("order_number", orderNumber);
         orderData.put("customer_name", ((TextView)findViewById(R.id.tvCustomerName)).getText().toString());
         orderData.put("customer_email", sessionManager.getUserEmail());
         orderData.put("customer_phone", ((TextView)findViewById(R.id.tvPhone)).getText().toString());
@@ -189,7 +190,7 @@ public class CheckoutActivity extends AppCompatActivity {
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful()) {
                     // Step 2: Clear the Cart
-                    clearCart(userId, authHeader);
+                    clearCart(userId, authHeader, orderNumber);
                 } else {
                     btnContinue.setEnabled(true);
                     btnContinue.setText("PLACE ORDER");
@@ -206,7 +207,7 @@ public class CheckoutActivity extends AppCompatActivity {
         });
     }
 
-    private void clearCart(String userId, String authHeader) {
+    private void clearCart(String userId, String authHeader, String orderNumber) {
         Map<String, String> filters = new HashMap<>();
         filters.put("user_id", "eq." + userId);
 
@@ -218,31 +219,25 @@ public class CheckoutActivity extends AppCompatActivity {
         ).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                showSuccessDialog();
                 CartManager.getInstance().getCartItems().clear();
+                showSuccessActivity(orderNumber);
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 // Even if clearing cart fails, order is placed
-                showSuccessDialog();
                 CartManager.getInstance().getCartItems().clear();
+                showSuccessActivity(orderNumber);
             }
         });
     }
 
-    private void showSuccessDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Order Successful!")
-                .setMessage("Your order has been placed successfully. You can track it in the My Orders section.")
-                .setCancelable(false)
-                .setPositiveButton("Go to Home", (dialog, which) -> {
-                    android.content.Intent intent = new android.content.Intent(this, HomeActivity.class);
-                    intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-                })
-                .show();
+    private void showSuccessActivity(String orderNumber) {
+        android.content.Intent intent = new android.content.Intent(this, SuccessActivity.class);
+        intent.putExtra("order_id", orderNumber);
+        intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void updatePriceDetails() {

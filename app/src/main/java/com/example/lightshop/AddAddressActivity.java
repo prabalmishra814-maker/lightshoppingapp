@@ -20,17 +20,14 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.lightshop.api.LocationIQApiService;
 import com.example.lightshop.api.SessionManager;
-import com.example.lightshop.api.StateApiService;
 import com.example.lightshop.api.SupabaseClient;
 import com.example.lightshop.models.LocationIQResponse;
-import com.example.lightshop.models.StateResponse;
 import com.example.lightshop.utils.StatusBarUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.textfield.TextInputEditText;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +39,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class AddAddressActivity extends AppCompatActivity {
 
-    private TextInputEditText etFullName, etPhone, etPincode, etCity, etHouseNo, etRoadName, etLandmark;
+    private TextInputEditText etFullName, etPhone, etPincode, etCity, etHouseNo, etRoadName;
     private AutoCompleteTextView spinnerState;
     private RadioGroup rgAddressType;
     private Button btnSaveAddress, btnCurrentLocation;
@@ -62,7 +59,7 @@ public class AddAddressActivity extends AppCompatActivity {
 
         initViews();
         setupToolbar();
-        fetchStates();
+        setupStates();
         initLocationApi();
         fetchExistingAddress();
 
@@ -86,7 +83,6 @@ public class AddAddressActivity extends AppCompatActivity {
         etCity = findViewById(R.id.et_city);
         etHouseNo = findViewById(R.id.et_house_no);
         etRoadName = findViewById(R.id.et_road_name);
-        etLandmark = findViewById(R.id.et_landmark);
         rgAddressType = findViewById(R.id.rg_address_type);
         btnSaveAddress = findViewById(R.id.btn_save_address);
         btnCurrentLocation = findViewById(R.id.btn_current_location);
@@ -116,13 +112,11 @@ public class AddAddressActivity extends AppCompatActivity {
         btnCurrentLocation.setText("Locating...");
         btnCurrentLocation.setEnabled(false);
 
-        // Flipkart-style Fast Location Fetch using FusedLocationProvider (Google Play Services)
         fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .addOnSuccessListener(this, location -> {
                     if (location != null) {
                         fetchAddressFromCoords(location.getLatitude(), location.getLongitude());
                     } else {
-                        // Fallback to Last Known if current fails
                         fusedLocationClient.getLastLocation().addOnSuccessListener(this, lastLoc -> {
                             if (lastLoc != null) {
                                 fetchAddressFromCoords(lastLoc.getLatitude(), lastLoc.getLongitude());
@@ -173,32 +167,14 @@ public class AddAddressActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchStates() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://cdn-api.co-vin.in/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        StateApiService api = retrofit.create(StateApiService.class);
-        api.getStates().enqueue(new Callback<StateResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<StateResponse> call, @NonNull Response<StateResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<StateResponse.State> states = response.body().states;
-                    ArrayAdapter<StateResponse.State> adapter = new ArrayAdapter<>(
-                            AddAddressActivity.this,
-                            android.R.layout.simple_dropdown_item_1line,
-                            states
-                    );
-                    spinnerState.setAdapter(adapter);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<StateResponse> call, @NonNull Throwable t) {
-                Toast.makeText(AddAddressActivity.this, "Failed to load states", Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void setupStates() {
+        String[] states = getResources().getStringArray(R.array.india_states);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                states
+        );
+        spinnerState.setAdapter(adapter);
     }
 
     private void setupToolbar() {
@@ -214,19 +190,21 @@ public class AddAddressActivity extends AppCompatActivity {
     private void validateAndSaveAddress() {
         String fullName = etFullName.getText() != null ? etFullName.getText().toString().trim() : "";
         String phoneInput = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
-        String phone = "+91 " + phoneInput;
+        
+        // Clean phone number for 'numeric' column in DB (digits only)
+        String phoneDigits = phoneInput.replaceAll("[^0-9]", "");
+        
         String pincode = etPincode.getText() != null ? etPincode.getText().toString().trim() : "";
         String state = spinnerState.getText().toString().trim();
         String city = etCity.getText() != null ? etCity.getText().toString().trim() : "";
         String houseNo = etHouseNo.getText() != null ? etHouseNo.getText().toString().trim() : "";
         String roadName = etRoadName.getText() != null ? etRoadName.getText().toString().trim() : "";
-        String landmark = etLandmark.getText() != null ? etLandmark.getText().toString().trim() : "";
 
         if (TextUtils.isEmpty(fullName)) {
             etFullName.setError("Required");
             return;
         }
-        if (TextUtils.isEmpty(phone)) {
+        if (TextUtils.isEmpty(phoneInput)) {
             etPhone.setError("Required");
             return;
         }
@@ -255,10 +233,10 @@ public class AddAddressActivity extends AppCompatActivity {
         RadioButton selectedType = findViewById(selectedTypeId);
         String addressType = selectedType.getText().toString();
 
-        saveAddressToSupabase(fullName, phone, pincode, state, city, houseNo, roadName, landmark, addressType);
+        saveAddressToSupabase(fullName, phoneDigits, pincode, state, city, houseNo, roadName, addressType);
     }
 
-    private void saveAddressToSupabase(String fullName, String phone, String pincode, String state, String city, String houseNo, String roadName, String landmark, String addressType) {
+    private void saveAddressToSupabase(String fullName, String phone, String pincode, String state, String city, String houseNo, String roadName, String addressType) {
         SessionManager sessionManager = new SessionManager(this);
         String userId = sessionManager.getUserId();
         
@@ -267,7 +245,6 @@ public class AddAddressActivity extends AppCompatActivity {
             return;
         }
 
-        // Create a Map for JSON address format
         Map<String, Object> addressJson = new java.util.HashMap<>();
         addressJson.put("name", fullName);
         addressJson.put("number", phone);
@@ -276,14 +253,19 @@ public class AddAddressActivity extends AppCompatActivity {
         addressJson.put("city", city);
         addressJson.put("state", state);
         addressJson.put("pincode", pincode);
-        addressJson.put("landmark", landmark);
         addressJson.put("type", addressType);
 
         Map<String, Object> updateData = new java.util.HashMap<>();
-        updateData.put("uid", userId); // Critical for UPSERT to work
+        updateData.put("uid", userId);
         updateData.put("address", addressJson);
         updateData.put("name", fullName);
-        updateData.put("number", phone);
+        
+        // Convert phone to Long/Double for 'numeric' column to avoid casting issues
+        try {
+            updateData.put("number", Long.parseLong(phone));
+        } catch (Exception e) {
+            updateData.put("number", phone);
+        }
         
         btnSaveAddress.setEnabled(false);
         btnSaveAddress.setText("Saving...");
@@ -291,9 +273,8 @@ public class AddAddressActivity extends AppCompatActivity {
         String userToken = sessionManager.getToken();
         String authHeader = "Bearer " + (userToken != null ? userToken : SupabaseClient.SUPABASE_ANON_KEY);
         
-        // Use addData with merge-duplicates for UPSERT
         SupabaseClient.getApiService().addData(
-                "Users",
+                "Users", // Keep capitalized if that's what's working for Fetch
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
                 "resolution=merge-duplicates,return=representation",
@@ -308,12 +289,17 @@ public class AddAddressActivity extends AppCompatActivity {
                     Toast.makeText(AddAddressActivity.this, "Address Updated Successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(AddAddressActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
-                    try {
-                        if (response.errorBody() != null) {
-                            android.util.Log.e("SupabaseUpdate", "Error Body: " + response.errorBody().string());
-                        }
-                    } catch (Exception e) { e.printStackTrace(); }
+                    // Try lowercase 'users' if 'Users' returns 404
+                    if (response.code() == 404) {
+                        retryWithLowercaseUsers(updateData, authHeader);
+                    } else {
+                        Toast.makeText(AddAddressActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        try {
+                            if (response.errorBody() != null) {
+                                android.util.Log.e("SupabaseUpdate", "Error Body: " + response.errorBody().string());
+                            }
+                        } catch (Exception e) { e.printStackTrace(); }
+                    }
                 }
             }
 
@@ -322,6 +308,34 @@ public class AddAddressActivity extends AppCompatActivity {
                 btnSaveAddress.setEnabled(true);
                 btnSaveAddress.setText("Save Address");
                 Toast.makeText(AddAddressActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void retryWithLowercaseUsers(Map<String, Object> updateData, String authHeader) {
+        SupabaseClient.getApiService().addData(
+                "users", // Lowercase retry
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "resolution=merge-duplicates,return=representation",
+                updateData
+        ).enqueue(new Callback<java.util.List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<java.util.List<Map<String, Object>>> call, @NonNull Response<java.util.List<Map<String, Object>>> response) {
+                btnSaveAddress.setEnabled(true);
+                btnSaveAddress.setText("Save Address");
+                if (response.isSuccessful()) {
+                    Toast.makeText(AddAddressActivity.this, "Address Updated Successfully!", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(AddAddressActivity.this, "Error 404: Table not found. Please check table name in Supabase.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<java.util.List<Map<String, Object>>> call, @NonNull Throwable t) {
+                btnSaveAddress.setEnabled(true);
+                btnSaveAddress.setText("Save Address");
             }
         });
     }
@@ -374,7 +388,6 @@ public class AddAddressActivity extends AppCompatActivity {
             if (address.containsKey("state")) spinnerState.setText((String) address.get("state"), false);
             if (address.containsKey("house_no")) etHouseNo.setText((String) address.get("house_no"));
             if (address.containsKey("road_name")) etRoadName.setText((String) address.get("road_name"));
-            if (address.containsKey("landmark")) etLandmark.setText((String) address.get("landmark"));
             
             if (address.containsKey("type")) {
                 String type = (String) address.get("type");
