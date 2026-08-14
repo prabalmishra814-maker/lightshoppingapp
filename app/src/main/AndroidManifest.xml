@@ -111,6 +111,12 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.LightShop" />
+
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.LightShop" />
     </application>
 
 </manifest>

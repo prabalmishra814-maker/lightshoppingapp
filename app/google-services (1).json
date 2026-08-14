@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "611486037764",
+    "firebase_url": "https://light-basket-default-rtdb.firebaseio.com",
     "project_id": "light-basket",
     "storage_bucket": "light-basket.firebasestorage.app"
   },
@@ -13,6 +14,14 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "611486037764-845f5369io6kmcura8dr1r09m4qks6ce.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.amstudio.lightbasket",
+            "certificate_hash": "bbd0b47d709884a1493d20fdff5834eedc6e93ea"
+          }
+        },
         {
           "client_id": "611486037764-vb5ado4a5tkrpe339vvaehkre0nskn6v.apps.googleusercontent.com",
           "client_type": 3

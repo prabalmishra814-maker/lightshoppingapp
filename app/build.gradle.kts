@@ -2,15 +2,15 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    // alias(libs.plugins.google.services) // Uncomment after adding google-services.json
+    alias(libs.plugins.google.services) // Uncomment after adding google-services.json
 }
 
 android {
-    namespace = "com.example.lightshop"
+    namespace = "com.amstudio.lightbasket"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.example.lightshop"
+        applicationId = "com.amstudio.lightbasket"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
