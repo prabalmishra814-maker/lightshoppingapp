@@ -11,6 +11,7 @@ public class SessionManager {
     private static final String KEY_USER_EMAIL = "user_email";
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_USER_PROFILE = "user_profile";
+    private static final String KEY_USER_PHONE = "user_phone";
     private static final String KEY_RECENTLY_VIEWED = "recently_viewed";
 
     private SharedPreferences pref;
@@ -95,6 +96,15 @@ public class SessionManager {
 
     public String getUserProfile() {
         return pref.getString(KEY_USER_PROFILE, "");
+    }
+
+    public String getUserPhone() {
+        return pref.getString(KEY_USER_PHONE, "");
+    }
+
+    public void setUserPhone(String phone) {
+        editor.putString(KEY_USER_PHONE, phone);
+        editor.apply();
     }
 
     public void logout() {

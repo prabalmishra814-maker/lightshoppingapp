@@ -10,8 +10,9 @@
         android:id="@+id/iv_logo"
         android:layout_width="120dp"
         android:layout_height="120dp"
-        android:src="@drawable/ic_launcher_foreground"
-        android:contentDescription="@string/app_name" />
+        android:src="@drawable/_1786381850350"
+        android:contentDescription="@string/app_name"
+        />
 
     <TextView
         android:layout_width="wrap_content"

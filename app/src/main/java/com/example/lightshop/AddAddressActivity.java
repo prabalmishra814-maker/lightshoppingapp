@@ -190,13 +190,13 @@ public class AddAddressActivity extends AppCompatActivity {
     private void validateAndSaveAddress() {
         String fullName = etFullName.getText() != null ? etFullName.getText().toString().trim() : "";
         String phoneInput = etPhone.getText() != null ? etPhone.getText().toString().trim() : "";
+        String city = etCity.getText() != null ? etCity.getText().toString().trim() : "";
         
         // Clean phone number for 'numeric' column in DB (digits only)
         String phoneDigits = phoneInput.replaceAll("[^0-9]", "");
         
         String pincode = etPincode.getText() != null ? etPincode.getText().toString().trim() : "";
         String state = spinnerState.getText().toString().trim();
-        String city = etCity.getText() != null ? etCity.getText().toString().trim() : "";
         String houseNo = etHouseNo.getText() != null ? etHouseNo.getText().toString().trim() : "";
         String roadName = etRoadName.getText() != null ? etRoadName.getText().toString().trim() : "";
 
@@ -229,11 +229,57 @@ public class AddAddressActivity extends AppCompatActivity {
             return;
         }
 
-        int selectedTypeId = rgAddressType.getCheckedRadioButtonId();
-        RadioButton selectedType = findViewById(selectedTypeId);
-        String addressType = selectedType.getText().toString();
+        // --- DELIVERY AVAILABILITY CHECK ---
+        checkDeliveryAvailability(city, isAvailable -> {
+            if (isAvailable) {
+                int selectedTypeId = rgAddressType.getCheckedRadioButtonId();
+                RadioButton selectedType = findViewById(selectedTypeId);
+                String addressType = selectedType.getText().toString();
+                saveAddressToSupabase(fullName, phoneDigits, pincode, state, city, houseNo, roadName, addressType);
+            } else {
+                Toast.makeText(this, "Sorry! Delivery is currently unavailable in " + city, Toast.LENGTH_LONG).show();
+                etCity.setError("Delivery unavailable here");
+            }
+        });
+    }
 
-        saveAddressToSupabase(fullName, phoneDigits, pincode, state, city, houseNo, roadName, addressType);
+    private void checkDeliveryAvailability(String city, com.example.lightshop.utils.UserUtils.AddressCheckCallback callback) {
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        java.util.Map<String, String> filters = new java.util.HashMap<>();
+        // Case-insensitive search (ilike) or exact match (eq)
+        // We use lowercase for better matching
+        filters.put("city_name", "ilike." + city.toLowerCase().trim());
+        filters.put("is_active", "eq.true");
+
+        btnSaveAddress.setEnabled(false);
+        btnSaveAddress.setText("Checking availability...");
+
+        SupabaseClient.getApiService().fetchDataWithFilters(
+                "serviceable_locations",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters
+        ).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                btnSaveAddress.setEnabled(true);
+                btnSaveAddress.setText("Save Address");
+                
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    callback.onResult(true); // City found, delivery available
+                } else {
+                    callback.onResult(false); // City not found
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                btnSaveAddress.setEnabled(true);
+                btnSaveAddress.setText("Save Address");
+                Toast.makeText(AddAddressActivity.this, "Network error checking delivery", Toast.LENGTH_SHORT).show();
+                callback.onResult(false);
+            }
+        });
     }
 
     private void saveAddressToSupabase(String fullName, String phone, String pincode, String state, String city, String houseNo, String roadName, String addressType) {
@@ -286,12 +332,13 @@ public class AddAddressActivity extends AppCompatActivity {
                 btnSaveAddress.setText("Save Address");
 
                 if (response.isSuccessful()) {
+                    sessionManager.setUserPhone(phone); // Save phone locally
                     Toast.makeText(AddAddressActivity.this, "Address Updated Successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     // Try lowercase 'users' if 'Users' returns 404
                     if (response.code() == 404) {
-                        retryWithLowercaseUsers(updateData, authHeader);
+                        retryWithLowercaseUsers(updateData, authHeader, phone);
                     } else {
                         Toast.makeText(AddAddressActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
                         try {
@@ -312,7 +359,7 @@ public class AddAddressActivity extends AppCompatActivity {
         });
     }
 
-    private void retryWithLowercaseUsers(Map<String, Object> updateData, String authHeader) {
+    private void retryWithLowercaseUsers(Map<String, Object> updateData, String authHeader, String phone) {
         SupabaseClient.getApiService().addData(
                 "users", // Lowercase retry
                 SupabaseClient.SUPABASE_ANON_KEY,
@@ -325,6 +372,7 @@ public class AddAddressActivity extends AppCompatActivity {
                 btnSaveAddress.setEnabled(true);
                 btnSaveAddress.setText("Save Address");
                 if (response.isSuccessful()) {
+                    new SessionManager(AddAddressActivity.this).setUserPhone(phone); // Save phone locally
                     Toast.makeText(AddAddressActivity.this, "Address Updated Successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
@@ -377,11 +425,12 @@ public class AddAddressActivity extends AppCompatActivity {
             if (address.containsKey("name")) etFullName.setText((String) address.get("name"));
             if (address.containsKey("number")) {
                 String fullPhone = (String) address.get("number");
+                String displayPhone = fullPhone;
                 if (fullPhone != null && fullPhone.startsWith("+91 ")) {
-                    etPhone.setText(fullPhone.substring(4));
-                } else {
-                    etPhone.setText(fullPhone);
+                    displayPhone = fullPhone.substring(4);
                 }
+                etPhone.setText(displayPhone);
+                new SessionManager(this).setUserPhone(displayPhone); // Sync to session
             }
             if (address.containsKey("pincode")) etPincode.setText((String) address.get("pincode"));
             if (address.containsKey("city")) etCity.setText((String) address.get("city"));

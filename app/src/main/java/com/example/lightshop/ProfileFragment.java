@@ -32,8 +32,19 @@ public class ProfileFragment extends Fragment {
         // Header
         TextView tvName = view.findViewById(R.id.tv_profile_name);
         TextView tvEmail = view.findViewById(R.id.tv_profile_email);
+        TextView tvPhone = view.findViewById(R.id.tv_profile_phone);
         tvName.setText(sessionManager.getUserName());
         tvEmail.setText(sessionManager.getUserEmail());
+        
+        String phone = sessionManager.getUserPhone();
+        if (phone != null && !phone.isEmpty()) {
+            tvPhone.setText("+91 " + phone);
+            tvPhone.setVisibility(View.VISIBLE);
+        } else {
+            tvPhone.setVisibility(View.GONE);
+        }
+
+        fetchUserProfile(sessionManager, tvPhone);
 
         // Quick Actions
         setupQuickAction(view.findViewById(R.id.item_orders), "Orders", R.drawable.ic_box, R.color.cat_electronics_bg, R.color.accent_blue);
@@ -98,6 +109,46 @@ public class ProfileFragment extends Fragment {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private void fetchUserProfile(SessionManager sessionManager, TextView tvPhone) {
+        String userId = sessionManager.getUserId();
+        if (userId == null || userId.isEmpty()) return;
+
+        String authHeader = "Bearer " + sessionManager.getToken();
+        java.util.Map<String, String> filters = new java.util.HashMap<>();
+        filters.put("uid", "eq." + userId);
+        filters.put("select", "address");
+
+        com.example.lightshop.api.SupabaseClient.getApiService().fetchDataWithFilters(
+                "Users",
+                com.example.lightshop.api.SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters
+        ).enqueue(new retrofit2.Callback<java.util.List<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull retrofit2.Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull retrofit2.Response<java.util.List<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    Object addressObj = response.body().get(0).get("address");
+                    if (addressObj instanceof java.util.Map) {
+                        java.util.Map<String, Object> address = (java.util.Map<String, Object>) addressObj;
+                        if (address.containsKey("number")) {
+                            String phone = (String) address.get("number");
+                            if (phone != null && !phone.isEmpty()) {
+                                sessionManager.setUserPhone(phone);
+                                tvPhone.setText("+91 " + phone);
+                                tvPhone.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull retrofit2.Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {
+                // Silent fail
+            }
+        });
     }
 
     private void setupQuickAction(View view, String label, int iconRes, int bgTintRes, int iconTintRes) {
