@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Lite Basket</string>
+    <string name="app_name">Lite Baskets</string>
     <string name="search_hint">Search for products, brands and more</string>
     <string name="deliver_to">Deliver to</string>
     <string name="change">Change</string>
