@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.amstudio.lightbasket.api.SessionManager;
+import com.bumptech.glide.Glide;
 
 public class ProfileFragment extends Fragment {
 
@@ -36,6 +37,17 @@ public class ProfileFragment extends Fragment {
         tvName.setText(sessionManager.getUserName());
         tvEmail.setText(sessionManager.getUserEmail());
         
+        ImageView ivProfile = view.findViewById(R.id.iv_profile_pic);
+        String profileUrl = sessionManager.getUserProfile();
+        if (profileUrl != null && !profileUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(profileUrl)
+                    .placeholder(R.drawable.ic_person_24)
+                    .error(R.drawable.ic_person_24)
+                    .circleCrop()
+                    .into(ivProfile);
+        }
+
         String phone = sessionManager.getUserPhone();
         if (phone != null && !phone.isEmpty()) {
             tvPhone.setText("+91 " + phone);
