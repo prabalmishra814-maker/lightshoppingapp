@@ -101,17 +101,7 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
                     }
                     adapter.notifyDataSetChanged();
                 } else {
-                    String errorMsg = "Error: " + response.code();
-                    try {
-                        if (response.errorBody() != null) {
-                            errorMsg += " - " + response.errorBody().string();
-                        }
-                    } catch (Exception ignored) {}
-                    
-                    if (response.code() == 404) {
-                        errorMsg = "Table not found (404). Check if 'wishlist' table exists.";
-                    }
-                    Toast.makeText(WishlistActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(WishlistActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
                 updateUI();
             }
@@ -123,7 +113,7 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
                     shimmer.setVisibility(View.GONE);
                 }
                 updateUI();
-                Toast.makeText(WishlistActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(WishlistActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -165,13 +155,13 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
                     updateUI();
                     Toast.makeText(WishlistActivity.this, "Removed from wishlist", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(WishlistActivity.this, "Failed to remove", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WishlistActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                Toast.makeText(WishlistActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(WishlistActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -189,7 +179,7 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
 
             @Override
             public void onFailure(String error) {
-                Toast.makeText(WishlistActivity.this, "Failed: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(WishlistActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -177,7 +177,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFailure(Call<List<com.amstudio.lightbasket.models.WishlistModel>> call, Throwable t) {
                 if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Wishlist Error: " + t.getMessage(), android.widget.Toast.LENGTH_SHORT).show();
+                    android.widget.Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", android.widget.Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -342,7 +342,7 @@ public class HomeFragment extends Fragment {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
                 }
-                Toast.makeText(getContext(), "Failed to load categories", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

@@ -155,7 +155,7 @@ public class AuthActivity extends AppCompatActivity {
                                     String idToken = googleIdTokenCredential.getIdToken();
                                     signInWithSupabaseGoogle(idToken);
                                 } catch (Exception e) {
-                                    Toast.makeText(AuthActivity.this, "Google ID Token parsing failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(AuthActivity.this, "Google login failed. Please try again.", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }
@@ -163,7 +163,7 @@ public class AuthActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
-                        Toast.makeText(AuthActivity.this, "Google Sign-In Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AuthActivity.this, "Google login failed. Please check your connection.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -197,14 +197,14 @@ public class AuthActivity extends AppCompatActivity {
                             syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                         } else {
                             String errorMsg = parseError(response);
-                            Toast.makeText(AuthActivity.this, "Supabase Google Login failed: " + errorMsg, Toast.LENGTH_LONG).show();
+                            Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Throwable t) {
                         btnGoogle.setEnabled(true);
-                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -295,14 +295,14 @@ public class AuthActivity extends AppCompatActivity {
                             syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                         } else {
                             String errorMsg = parseError(response);
-                            Toast.makeText(AuthActivity.this, "Login failed: " + errorMsg, Toast.LENGTH_LONG).show();
+                            Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Throwable t) {
                         setLoadingState(btnLogin, false, "Login");
-                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -356,9 +356,31 @@ public class AuthActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<AuthModels.AuthResponse> call, Response<AuthModels.AuthResponse> response) {
                         setLoadingState(btnRegister, false, "Register");
-                        if (response.isSuccessful()) {
-                            Toast.makeText(AuthActivity.this, "Registration successful! Please login.", Toast.LENGTH_LONG).show();
-                            showLogin();
+                        if (response.isSuccessful() && response.body() != null) {
+                            AuthModels.AuthResponse authResponse = response.body();
+                            
+                            // If Supabase returns a session (email confirmation disabled), log in immediately
+                            if (authResponse.accessToken != null) {
+                                String name = "User";
+                                String email = "";
+                                String userId = "";
+                                String profileUrl = "";
+                                if (authResponse.user != null) {
+                                    userId = authResponse.user.id;
+                                    email = authResponse.user.email;
+                                    if (authResponse.user.userMetadata != null) {
+                                        name = authResponse.user.userMetadata.fullName;
+                                        profileUrl = authResponse.user.userMetadata.avatarUrl;
+                                    }
+                                }
+                                sessionManager.saveSession(authResponse.accessToken, authResponse.refreshToken, userId, email, name, profileUrl);
+                                syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
+                                Toast.makeText(AuthActivity.this, "Welcome! Account created successfully.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                // If no token, maybe email confirmation is still on in Supabase, but we'll just show login
+                                Toast.makeText(AuthActivity.this, "Account created! Please login now.", Toast.LENGTH_LONG).show();
+                                showLogin();
+                            }
                         } else {
                             String errorMsg = parseError(response);
                             Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
@@ -368,7 +390,7 @@ public class AuthActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
                         setLoadingState(btnRegister, false, "Register");
-                        Toast.makeText(AuthActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -423,12 +445,40 @@ public class AuthActivity extends AppCompatActivity {
         tvFooterRegister.setMovementMethod(LinkMovementMethod.getInstance());
         tvFooterRegister.setHighlightColor(Color.TRANSPARENT);
 
-        // Terms & Conditions
+        // Terms & Conditions (Register)
         String termsText = "I agree to the Terms & Conditions and Privacy Policy";
         SpannableString ssTerms = new SpannableString(termsText);
+        
+        ClickableSpan termsSpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                // Handle Terms & Conditions click
+            }
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+            }
+        };
+
+        ssTerms.setSpan(termsSpan, 15, 33, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssTerms.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), 15, 33, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        ssTerms.setSpan(new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                // Handle Privacy Policy click
+            }
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+            }
+        }, 38, ssTerms.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssTerms.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), 38, ssTerms.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
         cbTerms.setText(ssTerms);
+        cbTerms.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void showLogin() {
@@ -464,23 +514,25 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private String parseError(Response<AuthModels.AuthResponse> response) {
+        if (response.code() == 429) {
+            return "Too many requests. Please wait a moment.";
+        }
         try {
             if (response.errorBody() != null) {
                 String errorJson = response.errorBody().string();
-                android.util.Log.e("SupabaseError", "Error Body: " + errorJson);
                 AuthModels.AuthResponse errorResponse = new com.google.gson.Gson().fromJson(errorJson, AuthModels.AuthResponse.class);
                 if (errorResponse != null) {
-                    if (errorResponse.errorDescription != null && !errorResponse.errorDescription.isEmpty()) 
-                        return errorResponse.errorDescription;
-                    if (errorResponse.error != null && !errorResponse.error.isEmpty()) 
-                        return errorResponse.error;
+                    String desc = errorResponse.errorDescription != null ? errorResponse.errorDescription : errorResponse.error;
+                    if (desc != null) {
+                        if (desc.contains("Invalid login credentials")) return "Wrong email or password.";
+                        if (desc.contains("User already registered")) return "This email is already registered.";
+                        if (desc.contains("rate limit")) return "Please wait a moment and try again.";
+                        return desc;
+                    }
                 }
-                return "Error " + response.code() + ": " + errorJson;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "Error " + response.code() + ". Please try again.";
+        } catch (Exception e) { e.printStackTrace(); }
+        return "Something went wrong. Please try again.";
     }
 }
 

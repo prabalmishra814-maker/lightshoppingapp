@@ -72,6 +72,10 @@ public class ProfileFragment extends Fragment {
         setupRow(view.findViewById(R.id.row_help_center), "Help Center", "Find answers to common questions", R.drawable.ic_help, R.color.cat_electronics_bg, R.color.accent_blue);
         setupRow(view.findViewById(R.id.row_contact_us), "Contact Us", "Get in touch with our support team", R.drawable.ic_headphones, R.color.cat_home_bg, R.color.status_processing);
 
+        // Social Section
+        setupRow(view.findViewById(R.id.row_facebook), "Facebook", "Follow us on Facebook", R.drawable.ic_facebook, R.color.cat_electronics_bg, R.color.accent_blue);
+        setupRow(view.findViewById(R.id.row_instagram), "Instagram", "Follow us on Instagram", R.drawable.ic_instagram, R.color.cat_women_bg, R.color.status_cancelled);
+
         // About Section
         setupRow(view.findViewById(R.id.row_about_app), "About App", "Know more about the app", R.drawable.ic_info, R.color.divider_color, R.color.text_subtitle);
         setupRow(view.findViewById(R.id.row_terms), "Terms & Conditions", "Read our terms and conditions", R.drawable.ic_description, R.color.cat_electronics_bg, R.color.accent_blue);
@@ -91,11 +95,21 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.item_payments).setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Edit Profile coming soon", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
         });
 
         view.findViewById(R.id.item_addresses).setOnClickListener(v -> {
             startActivity(new Intent(getContext(), AddAddressActivity.class));
+        });
+
+        view.findViewById(R.id.row_facebook).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.facebook.com/lightbasket"));
+            startActivity(intent);
+        });
+
+        view.findViewById(R.id.row_instagram).setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.instagram.com/lightbasket"));
+            startActivity(intent);
         });
 
         View.OnClickListener wishlistListener = v -> {

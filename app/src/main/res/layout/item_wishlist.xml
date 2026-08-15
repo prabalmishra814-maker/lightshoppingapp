@@ -39,7 +39,7 @@
                 android:backgroundTint="@color/white"
                 android:padding="8dp"
                 android:src="@drawable/ic_logout"
-                android:rotation="45"
+                android:rotation="0"
                 app:tint="@color/color_logout" />
         </RelativeLayout>
 

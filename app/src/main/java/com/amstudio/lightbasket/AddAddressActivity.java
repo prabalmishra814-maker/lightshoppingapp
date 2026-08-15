@@ -47,7 +47,7 @@ public class AddAddressActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 100;
-    private static final String LOCATIONIQ_API_KEY = "pk.d8803d14af06c71661f4c0952f74bd17";
+    private static final String LOCATIONIQ_API_KEY = BuildConfig.LOCATIONIQ_API_KEY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,14 +122,14 @@ public class AddAddressActivity extends AppCompatActivity {
                                 fetchAddressFromCoords(lastLoc.getLatitude(), lastLoc.getLongitude());
                             } else {
                                 resetLocationButton();
-                                Toast.makeText(this, "Could not determine location", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
                 })
                 .addOnFailureListener(e -> {
                     resetLocationButton();
-                    Toast.makeText(this, "Location Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -162,7 +162,7 @@ public class AddAddressActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<LocationIQResponse> call, @NonNull Throwable t) {
                 btnCurrentLocation.setText("Use Current Location");
                 btnCurrentLocation.setEnabled(true);
-                Toast.makeText(AddAddressActivity.this, "Failed to get address", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddAddressActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -276,7 +276,7 @@ public class AddAddressActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
                 btnSaveAddress.setEnabled(true);
                 btnSaveAddress.setText("Save Address");
-                Toast.makeText(AddAddressActivity.this, "Network error checking delivery", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddAddressActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 callback.onResult(false);
             }
         });
@@ -333,14 +333,14 @@ public class AddAddressActivity extends AppCompatActivity {
 
                 if (response.isSuccessful()) {
                     sessionManager.setUserPhone(phone); // Save phone locally
-                    Toast.makeText(AddAddressActivity.this, "Address Updated Successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddAddressActivity.this, "Address saved successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     // Try lowercase 'users' if 'Users' returns 404
                     if (response.code() == 404) {
                         retryWithLowercaseUsers(updateData, authHeader, phone);
                     } else {
-                        Toast.makeText(AddAddressActivity.this, "Error: " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AddAddressActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                         try {
                             if (response.errorBody() != null) {
                                 android.util.Log.e("SupabaseUpdate", "Error Body: " + response.errorBody().string());
@@ -354,7 +354,7 @@ public class AddAddressActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<java.util.List<Map<String, Object>>> call, @NonNull Throwable t) {
                 btnSaveAddress.setEnabled(true);
                 btnSaveAddress.setText("Save Address");
-                Toast.makeText(AddAddressActivity.this, "Network Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddAddressActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -373,10 +373,10 @@ public class AddAddressActivity extends AppCompatActivity {
                 btnSaveAddress.setText("Save Address");
                 if (response.isSuccessful()) {
                     new SessionManager(AddAddressActivity.this).setUserPhone(phone); // Save phone locally
-                    Toast.makeText(AddAddressActivity.this, "Address Updated Successfully!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(AddAddressActivity.this, "Address saved successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
-                    Toast.makeText(AddAddressActivity.this, "Error 404: Table not found. Please check table name in Supabase.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(AddAddressActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 

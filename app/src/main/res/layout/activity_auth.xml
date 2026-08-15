@@ -338,7 +338,8 @@
                     android:layout_marginTop="16dp"
                     android:text="I agree to the Terms &amp; Conditions and Privacy Policy"
                     android:textColor="@color/text_hint"
-                    android:buttonTint="@color/primary_blue"
+                    android:button="@drawable/checkbox_square_selector"
+                    android:paddingStart="8dp"
                     android:textSize="14sp" />
 
                 <com.google.android.material.button.MaterialButton

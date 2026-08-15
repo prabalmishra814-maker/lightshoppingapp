@@ -56,7 +56,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             sessionManager.addToRecentlyViewed(product);
             updateCartBadge();
         } else {
-            Toast.makeText(this, "Product not found", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -375,7 +375,7 @@ public class ProductDetailActivity extends AppCompatActivity {
 
     private void addToCartAndGoToCart() {
         if (product == null || product.getProductId() == null) {
-            Toast.makeText(this, "Error: Invalid product", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -405,14 +405,14 @@ public class ProductDetailActivity extends AppCompatActivity {
             public void onFailure(String error) {
                 binding.btnBuyNow.setEnabled(true);
                 binding.btnBuyNow.setText("Buy Now");
-                Toast.makeText(ProductDetailActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProductDetailActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void addToCart() {
         if (product == null || product.getProductId() == null) {
-            Toast.makeText(this, "Error: Invalid product", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -438,7 +438,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             public void onFailure(String error) {
                 binding.btnAddToCart.setEnabled(true);
                 updateCartUI();
-                Toast.makeText(ProductDetailActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProductDetailActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -511,7 +511,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                     Toast.makeText(ProductDetailActivity.this, "Removed from Cart", Toast.LENGTH_SHORT).show();
                 } else {
                     updateCartUI();
-                    Toast.makeText(ProductDetailActivity.this, "Failed to remove: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProductDetailActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -519,7 +519,7 @@ public class ProductDetailActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
                 binding.btnAddToCart.setEnabled(true);
                 updateCartUI();
-                Toast.makeText(ProductDetailActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProductDetailActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

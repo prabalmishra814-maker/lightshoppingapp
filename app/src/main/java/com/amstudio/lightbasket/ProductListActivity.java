@@ -119,7 +119,7 @@ public class ProductListActivity extends AppCompatActivity {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
                 }
-                Toast.makeText(ProductListActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProductListActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

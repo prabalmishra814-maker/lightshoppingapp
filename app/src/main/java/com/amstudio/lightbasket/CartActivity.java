@@ -129,19 +129,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     adapter.notifyDataSetChanged();
                     updatePriceDetails();
                 } else {
-                    String error = "Failed to load cart: " + response.code();
-                    try {
-                        if (response.errorBody() != null) {
-                            error += " - " + response.errorBody().string();
-                        }
-                    } catch (Exception ignored) {}
-                    Toast.makeText(CartActivity.this, error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -221,7 +215,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), oldQty);
                     adapter.notifyItemChanged(position);
                     updatePriceDetails();
-                    Toast.makeText(CartActivity.this, "Failed to update quantity", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -232,7 +226,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), oldQty);
                 adapter.notifyItemChanged(position);
                 updatePriceDetails();
-                Toast.makeText(CartActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -270,7 +264,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
             @Override
             public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Remove failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -307,13 +301,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     onRemoveItem(position);
                     Toast.makeText(CartActivity.this, "Moved to Wishlist", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(CartActivity.this, "Failed to move to wishlist", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -386,13 +380,13 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                     // 2. Clear Cart in DB
                     clearCartFromDb(userId, authHeader);
                 } else {
-                    Toast.makeText(CartActivity.this, "Failed to move items", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -420,7 +414,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
             @Override
             public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
-                Toast.makeText(CartActivity.this, "Cart clear failed", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

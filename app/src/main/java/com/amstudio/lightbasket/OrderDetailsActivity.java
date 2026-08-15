@@ -144,7 +144,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
     private void cancelOrderOnSupabase(String reason) {
         if (currentOrderId == null || currentOrderId.isEmpty()) {
-            Toast.makeText(this, "Order ID missing", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -177,7 +177,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 } else {
                     btnCancelOrder.setEnabled(true);
                     btnCancelOrder.setText("Cancel Order");
-                    Toast.makeText(OrderDetailsActivity.this, "Update Failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OrderDetailsActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -185,7 +185,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
             public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
                 btnCancelOrder.setEnabled(true);
                 btnCancelOrder.setText("Cancel Order");
-                Toast.makeText(OrderDetailsActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OrderDetailsActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

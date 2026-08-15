@@ -194,7 +194,7 @@ public class CheckoutActivity extends AppCompatActivity {
                 } else {
                     btnContinue.setEnabled(true);
                     btnContinue.setText("PLACE ORDER");
-                    Toast.makeText(CheckoutActivity.this, "Order Failed: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(CheckoutActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -202,7 +202,7 @@ public class CheckoutActivity extends AppCompatActivity {
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 btnContinue.setEnabled(true);
                 btnContinue.setText("PLACE ORDER");
-                Toast.makeText(CheckoutActivity.this, "Network Error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CheckoutActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

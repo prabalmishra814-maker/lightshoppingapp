@@ -181,7 +181,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 }
             }
             @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Toast.makeText(context, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -195,7 +197,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show();
             }
             @Override
-            public void onFailure(String error) {}
+            public void onFailure(String error) {
+                Toast.makeText(context, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -218,7 +222,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 }
             }
             @Override
-            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                Toast.makeText(context, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -238,7 +244,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                 }
             }
             @Override
-            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {}
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Toast.makeText(context, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

@@ -154,7 +154,7 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
     private void addToWishlist(ProductModel product) {
         String userId = sessionManager.getUserId();
         if (userId.isEmpty()) {
-            Toast.makeText(context, "Please login", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Please login first", Toast.LENGTH_SHORT).show();
             return;
         }
 

@@ -87,14 +87,14 @@ public class MyOrdersFragment extends Fragment implements OrdersAdapter.OnOrderC
                     filterOrders(filter);
 
                 } else {
-                    Toast.makeText(getContext(), "Failed to load orders", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
                 swipeRefresh.setRefreshing(false);
-                Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
     }

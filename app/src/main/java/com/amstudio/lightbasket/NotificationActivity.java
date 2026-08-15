@@ -95,7 +95,7 @@ public class NotificationActivity extends AppCompatActivity {
                         emptyState.setVisibility(View.GONE);
                     }
                 } else {
-                    Toast.makeText(NotificationActivity.this, "Failed to load notifications", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NotificationActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     emptyState.setVisibility(View.VISIBLE);
                 }
             }
@@ -103,7 +103,7 @@ public class NotificationActivity extends AppCompatActivity {
             @Override
             public void onFailure(@NonNull Call<List<NotificationModel>> call, @NonNull Throwable t) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(NotificationActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(NotificationActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                 emptyState.setVisibility(View.VISIBLE);
             }
         });
