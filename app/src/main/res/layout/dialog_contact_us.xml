@@ -57,6 +57,34 @@
                 app:tint="@color/primary" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_rounded_card"
+            android:backgroundTint="@color/light_grey_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tv_email_address"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="support@litebasket.com"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/btn_copy_email"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Copy Email"
+                android:src="@drawable/ic_content_copy"
+                app:tint="@color/primary" />
+        </LinearLayout>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_call_now"
             style="@style/Widget.Material3.Button"

@@ -26,6 +26,7 @@ public class ProfileFragment extends Fragment {
     private String facebookUrl = "https://www.facebook.com/lightbasket";
     private String instagramUrl = "https://www.instagram.com/lightbasket";
     private String contactNumber = "+91 9876543210";
+    private String contactEmail = "support@litebasket.com";
     private String aboutUrl = "";
     private String termsUrl = "";
     private String privacyUrl = "";
@@ -234,27 +235,48 @@ public class ProfileFragment extends Fragment {
         }
 
         TextView tvPhone = dialogView.findViewById(R.id.tv_phone_number);
+        TextView tvEmail = dialogView.findViewById(R.id.tv_email_address);
         ImageView btnCopy = dialogView.findViewById(R.id.btn_copy_number);
+        ImageView btnCopyEmail = dialogView.findViewById(R.id.btn_copy_email);
         MaterialButton btnCall = dialogView.findViewById(R.id.btn_call_now);
         MaterialButton btnClose = dialogView.findViewById(R.id.btn_close);
 
-        tvPhone.setText(contactNumber);
+        if (tvPhone != null) tvPhone.setText(contactNumber);
+        if (tvEmail != null) tvEmail.setText(contactEmail);
 
-        btnCopy.setOnClickListener(v -> {
-            if (getContext() == null) return;
-            ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText("Phone Number", contactNumber);
-            if (clipboard != null) {
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(getContext(), "Phone number copied to clipboard", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (btnCopy != null) {
+            btnCopy.setOnClickListener(v -> {
+                if (getContext() == null) return;
+                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Phone Number", contactNumber);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(getContext(), "Phone number copied to clipboard", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
-        btnCall.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse("tel:" + contactNumber.replace(" ", "")));
-            startActivity(intent);
-        });
+        if (btnCopyEmail != null) {
+            btnCopyEmail.setOnClickListener(v -> {
+                if (getContext() == null) return;
+                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Email Address", contactEmail);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(getContext(), "Email address copied to clipboard", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        if (btnCall != null) {
+            btnCall.setOnClickListener(v -> {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:" + contactNumber.replace(" ", "")));
+                    startActivity(intent);
+                } catch (Exception e) { e.printStackTrace(); }
+            });
+        }
 
         btnClose.setOnClickListener(v -> dialog.dismiss());
 
@@ -278,6 +300,7 @@ public class ProfileFragment extends Fragment {
                             if (config.containsKey("facebook_url")) facebookUrl = String.valueOf(config.get("facebook_url"));
                             if (config.containsKey("instagram_url")) instagramUrl = String.valueOf(config.get("instagram_url"));
                             if (config.containsKey("contact_number")) contactNumber = String.valueOf(config.get("contact_number"));
+                            if (config.containsKey("contact_email")) contactEmail = String.valueOf(config.get("contact_email"));
                             if (config.containsKey("about_url")) aboutUrl = String.valueOf(config.get("about_url"));
                             if (config.containsKey("terms_conditions_url")) termsUrl = String.valueOf(config.get("terms_conditions_url"));
                             if (config.containsKey("privacy_policy_url")) privacyUrl = String.valueOf(config.get("privacy_policy_url"));
