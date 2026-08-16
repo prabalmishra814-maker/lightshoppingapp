@@ -193,7 +193,7 @@ public class AuthActivity extends AppCompatActivity {
                                 }
                             }
                             sessionManager.saveSession(authResponse.accessToken, authResponse.refreshToken, userId, email, name, profileUrl);
-                            
+                            createWelcomeNotification(userId, authResponse.accessToken);
                             syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                         } else {
                             String errorMsg = parseError(response);
@@ -291,7 +291,7 @@ public class AuthActivity extends AppCompatActivity {
                                 }
                             }
                             sessionManager.saveSession(authResponse.accessToken, authResponse.refreshToken, userId, email, name, profileUrl);
-                            
+                            createWelcomeNotification(userId, authResponse.accessToken);
                             syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                         } else {
                             String errorMsg = parseError(response);
@@ -374,6 +374,7 @@ public class AuthActivity extends AppCompatActivity {
                                     }
                                 }
                                 sessionManager.saveSession(authResponse.accessToken, authResponse.refreshToken, userId, email, name, profileUrl);
+                                createWelcomeNotification(userId, authResponse.accessToken);
                                 syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                                 Toast.makeText(AuthActivity.this, "Welcome! Account created successfully.", Toast.LENGTH_SHORT).show();
                             } else {
@@ -511,6 +512,34 @@ public class AuthActivity extends AppCompatActivity {
         transition.addTransition(new Slide(gravity));
         transition.setDuration(250);
         TransitionManager.beginDelayedTransition(findViewById(android.R.id.content), transition);
+    }
+
+    private void createWelcomeNotification(String userId, String accessToken) {
+        java.util.Map<String, Object> notification = new java.util.HashMap<>();
+        notification.put("uid", userId);
+        notification.put("title", "Welcome to LightBasket!");
+        notification.put("message", "Thanks for joining us. Start exploring our latest collections!");
+        notification.put("type", "welcome");
+        notification.put("is_read", false);
+
+        String authHeader = "Bearer " + accessToken;
+        SupabaseClient.getApiService().addData(
+                "notifications",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                "return=representation",
+                notification
+        ).enqueue(new Callback<java.util.List<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Response<java.util.List<java.util.Map<String, Object>>> response) {
+                // Background task, no action needed on response
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {
+                // Silent fail
+            }
+        });
     }
 
     private String parseError(Response<AuthModels.AuthResponse> response) {

@@ -70,11 +70,13 @@ public class NotificationActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         
         Map<String, String> filters = new HashMap<>();
-        filters.put("uid", "eq." + userId);
+        // Fetch both user-specific notifications and general announcements (uid is null)
+        filters.put("or", "(uid.eq." + userId + ",uid.is.null)");
         filters.put("order", "created_at.desc");
 
         String authHeader = "Bearer " + sessionManager.getToken();
         
+        android.util.Log.d("Notifications", "Fetching for user: " + userId);
         SupabaseClient.getApiService().fetchNotifications(
                 SupabaseClient.SUPABASE_ANON_KEY,
                 authHeader,
@@ -88,6 +90,7 @@ public class NotificationActivity extends AppCompatActivity {
                     notificationList.clear();
                     notificationList.addAll(response.body());
                     adapter.notifyDataSetChanged();
+                    android.util.Log.d("Notifications", "Count: " + notificationList.size());
                     
                     if (notificationList.isEmpty()) {
                         emptyState.setVisibility(View.VISIBLE);
