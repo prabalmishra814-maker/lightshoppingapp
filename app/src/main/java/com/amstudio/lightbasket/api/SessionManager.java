@@ -107,6 +107,11 @@ public class SessionManager {
         editor.apply();
     }
 
+    public void setUserName(String name) {
+        editor.putString(KEY_USER_NAME, name);
+        editor.apply();
+    }
+
     public void logout() {
         editor.clear();
         editor.apply();

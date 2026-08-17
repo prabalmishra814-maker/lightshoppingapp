@@ -51,6 +51,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.tvMrp.setText(com.amstudio.lightbasket.utils.PriceUtils.formatPrice(mrp));
         holder.tvQuantity.setText(String.valueOf(cartItem.getQuantity()));
 
+        if (product.getSize() != null && !product.getSize().isEmpty() && !product.getSize().equals("0") && !product.getSize().equals("null")) {
+            holder.tvSelectedSize.setVisibility(View.VISIBLE);
+            holder.tvSelectedSize.setText("Size: " + product.getSize());
+        } else {
+            holder.tvSelectedSize.setVisibility(View.GONE);
+        }
+
         // Load image using Glide
         Glide.with(holder.itemView.getContext())
                 .load(product.getProductImage())
@@ -102,7 +109,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     public static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView ivProductImage, btnMinus, btnPlus;
-        TextView tvProductName, tvProductDesc, tvStockStatus, tvSellingPrice, tvMrp, tvDiscount, tvQuantity, btnRemove, btnMoveToWishlist;
+        TextView tvProductName, tvProductDesc, tvStockStatus, tvSellingPrice, tvMrp, tvDiscount, tvQuantity, btnRemove, btnMoveToWishlist, tvSelectedSize;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -118,6 +125,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             btnRemove = itemView.findViewById(R.id.btnRemove);
             btnMoveToWishlist = itemView.findViewById(R.id.btnMoveToWishlist);
+            tvSelectedSize = itemView.findViewById(R.id.tvSelectedSize);
         }
     }
 }

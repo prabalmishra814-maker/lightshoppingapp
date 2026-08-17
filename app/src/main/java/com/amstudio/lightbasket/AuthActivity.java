@@ -52,9 +52,12 @@ public class AuthActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvSubtitle;
     private LinearLayout loginContainer, registerContainer;
-    private TextView tvFooterLogin, tvFooterRegister;
+    private TextView tvFooterLogin, tvFooterRegister, tvLoginTerms;
     private CheckBox cbTerms;
     private View btnLogin, btnRegister, btnGoogle;
+
+    private String termsUrl = "";
+    private String privacyUrl = "";
 
     private static final String GOOGLE_WEB_CLIENT_ID = "611486037764-vb5ado4a5tkrpe339vvaehkre0nskn6v.apps.googleusercontent.com";
 
@@ -86,8 +89,30 @@ public class AuthActivity extends AppCompatActivity {
         });
 
         initViews();
+        fetchAppConfig();
         setupSpannables();
         setupBackNavigation();
+    }
+
+    private void fetchAppConfig() {
+        SupabaseClient.getApiService().fetchData(
+                "app_config",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                "Bearer " + SupabaseClient.SUPABASE_ANON_KEY,
+                "*"
+        ).enqueue(new Callback<java.util.List<java.util.Map<String, Object>>>() {
+            @Override
+            public void onResponse(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Response<java.util.List<java.util.Map<String, Object>>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    java.util.Map<String, Object> config = response.body().get(0);
+                    if (config.containsKey("terms_conditions_url")) termsUrl = String.valueOf(config.get("terms_conditions_url"));
+                    if (config.containsKey("privacy_policy_url")) privacyUrl = String.valueOf(config.get("privacy_policy_url"));
+                    setupSpannables(); // Re-setup to ensure links are ready (optional but safe)
+                }
+            }
+            @Override
+            public void onFailure(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {}
+        });
     }
 
     private void initViews() {
@@ -97,6 +122,7 @@ public class AuthActivity extends AppCompatActivity {
         registerContainer = findViewById(R.id.registerContainer);
         tvFooterLogin = findViewById(R.id.tv_footer_login);
         tvFooterRegister = findViewById(R.id.tv_footer_register);
+        tvLoginTerms = findViewById(R.id.tv_login_terms);
         cbTerms = findViewById(R.id.cb_terms);
         btnLogin = findViewById(R.id.btn_login);
         btnRegister = findViewById(R.id.btn_register);
@@ -404,82 +430,79 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void setupSpannables() {
-        // Footer Login (Don't have an account? Register)
-        String footerLoginText = "Don't have an account? Register";
-        SpannableString ssLogin = new SpannableString(footerLoginText);
-        ClickableSpan csRegister = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                showRegister();
-            }
-            @Override
-            public void updateDrawState(@NonNull TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setUnderlineText(false);
-                ds.setFakeBoldText(true);
-            }
-        };
-        ssLogin.setSpan(csRegister, 23, 31, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ssLogin.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), 23, 31, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        tvFooterLogin.setText(ssLogin);
-        tvFooterLogin.setMovementMethod(LinkMovementMethod.getInstance());
-        tvFooterLogin.setHighlightColor(Color.TRANSPARENT);
-
-        // Footer Register (Already have an account? Login)
-        String footerRegisterText = "Already have an account? Login";
-        SpannableString ssRegister = new SpannableString(footerRegisterText);
-        ClickableSpan csLogin = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                showLogin();
-            }
-            @Override
-            public void updateDrawState(@NonNull TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setUnderlineText(false);
-                ds.setFakeBoldText(true);
-            }
-        };
-        ssRegister.setSpan(csLogin, 25, 30, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ssRegister.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), 25, 30, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        tvFooterRegister.setText(ssRegister);
-        tvFooterRegister.setMovementMethod(LinkMovementMethod.getInstance());
-        tvFooterRegister.setHighlightColor(Color.TRANSPARENT);
-
-        // Terms & Conditions (Register)
-        String termsText = "I agree to the Terms & Conditions and Privacy Policy";
-        SpannableString ssTerms = new SpannableString(termsText);
+        // Footer Login
+        setupClickableFooter(tvFooterLogin, "Don't have an account? Register", "Register", this::showRegister);
         
-        ClickableSpan termsSpan = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                // Handle Terms & Conditions click
-            }
-            @Override
-            public void updateDrawState(@NonNull TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setUnderlineText(false);
-            }
-        };
+        // Footer Register
+        setupClickableFooter(tvFooterRegister, "Already have an account? Login", "Login", this::showLogin);
 
-        ssTerms.setSpan(termsSpan, 15, 33, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ssTerms.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), 15, 33, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
-        ssTerms.setSpan(new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                // Handle Privacy Policy click
-            }
-            @Override
-            public void updateDrawState(@NonNull TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setUnderlineText(false);
-            }
-        }, 38, ssTerms.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        ssTerms.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), 38, ssTerms.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        
-        cbTerms.setText(ssTerms);
+        // Login Page Terms Notice
+        String loginTermsText = "By logging in, you agree to our Terms & Conditions and Privacy Policy";
+        SpannableString ssLoginTerms = new SpannableString(loginTermsText);
+        setLinkSpan(ssLoginTerms, "Terms & Conditions", termsUrl);
+        setLinkSpan(ssLoginTerms, "Privacy Policy", privacyUrl);
+        tvLoginTerms.setText(ssLoginTerms);
+        tvLoginTerms.setMovementMethod(LinkMovementMethod.getInstance());
+        tvLoginTerms.setHighlightColor(Color.TRANSPARENT);
+
+        // Register Page Checkbox Terms
+        String regTermsText = "I agree to the Terms & Conditions and Privacy Policy";
+        SpannableString ssRegTerms = new SpannableString(regTermsText);
+        setLinkSpan(ssRegTerms, "Terms & Conditions", termsUrl);
+        setLinkSpan(ssRegTerms, "Privacy Policy", privacyUrl);
+        cbTerms.setText(ssRegTerms);
         cbTerms.setMovementMethod(LinkMovementMethod.getInstance());
+    }
+
+    private void setupClickableFooter(TextView textView, String fullText, String clickablePart, Runnable action) {
+        SpannableString ss = new SpannableString(fullText);
+        int start = fullText.indexOf(clickablePart);
+        int end = start + clickablePart.length();
+        
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                action.run();
+            }
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+                ds.setFakeBoldText(true);
+            }
+        };
+        
+        ss.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        ss.setSpan(new ForegroundColorSpan(getColor(R.color.primary)), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        textView.setText(ss);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        textView.setHighlightColor(Color.TRANSPARENT);
+    }
+
+    private void setLinkSpan(SpannableString ss, String linkText, String url) {
+        int start = ss.toString().indexOf(linkText);
+        if (start == -1) return;
+        int end = start + linkText.length();
+
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                if (url != null && !url.isEmpty()) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(url));
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(AuthActivity.this, "Link not available", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void updateDrawState(@NonNull TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+                ds.setColor(getColor(R.color.primary));
+                ds.setFakeBoldText(true);
+            }
+        };
+        ss.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 
     private void showLogin() {

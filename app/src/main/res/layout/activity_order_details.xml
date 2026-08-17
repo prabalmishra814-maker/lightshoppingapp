@@ -103,6 +103,31 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:background="#FFF7ED"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_bolt"
+                            app:tint="#F59E0B" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Guaranteed delivery within 24 hours"
+                            android:textColor="#F59E0B"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
                     <!-- Improved Vertical Stepper -->
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -458,6 +483,22 @@
                     </RelativeLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Replace Button Section -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnReplaceProduct"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="Replace Product"
+                android:textAllCaps="false"
+                android:textColor="@color/accent_blue"
+                android:visibility="gone"
+                app:icon="@drawable/ic_replacement"
+                app:iconTint="@color/accent_blue"
+                app:cornerRadius="12dp" />
 
             <!-- Cancel Button Section -->
             <com.google.android.material.button.MaterialButton

@@ -32,5 +32,9 @@ public class PriceUtils {
     public static String formatPrice(double amount) {
         return "₹" + String.format(Locale.getDefault(), "%,.0f", amount);
     }
+
+    public static float dpToPx(android.content.Context context, float dp) {
+        return dp * context.getResources().getDisplayMetrics().density;
+    }
 }
 

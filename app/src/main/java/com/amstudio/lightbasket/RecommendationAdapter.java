@@ -44,8 +44,9 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, price, mrp, discount;
+        TextView name, price, mrp, discount, rating;
         ImageView image, wishlist;
+        View ratingContainer;
 
         public ViewHolder(View view) {
             super(view);
@@ -56,6 +57,8 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
             
             image = view.findViewById(R.id.iv_product);
             wishlist = view.findViewById(R.id.iv_wishlist);
+            rating = view.findViewById(R.id.tv_rating);
+            ratingContainer = view.findViewById(R.id.rating_container);
         }
     }
 
@@ -70,6 +73,14 @@ public class RecommendationAdapter extends RecyclerView.Adapter<RecommendationAd
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ProductModel item = items.get(position);
         holder.name.setText(item.getProductName());
+
+        // Bind Rating
+        if (item.getRating() != null && !item.getRating().isEmpty() && !item.getRating().equals("0")) {
+            holder.rating.setText(item.getRating());
+            holder.ratingContainer.setVisibility(View.VISIBLE);
+        } else {
+            holder.ratingContainer.setVisibility(View.GONE);
+        }
 
         String sellingPriceStr = item.getSellingPrice() != null ? item.getSellingPrice() : item.getPrice();
         String mrpStr = item.getMrp() != null ? item.getMrp() : item.getMainPrice();

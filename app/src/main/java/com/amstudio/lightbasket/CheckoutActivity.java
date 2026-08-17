@@ -161,6 +161,7 @@ public class CheckoutActivity extends AppCompatActivity {
             itemMap.put("quantity", item.getQuantity());
             itemMap.put("item_total", price * item.getQuantity());
             itemMap.put("product_image", item.getProduct().getProductImage());
+            itemMap.put("product_size", item.getProduct().getSize());
             itemMap.put("item_status", "Pending"); 
             itemsList.add(itemMap);
         }
@@ -189,8 +190,8 @@ public class CheckoutActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful()) {
-                    // Step 2: Clear the Cart
-                    clearCart(userId, authHeader, orderNumber);
+                    // Step 2: Decrease Stock
+                    decreaseStock(manager.getCartItems(), userId, authHeader, orderNumber);
                 } else {
                     btnContinue.setEnabled(true);
                     btnContinue.setText("PLACE ORDER");
@@ -205,6 +206,97 @@ public class CheckoutActivity extends AppCompatActivity {
                 Toast.makeText(CheckoutActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void decreaseStock(List<CartItem> items, String userId, String authHeader, String orderNumber) {
+        if (items == null || items.isEmpty()) {
+            clearCart(userId, authHeader, orderNumber);
+            return;
+        }
+
+        final int[] updatedCount = {0};
+        for (CartItem item : items) {
+            String productId = item.getProduct().getProductId();
+            int quantityOrdered = item.getQuantity();
+
+            // First fetch current stock to ensure we have the latest value
+            Map<String, String> filters = new HashMap<>();
+            filters.put("PRODUCT_ID", "eq." + productId);
+            filters.put("select", "product_stock");
+
+            SupabaseClient.getApiService().fetchDataWithFilters(
+                    "Product",
+                    SupabaseClient.SUPABASE_ANON_KEY,
+                    authHeader,
+                    filters
+            ).enqueue(new Callback<List<Map<String, Object>>>() {
+                @Override
+                public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                    if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                        Object stockObj = response.body().get(0).get("product_stock");
+                        int currentStock = 0;
+                        try {
+                            currentStock = Integer.parseInt(String.valueOf(stockObj));
+                        } catch (Exception ignored) {}
+
+                        int newStock = Math.max(0, currentStock - quantityOrdered);
+
+                        // Update the stock
+                        Map<String, Object> updateData = new HashMap<>();
+                        updateData.put("product_stock", String.valueOf(newStock));
+
+                        Map<String, String> updateFilters = new HashMap<>();
+                        updateFilters.put("PRODUCT_ID", "eq." + productId);
+
+                        SupabaseClient.getApiService().updateDataByColumn(
+                                "Product",
+                                SupabaseClient.SUPABASE_ANON_KEY,
+                                authHeader,
+                                updateFilters,
+                                updateData
+                        ).enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                synchronized (updatedCount) {
+                                    updatedCount[0]++;
+                                    if (updatedCount[0] == items.size()) {
+                                        clearCart(userId, authHeader, orderNumber);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                synchronized (updatedCount) {
+                                    updatedCount[0]++;
+                                    if (updatedCount[0] == items.size()) {
+                                        clearCart(userId, authHeader, orderNumber);
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        // If fetch fails, still count as processed
+                        synchronized (updatedCount) {
+                            updatedCount[0]++;
+                            if (updatedCount[0] == items.size()) {
+                                clearCart(userId, authHeader, orderNumber);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
+                    synchronized (updatedCount) {
+                        updatedCount[0]++;
+                        if (updatedCount[0] == items.size()) {
+                            clearCart(userId, authHeader, orderNumber);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     private void clearCart(String userId, String authHeader, String orderNumber) {

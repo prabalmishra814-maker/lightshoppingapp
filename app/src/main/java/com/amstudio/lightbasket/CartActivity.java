@@ -100,6 +100,8 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                             
                             String mrp = getStringFromMap(map, "product_mrp");
                             p.setMrp(mrp != null && !mrp.isEmpty() ? mrp : sellingPrice);
+                            
+                            p.setSize(getStringFromMap(map, "product_size"));
 
                             int qty = 1;
                             Object qtyObj = map.get("quantity");
@@ -186,7 +188,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
 
         // Optimistic Update
         item.setQuantity(newQty);
-        CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), newQty);
+        CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), item.getProduct().getSize(), newQty);
         adapter.notifyItemChanged(position);
         updatePriceDetails();
 
@@ -199,6 +201,9 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         java.util.Map<String, String> filters = new java.util.HashMap<>();
         filters.put("user_id", "eq." + userId);
         filters.put("product_id", "eq." + item.getProduct().getProductId());
+        if (item.getProduct().getSize() != null && !item.getProduct().getSize().isEmpty() && !item.getProduct().getSize().equals("0")) {
+            filters.put("product_size", "eq." + item.getProduct().getSize());
+        }
 
         SupabaseClient.getApiService().updateDataByColumn(
                 "cart",
@@ -212,7 +217,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
                 if (!response.isSuccessful()) {
                     // Rollback
                     item.setQuantity(oldQty);
-                    CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), oldQty);
+                    CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), item.getProduct().getSize(), oldQty);
                     adapter.notifyItemChanged(position);
                     updatePriceDetails();
                     Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
@@ -223,7 +228,7 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
             public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
                 // Rollback
                 item.setQuantity(oldQty);
-                CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), oldQty);
+                CartManager.getInstance().updateQuantityByProductId(item.getProduct().getProductId(), item.getProduct().getSize(), oldQty);
                 adapter.notifyItemChanged(position);
                 updatePriceDetails();
                 Toast.makeText(CartActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
@@ -242,6 +247,9 @@ public class CartActivity extends AppCompatActivity implements CartAdapter.OnCar
         java.util.Map<String, String> filters = new java.util.HashMap<>();
         filters.put("user_id", "eq." + userId);
         filters.put("product_id", "eq." + item.getProduct().getProductId());
+        if (item.getProduct().getSize() != null && !item.getProduct().getSize().isEmpty() && !item.getProduct().getSize().equals("0")) {
+            filters.put("product_size", "eq." + item.getProduct().getSize());
+        }
 
         SupabaseClient.getApiService().deleteDataByFilters(
                 "cart",

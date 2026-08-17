@@ -171,7 +171,7 @@ public class WishlistActivity extends AppCompatActivity implements WishlistAdapt
         if (position < 0 || position >= wishlistList.size()) return;
         ProductModel product = wishlistList.get(position);
 
-        CartHelper.addToCart(this, product, new CartHelper.CartCallback() {
+        CartHelper.addToCart(this, product, 1, null, null, null, new CartHelper.CartCallback() {
             @Override
             public void onSuccess() {
                 Toast.makeText(WishlistActivity.this, "Added to cart", Toast.LENGTH_SHORT).show();

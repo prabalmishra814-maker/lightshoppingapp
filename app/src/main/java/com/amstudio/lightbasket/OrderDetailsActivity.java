@@ -17,8 +17,12 @@ import com.bumptech.glide.Glide;
 import com.amstudio.lightbasket.utils.StatusBarUtils;
 import com.google.android.material.button.MaterialButton;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class OrderDetailsActivity extends AppCompatActivity {
 
@@ -28,7 +32,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private View linePlaced, lineConfirmed, lineShipped;
     private TextView labelConfirmed, labelShipped, labelDelivered;
     private TextView subConfirmed, subShipped, subDelivered;
-    private MaterialButton btnViewOnMap, btnCancelOrder;
+    private MaterialButton btnViewOnMap, btnCancelOrder, btnReplaceProduct;
     private String currentOrderId;
 
     @Override
@@ -58,6 +62,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         ivProduct = findViewById(R.id.ivProduct);
         btnViewOnMap = findViewById(R.id.btnViewOnMap);
         btnCancelOrder = findViewById(R.id.btnCancelOrder);
+        btnReplaceProduct = findViewById(R.id.btnReplaceProduct);
 
         dotConfirmed = findViewById(R.id.dot_confirmed);
         dotShipped = findViewById(R.id.dot_shipped);
@@ -88,7 +93,13 @@ public class OrderDetailsActivity extends AppCompatActivity {
         
         String price = intent.getStringExtra("price");
         int qty = intent.getIntExtra("quantity", 1);
-        tvPriceQty.setText("₹" + price + " | Qty: " + qty);
+        String size = intent.getStringExtra("product_size");
+        
+        String priceQtyText = "₹" + price + " | Qty: " + qty;
+        if (size != null && !size.isEmpty() && !size.equalsIgnoreCase("null") && !size.equals("0")) {
+            priceQtyText += " | Size: " + size;
+        }
+        tvPriceQty.setText(priceQtyText);
 
         tvPaymentMethod.setText(intent.getStringExtra("payment_method"));
         tvTotalAmount.setText("₹" + intent.getStringExtra("final_amount"));
@@ -105,6 +116,14 @@ public class OrderDetailsActivity extends AppCompatActivity {
             btnCancelOrder.setOnClickListener(v -> showCancelReasonDialog());
         } else {
             btnCancelOrder.setVisibility(View.GONE);
+        }
+
+        // Replacement Logic: Allow only if Delivered
+        if (status != null && status.equalsIgnoreCase("Delivered")) {
+            btnReplaceProduct.setVisibility(View.VISIBLE);
+            btnReplaceProduct.setOnClickListener(v -> showReplacementReasonDialog());
+        } else {
+            btnReplaceProduct.setVisibility(View.GONE);
         }
 
         double lat = intent.getDoubleExtra("latitude", 0.0);
@@ -157,7 +176,76 @@ public class OrderDetailsActivity extends AppCompatActivity {
         updateData.put("order_status", "Cancelled");
         updateData.put("cancel_reason", reason);
 
-        // Filters for the specific order row
+        Map<String, String> filters = new HashMap<>();
+        filters.put("id", "eq." + currentOrderId);
+
+        com.amstudio.lightbasket.api.SupabaseClient.getApiService().updateDataByColumn(
+                "orders",
+                com.amstudio.lightbasket.api.SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters,
+                updateData
+        ).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(OrderDetailsActivity.this, "Order Cancelled Successfully", Toast.LENGTH_SHORT).show();
+                    updateStepper("Cancelled");
+                    btnCancelOrder.setVisibility(View.GONE);
+                } else {
+                    btnCancelOrder.setEnabled(true);
+                    btnCancelOrder.setText("Cancel Order");
+                    Toast.makeText(OrderDetailsActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                btnCancelOrder.setEnabled(true);
+                btnCancelOrder.setText("Cancel Order");
+                Toast.makeText(OrderDetailsActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showReplacementReasonDialog() {
+        String[] reasons = {"Defective/Damaged product", "Wrong item received", "Size/Fit issue", "Quality not as expected", "Other"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Select Reason for Replacement")
+                .setItems(reasons, (dialog, which) -> {
+                    String reason = reasons[which];
+                    confirmReplacement(reason);
+                })
+                .setNegativeButton("Back", null)
+                .show();
+    }
+
+    private void confirmReplacement(String reason) {
+        new AlertDialog.Builder(this)
+                .setTitle("Request Replacement?")
+                .setMessage("Are you sure you want to request a replacement for reason: " + reason + "?")
+                .setPositiveButton("Yes, Request", (dialog, which) -> submitReplacementToSupabase(reason))
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void submitReplacementToSupabase(String reason) {
+        if (currentOrderId == null || currentOrderId.isEmpty()) {
+            Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        btnReplaceProduct.setEnabled(false);
+        btnReplaceProduct.setText("PROCESSING...");
+
+        com.amstudio.lightbasket.api.SessionManager sessionManager = new com.amstudio.lightbasket.api.SessionManager(this);
+        String authHeader = "Bearer " + sessionManager.getToken();
+
+        Map<String, Object> updateData = new HashMap<>();
+        updateData.put("order_status", "Replacement Request");
+        updateData.put("replacement_reason", reason); // Optional: adding reason to main table
+
         Map<String, String> filters = new HashMap<>();
         filters.put("id", "eq." + currentOrderId);
 
@@ -171,21 +259,22 @@ public class OrderDetailsActivity extends AppCompatActivity {
             @Override
             public void onResponse(retrofit2.Call<ResponseBody> call, retrofit2.Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(OrderDetailsActivity.this, "Order Cancelled Successfully", Toast.LENGTH_SHORT).show();
-                    updateStepper("Cancelled");
-                    btnCancelOrder.setVisibility(View.GONE);
+                    Toast.makeText(OrderDetailsActivity.this, "Replacement Request Submitted", Toast.LENGTH_SHORT).show();
+                    btnReplaceProduct.setVisibility(View.GONE);
+                    // Update UI stepper or label if needed
+                    labelDelivered.setText("Replacement Requested");
                 } else {
-                    btnCancelOrder.setEnabled(true);
-                    btnCancelOrder.setText("Cancel Order");
-                    Toast.makeText(OrderDetailsActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+                    btnReplaceProduct.setEnabled(true);
+                    btnReplaceProduct.setText("Replace Product");
+                    Toast.makeText(OrderDetailsActivity.this, "Failed to submit request", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<ResponseBody> call, Throwable t) {
-                btnCancelOrder.setEnabled(true);
-                btnCancelOrder.setText("Cancel Order");
-                Toast.makeText(OrderDetailsActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+                btnReplaceProduct.setEnabled(true);
+                btnReplaceProduct.setText("Replace Product");
+                Toast.makeText(OrderDetailsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -197,7 +286,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
         int activeColor = ContextCompat.getColor(this, R.color.savings_green);
         ColorStateList activeTint = ColorStateList.valueOf(activeColor);
 
-        // ALWAYS Reset colors first (Crucial for correct UI)
         resetStepper();
 
         if (status.equalsIgnoreCase("Confirmed") || status.equalsIgnoreCase("Ready to Ship") || 
@@ -245,4 +333,3 @@ public class OrderDetailsActivity extends AppCompatActivity {
         if (subLabel != null) subLabel.setTextColor(ContextCompat.getColor(this, R.color.text_subtitle));
     }
 }
-

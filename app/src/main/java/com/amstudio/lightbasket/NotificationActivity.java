@@ -20,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NotificationActivity extends AppCompatActivity {
+public class NotificationActivity extends AppCompatActivity implements NotificationAdapter.OnNotificationListener {
 
     private RecyclerView rvNotifications;
     private NotificationAdapter adapter;
@@ -53,8 +53,47 @@ public class NotificationActivity extends AppCompatActivity {
         emptyState = findViewById(R.id.empty_state);
 
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new NotificationAdapter(notificationList);
+        adapter = new NotificationAdapter(notificationList, this);
         rvNotifications.setAdapter(adapter);
+    }
+
+    @Override
+    public void onDelete(int position) {
+        if (position < 0 || position >= notificationList.size()) return;
+        
+        NotificationModel notification = notificationList.get(position);
+        SessionManager sessionManager = new SessionManager(this);
+        String authHeader = "Bearer " + sessionManager.getToken();
+        
+        Map<String, String> filters = new HashMap<>();
+        filters.put("id", "eq." + notification.getId());
+
+        SupabaseClient.getApiService().deleteDataByFilters(
+                "notifications",
+                SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters
+        ).enqueue(new Callback<okhttp3.ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<okhttp3.ResponseBody> call, @NonNull Response<okhttp3.ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    notificationList.remove(position);
+                    adapter.notifyItemRemoved(position);
+                    adapter.notifyItemRangeChanged(position, notificationList.size());
+                    
+                    if (notificationList.isEmpty()) {
+                        emptyState.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    Toast.makeText(NotificationActivity.this, "Failed to delete notification", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<okhttp3.ResponseBody> call, @NonNull Throwable t) {
+                Toast.makeText(NotificationActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void fetchNotifications() {

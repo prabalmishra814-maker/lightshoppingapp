@@ -21,10 +21,10 @@ public class CartHelper {
     }
 
     public static void addToCart(Context context, ProductModel product, CartCallback callback) {
-        addToCart(context, product, 1, callback);
+        addToCart(context, product, 1, null, null, null, callback);
     }
 
-    public static void addToCart(Context context, ProductModel product, int quantity, CartCallback callback) {
+    public static void addToCart(Context context, ProductModel product, int quantity, String selectedSize, String dynamicPrice, String dynamicMrp, CartCallback callback) {
         SessionManager sessionManager = new SessionManager(context);
         String userId = sessionManager.getUserId();
 
@@ -34,8 +34,12 @@ public class CartHelper {
             return;
         }
 
-        String rawPrice = product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0");
-        String rawMrp = product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : rawPrice);
+        // Use dynamic price if provided, else fallback to product price
+        String rawPrice = (dynamicPrice != null && !dynamicPrice.isEmpty()) ? dynamicPrice : 
+                         (product.getSellingPrice() != null ? product.getSellingPrice() : (product.getPrice() != null ? product.getPrice() : "0"));
+        
+        String rawMrp = (dynamicMrp != null && !dynamicMrp.isEmpty()) ? dynamicMrp : 
+                        (product.getMrp() != null ? product.getMrp() : (product.getMainPrice() != null ? product.getMainPrice() : rawPrice));
         
         double priceValue = PriceUtils.parsePrice(rawPrice);
         double mrpValue = PriceUtils.parsePrice(rawMrp);
@@ -51,10 +55,17 @@ public class CartHelper {
         cartData.put("user_id", userId);
         cartData.put("product_id", pid);
         cartData.put("product_name", product.getProductName() != null ? product.getProductName() : "Unknown Product");
-        cartData.put("product_price", String.valueOf(priceValue));
-        cartData.put("product_mrp", String.valueOf(mrpValue)); 
+        
+        // Simple: Just send the price for the selected size
+        cartData.put("product_price", String.valueOf((int)priceValue));
+        cartData.put("product_mrp", String.valueOf((int)mrpValue)); 
+        
         cartData.put("product_image", product.getProductImage() != null ? product.getProductImage() : "");
         cartData.put("quantity", quantity);
+        
+        if (selectedSize != null && !selectedSize.isEmpty()) {
+            cartData.put("product_size", selectedSize);
+        }
 
         android.util.Log.d("CartHelper", "Sending Cart Data: " + cartData.toString());
 
@@ -70,6 +81,13 @@ public class CartHelper {
             @Override
             public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
                 if (response.isSuccessful()) {
+                    // Update ProductModel with selected size and price before adding to local manager
+                    if (selectedSize != null && !selectedSize.isEmpty()) {
+                        product.setSize(selectedSize);
+                    }
+                    if (dynamicPrice != null) product.setSellingPrice(dynamicPrice);
+                    if (dynamicMrp != null) product.setMrp(dynamicMrp);
+                    
                     CartManager.getInstance().addItem(product, quantity);
                     if (callback != null) callback.onSuccess();
                 } else {

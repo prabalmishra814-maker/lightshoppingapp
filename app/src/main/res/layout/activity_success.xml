@@ -83,10 +83,10 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="@drawable/bg_circle_pastel"
-                android:backgroundTint="#EEF2FF"
-                android:padding="8dp"
-                android:src="@drawable/ic_car"
-                app:tint="@color/primary_blue" />
+                android:backgroundTint="#FFF7ED"
+                android:padding="10dp"
+                android:src="@drawable/ic_bolt"
+                app:tint="#F59E0B" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -98,18 +98,19 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/estimated_delivery"
-                    android:textColor="@color/text_subtitle"
-                    android:textSize="12sp" />
+                    android:text="Guaranteed Fast Delivery"
+                    android:textColor="#F59E0B"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tv_delivery_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="Mon, 21 Aug - Wed, 23 Aug"
+                    android:text="Within 24 Hours"
                     android:textColor="@color/text_primary"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>

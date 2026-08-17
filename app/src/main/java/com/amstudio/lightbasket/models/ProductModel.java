@@ -1,7 +1,10 @@
 package com.amstudio.lightbasket.models;
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 import java.io.Serializable;
+import java.util.List;
 
 public class  ProductModel implements Serializable {
     @SerializedName(value = "product_id", alternate = {"id", "PRODUCT_ID"})
@@ -66,6 +69,12 @@ public class  ProductModel implements Serializable {
 
     @SerializedName("product_sold_count")
     private String soldCount;
+
+    @SerializedName("manufacture_date")
+    private String manufactureDate;
+
+    @SerializedName("expiry_date")
+    private String expiryDate;
 
     public ProductModel() {
     }
@@ -133,5 +142,35 @@ public class  ProductModel implements Serializable {
 
     public String getSoldCount() { return soldCount; }
     public void setSoldCount(String soldCount) { this.soldCount = soldCount; }
+
+    public String getManufactureDate() { return manufactureDate; }
+    public void setManufactureDate(String manufactureDate) { this.manufactureDate = manufactureDate; }
+
+    public String getExpiryDate() { return expiryDate; }
+    public void setExpiryDate(String expiryDate) { this.expiryDate = expiryDate; }
+
+    // Variants parsing logic
+    public List<SizeVariant> getVariants() {
+        if (size != null && size.startsWith("VARIANTS:")) {
+            try {
+                String json = size.substring(9);
+                return new Gson().fromJson(json, new TypeToken<List<SizeVariant>>(){}.getType());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static class SizeVariant implements Serializable {
+        @SerializedName("size")
+        public String sizeName;
+        @SerializedName("price")
+        public String variantPrice;
+        @SerializedName("stock")
+        public String variantStock;
+        @SerializedName("mrp")
+        public String variantMrp; // Optional MRP for variant
+    }
 }
 

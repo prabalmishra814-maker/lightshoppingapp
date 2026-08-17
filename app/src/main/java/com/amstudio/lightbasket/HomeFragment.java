@@ -1,5 +1,6 @@
 package com.amstudio.lightbasket;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.core.app.ActivityOptionsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.amstudio.lightbasket.models.ProductModel;
 import com.amstudio.lightbasket.models.CategoryModel;
 import com.amstudio.lightbasket.api.SupabaseClient;
@@ -43,6 +45,7 @@ public class HomeFragment extends Fragment {
     private Set<String> cartProductIds = new HashSet<>();
     private Set<String> wishlistProductIds = new HashSet<>();
     private ProductAdapter allProductsAdapter;
+    private SwipeRefreshLayout swipeRefresh;
 
     @Nullable
     @Override
@@ -55,6 +58,12 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         sessionManager = new SessionManager(requireContext());
+        
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
+        swipeRefresh.setOnRefreshListener(this::refreshData);
+        // Set refreshing color (optional)
+        swipeRefresh.setColorSchemeResources(R.color.primary_blue);
+
         setupClickListeners(view);
         setupImageSlider(view);
 
@@ -62,6 +71,37 @@ public class HomeFragment extends Fragment {
         fetchCartProductIds();
         fetchWishlistProductIds();
         fetchUserAddress(view);
+    }
+
+    private void refreshData() {
+        if (getView() == null) return;
+        
+        // Show shimmers again during manual refresh
+        ShimmerFrameLayout shimmerCat = getView().findViewById(R.id.shimmer_categories);
+        ShimmerFrameLayout shimmerBest = getView().findViewById(R.id.shimmer_best_selling);
+        RecyclerView rvCat = getView().findViewById(R.id.rv_home_categories);
+        RecyclerView rvBest = getView().findViewById(R.id.rv_best_selling);
+        
+        if (shimmerCat != null) {
+            shimmerCat.setVisibility(View.VISIBLE);
+            shimmerCat.startShimmer();
+        }
+        if (rvCat != null) rvCat.setVisibility(View.GONE);
+        
+        if (shimmerBest != null) {
+            shimmerBest.setVisibility(View.VISIBLE);
+            shimmerBest.startShimmer();
+        }
+        if (rvBest != null) rvBest.setVisibility(View.GONE);
+
+        setupImageSlider(getView());
+        fetchCategoriesFromSupabase(getView());
+        fetchProductsFromSupabase(getView());
+        fetchCartProductIds();
+        fetchWishlistProductIds();
+        fetchUserAddress(getView());
+        
+        // setRefreshing(false) will be called in the respective onResponse/onFailure
     }
 
     @Override
@@ -90,6 +130,9 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
             public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded() || getView() == null) return;
+                
                 TextView tvAddress = view.findViewById(R.id.tv_delivery_address);
                 TextView tvChange = view.findViewById(R.id.tv_change_address);
                 if (tvAddress == null) return;
@@ -121,6 +164,8 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 TextView tvAddress = view.findViewById(R.id.tv_delivery_address);
                 TextView tvChange = view.findViewById(R.id.tv_change_address);
                 if (tvAddress != null) {
@@ -164,6 +209,8 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<com.amstudio.lightbasket.models.WishlistModel>>() {
             @Override
             public void onResponse(Call<List<com.amstudio.lightbasket.models.WishlistModel>> call, Response<List<com.amstudio.lightbasket.models.WishlistModel>> response) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     for (com.amstudio.lightbasket.models.WishlistModel item : response.body()) {
                         if (item.getProductId() != null) {
@@ -176,6 +223,8 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<com.amstudio.lightbasket.models.WishlistModel>> call, Throwable t) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (getContext() != null) {
                     android.widget.Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", android.widget.Toast.LENGTH_SHORT).show();
                 }
@@ -196,6 +245,8 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
             public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null) {
                     cartProductIds.clear();
                     for (Map<String, Object> item : response.body()) {
@@ -209,7 +260,9 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {}
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            }
         });
     }
 
@@ -239,6 +292,7 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<Map<String, Object>>>() {
             @Override
             public void onResponse(@NonNull Call<List<Map<String, Object>>> call, @NonNull Response<List<Map<String, Object>>> response) {
+                if (!isAdded()) return;
                 if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     ArrayList<SlideModel> imageList = new ArrayList<>();
                     for (Map<String, Object> map : response.body()) {
@@ -258,6 +312,8 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(@NonNull Call<List<Map<String, Object>>> call, @NonNull Throwable t) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 showDefaultBanners(imageSlider);
             }
         });
@@ -282,6 +338,8 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<ProductModel>>() {
             @Override
             public void onResponse(Call<List<ProductModel>> call, Response<List<ProductModel>> response) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (shimmer != null) {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
@@ -303,6 +361,8 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<ProductModel>> call, Throwable t) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (shimmer != null) {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
@@ -322,6 +382,8 @@ public class HomeFragment extends Fragment {
         ).enqueue(new Callback<List<CategoryModel>>() {
             @Override
             public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (shimmer != null) {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
@@ -338,6 +400,8 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                if (!isAdded()) return;
                 if (shimmer != null) {
                     shimmer.stopShimmer();
                     shimmer.setVisibility(View.GONE);
@@ -442,21 +506,24 @@ public class HomeFragment extends Fragment {
                 return;
             }
 
+            Context context = getContext();
+            if (context == null) return;
+
             if (imageSource.startsWith("http")) {
-                Glide.with(getContext())
+                Glide.with(context)
                         .load(imageSource)
                         .placeholder(R.drawable.ic_category)
                         .error(R.drawable.ic_category)
                         .into(imageView);
             } else {
-                int resId = getResources().getIdentifier(imageSource, "drawable", requireContext().getPackageName());
+                int resId = context.getResources().getIdentifier(imageSource, "drawable", context.getPackageName());
                 if (resId != 0) {
-                    Glide.with(getContext())
+                    Glide.with(context)
                             .load(resId)
                             .placeholder(R.drawable.ic_category)
                             .into(imageView);
                 } else {
-                    Glide.with(getContext())
+                    Glide.with(context)
                             .load(imageSource)
                             .placeholder(R.drawable.ic_category)
                             .error(R.drawable.ic_category)

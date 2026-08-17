@@ -144,7 +144,7 @@
                     android:layout_weight="1" />
 
                 <include
-                    android:id="@+id/item_payments"
+                    android:id="@+id/item_edit_profile"
                     layout="@layout/item_quick_action"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

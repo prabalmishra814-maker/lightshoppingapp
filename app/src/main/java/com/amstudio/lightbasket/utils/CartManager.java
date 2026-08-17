@@ -30,7 +30,14 @@ public class CartManager {
 
     public void addItem(ProductModel product, int quantity) {
         for (CartItem item : cartItems) {
-            if (item.getProduct().getProductId().equals(product.getProductId())) {
+            boolean sameProduct = item.getProduct().getProductId().equals(product.getProductId());
+            boolean sameSize = true;
+            
+            String size1 = item.getProduct().getSize() != null ? item.getProduct().getSize() : "";
+            String size2 = product.getSize() != null ? product.getSize() : "";
+            sameSize = size1.equals(size2);
+
+            if (sameProduct && sameSize) {
                 item.setQuantity(item.getQuantity() + quantity);
                 return;
             }
@@ -48,9 +55,12 @@ public class CartManager {
         }
     }
 
-    public void updateQuantityByProductId(String productId, int newQty) {
+    public void updateQuantityByProductId(String productId, String size, int newQty) {
         for (CartItem item : cartItems) {
-            if (item.getProduct().getProductId().equals(productId)) {
+            String itemSize = item.getProduct().getSize() != null ? item.getProduct().getSize() : "";
+            String targetSize = size != null ? size : "";
+            
+            if (item.getProduct().getProductId().equals(productId) && itemSize.equals(targetSize)) {
                 item.setQuantity(newQty);
                 return;
             }

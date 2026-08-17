@@ -80,6 +80,7 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             intent.putExtra("order_id", order.getOrderId());
             intent.putExtra("order_number", order.getOrderNumber());
             intent.putExtra("customer_name", order.getCustomerName());
+            intent.putExtra("customer_phone", order.getCustomerPhone());
             intent.putExtra("full_address", order.getFullAddress());
             intent.putExtra("product_name", order.getProductName());
             intent.putExtra("price", order.getPrice());
@@ -90,6 +91,8 @@ public class OrdersAdapter extends RecyclerView.Adapter<OrdersAdapter.OrderViewH
             intent.putExtra("longitude", order.getLongitude());
             intent.putExtra("payment_method", order.getPaymentMethod());
             intent.putExtra("final_amount", order.getFinalAmount());
+            intent.putExtra("replacement_reason", order.getReplacementReason());
+            intent.putExtra("product_size", order.getProductSize());
             holder.itemView.getContext().startActivity(intent);
         });
     }

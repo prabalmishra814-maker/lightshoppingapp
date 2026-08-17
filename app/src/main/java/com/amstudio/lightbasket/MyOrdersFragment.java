@@ -105,8 +105,10 @@ public class MyOrdersFragment extends Fragment implements OrdersAdapter.OnOrderC
             String orderNumber = String.valueOf(orderMap.get("order_number"));
             String createdAt = String.valueOf(orderMap.get("created_at"));
             String customerName = String.valueOf(orderMap.get("customer_name"));
+            String customerPhone = String.valueOf(orderMap.get("customer_phone"));
             String paymentMethod = String.valueOf(orderMap.get("payment_method"));
             String finalAmount = String.valueOf(orderMap.get("final_amount"));
+            String replacementReason = String.valueOf(orderMap.get("replacement_reason"));
             
             // USE MAIN ORDER STATUS from the column you showed in screenshot
             String mainStatus = String.valueOf(orderMap.get("order_status"));
@@ -144,8 +146,9 @@ public class MyOrdersFragment extends Fragment implements OrdersAdapter.OnOrderC
                     String finalStatus = (itemStatus == null || itemStatus.equalsIgnoreCase("Pending")) ? mainStatus : itemStatus;
                     
                     String imageUrl = String.valueOf(item.get("product_image"));
+                    String pSize = item.containsKey("product_size") ? String.valueOf(item.get("product_size")) : "";
 
-                    allOrders.add(new OrderModel(orderId, orderNumber, dateDisplay, pName, price, qty, finalStatus, imageUrl, customerName, fullAddress, lat, lng, paymentMethod, finalAmount));
+                    allOrders.add(new OrderModel(orderId, orderNumber, dateDisplay, pName, price, qty, finalStatus, imageUrl, customerName, customerPhone, fullAddress, lat, lng, paymentMethod, finalAmount, replacementReason, pSize));
                 }
             }
         } catch (Exception e) {

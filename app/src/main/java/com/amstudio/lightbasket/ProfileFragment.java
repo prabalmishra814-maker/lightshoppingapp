@@ -23,9 +23,8 @@ import com.google.android.material.button.MaterialButton;
 
 public class ProfileFragment extends Fragment {
 
-    private String facebookUrl = "https://www.facebook.com/lightbasket";
-    private String instagramUrl = "https://www.instagram.com/lightbasket";
-    private String contactNumber = "+91 9876543210";
+    private String facebookUrl = "https://www.facebook.com";
+    private String instagramUrl = "https://www.instagram.com";
     private String contactEmail = "support@litebasket.com";
     private String aboutUrl = "";
     private String termsUrl = "";
@@ -35,6 +34,23 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_profile, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshProfileData();
+    }
+
+    private void refreshProfileData() {
+        if (getView() == null || getContext() == null) return;
+        SessionManager sessionManager = new SessionManager(getContext());
+        
+        TextView tvName = getView().findViewById(R.id.tv_profile_name);
+        if (tvName != null) {
+            String name = sessionManager.getUserName();
+            tvName.setText(name != null ? name : "User");
+        }
     }
 
     @Override
@@ -113,11 +129,11 @@ public class ProfileFragment extends Fragment {
                 });
             }
 
-            View itemPayments = view.findViewById(R.id.item_payments);
-            if (itemPayments != null) {
-                setupQuickAction(itemPayments, "Edit Profile", R.drawable.ic_profile, R.color.cat_home_bg, R.color.primary);
-                itemPayments.setOnClickListener(v -> {
-                    if (getContext() != null) Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+            View itemEditProfile = view.findViewById(R.id.item_edit_profile);
+            if (itemEditProfile != null) {
+                setupQuickAction(itemEditProfile, "Edit Profile", R.drawable.baseline_edit_24, R.color.cat_home_bg, R.color.primary);
+                itemEditProfile.setOnClickListener(v -> {
+                    if (getContext() != null) startActivity(new Intent(getContext(), EditProfileActivity.class));
                 });
             }
 
@@ -234,27 +250,12 @@ public class ProfileFragment extends Fragment {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
 
-        TextView tvPhone = dialogView.findViewById(R.id.tv_phone_number);
         TextView tvEmail = dialogView.findViewById(R.id.tv_email_address);
-        ImageView btnCopy = dialogView.findViewById(R.id.btn_copy_number);
         ImageView btnCopyEmail = dialogView.findViewById(R.id.btn_copy_email);
-        MaterialButton btnCall = dialogView.findViewById(R.id.btn_call_now);
+        MaterialButton btnEmail = dialogView.findViewById(R.id.btn_email_now);
         MaterialButton btnClose = dialogView.findViewById(R.id.btn_close);
 
-        if (tvPhone != null) tvPhone.setText(contactNumber);
         if (tvEmail != null) tvEmail.setText(contactEmail);
-
-        if (btnCopy != null) {
-            btnCopy.setOnClickListener(v -> {
-                if (getContext() == null) return;
-                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("Phone Number", contactNumber);
-                if (clipboard != null) {
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(getContext(), "Phone number copied to clipboard", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
 
         if (btnCopyEmail != null) {
             btnCopyEmail.setOnClickListener(v -> {
@@ -268,13 +269,20 @@ public class ProfileFragment extends Fragment {
             });
         }
 
-        if (btnCall != null) {
-            btnCall.setOnClickListener(v -> {
+        if (btnEmail != null) {
+            btnEmail.setOnClickListener(v -> {
                 try {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + contactNumber.replace(" ", "")));
-                    startActivity(intent);
-                } catch (Exception e) { e.printStackTrace(); }
+                    Intent intent = new Intent(Intent.ACTION_SENDTO);
+                    intent.setData(Uri.parse("mailto:"));
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{contactEmail});
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Support Request - Light Shop App");
+                    startActivity(Intent.createChooser(intent, "Send Email"));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    if (isAdded() && getContext() != null) {
+                        Toast.makeText(getContext(), "No email app found", Toast.LENGTH_SHORT).show();
+                    }
+                }
             });
         }
 
@@ -299,7 +307,6 @@ public class ProfileFragment extends Fragment {
                             java.util.Map<String, Object> config = response.body().get(0);
                             if (config.containsKey("facebook_url")) facebookUrl = String.valueOf(config.get("facebook_url"));
                             if (config.containsKey("instagram_url")) instagramUrl = String.valueOf(config.get("instagram_url"));
-                            if (config.containsKey("contact_number")) contactNumber = String.valueOf(config.get("contact_number"));
                             if (config.containsKey("contact_email")) contactEmail = String.valueOf(config.get("contact_email"));
                             if (config.containsKey("about_url")) aboutUrl = String.valueOf(config.get("about_url"));
                             if (config.containsKey("terms_conditions_url")) termsUrl = String.valueOf(config.get("terms_conditions_url"));
@@ -312,6 +319,7 @@ public class ProfileFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull retrofit2.Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {
+                    if (!isAdded()) return;
                     // Keep default values
                 }
             });
@@ -379,6 +387,7 @@ public class ProfileFragment extends Fragment {
 
                 @Override
                 public void onFailure(@NonNull retrofit2.Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {
+                    if (!isAdded()) return;
                     // Silent fail
                 }
             });
@@ -417,4 +426,3 @@ public class ProfileFragment extends Fragment {
         ivIcon.setImageTintList(ContextCompat.getColorStateList(getContext(), iconTintRes));
     }
 }
-

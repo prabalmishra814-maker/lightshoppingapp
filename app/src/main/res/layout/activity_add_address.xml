@@ -86,7 +86,7 @@
                     android:id="@+id/et_full_name"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:hint="e.g. John Doe"
+                    android:hint="Your Name"
                     android:inputType="textPersonName"
                     android:padding="16dp"
                     android:textColor="@color/text_primary"
@@ -120,7 +120,7 @@
                     android:id="@+id/et_phone"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:hint="00000 00000"
+                    android:hint="Enter Mobile Number"
                     android:inputType="phone"
                     android:padding="16dp"
                     android:textColor="@color/text_primary"
@@ -128,38 +128,17 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Section: Address Details -->
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:layout_marginBottom="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="Address Details"
-                    android:textColor="@color/accent_blue"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.1" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_current_location"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:text="Use Current Location"
-                    android:textAllCaps="false"
-                    android:textColor="@color/accent_blue"
-                    android:textSize="12sp"
-                    app:icon="@drawable/ic_location"
-                    app:iconSize="16dp"
-                    app:iconTint="@color/accent_blue" />
-            </RelativeLayout>
+                android:layout_marginBottom="16dp"
+                android:text="Address Details"
+                android:textColor="@color/accent_blue"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.1" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -192,7 +171,7 @@
                         android:id="@+id/et_pincode"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
-                        android:hint="110001"
+                        android:hint="225124"
                         android:inputType="number"
                         android:padding="16dp"
                         android:textColor="@color/text_primary"
@@ -260,7 +239,7 @@
                     android:id="@+id/et_city"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:hint="New Delhi"
+                    android:hint="Haidergarh"
                     android:inputType="text"
                     android:padding="16dp"
                     android:textColor="@color/text_primary"

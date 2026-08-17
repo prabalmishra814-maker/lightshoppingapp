@@ -55,18 +55,16 @@ public class SuccessActivity extends AppCompatActivity {
 
     private void setEstimatedDelivery() {
         Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR_OF_DAY, 24);
+        
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM", Locale.getDefault());
+        SimpleDateFormat timeSdf = new SimpleDateFormat("hh:mm a", Locale.getDefault());
         
-        // Start date: 4 days from now
-        calendar.add(Calendar.DAY_OF_YEAR, 4);
-        String startDate = sdf.format(calendar.getTime());
-        
-        // End date: 3 more days (total 7 days/1 week from now)
-        calendar.add(Calendar.DAY_OF_YEAR, 3);
-        String endDate = sdf.format(calendar.getTime());
+        String date = sdf.format(calendar.getTime());
+        String time = timeSdf.format(calendar.getTime());
         
         TextView tvDelivery = findViewById(R.id.tv_delivery_date);
-        tvDelivery.setText(startDate + " - " + endDate);
+        tvDelivery.setText("By " + date + ", " + time);
     }
 }
 

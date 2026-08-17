@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="160dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
@@ -33,6 +34,39 @@
                 android:padding="6dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_category" />
+
+            <!-- Rating Badge -->
+            <LinearLayout
+                android:id="@+id/rating_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="8dp"
+                android:background="@drawable/bg_light_green_pill"
+                android:backgroundTint="#F5F5F5"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/tv_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4.5"
+                    android:textColor="@color/dark_navy"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginStart="2dp"
+                    android:src="@android:drawable/btn_star_big_on"
+                    app:tint="#FFD700" />
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Elegant Discount Badge -->

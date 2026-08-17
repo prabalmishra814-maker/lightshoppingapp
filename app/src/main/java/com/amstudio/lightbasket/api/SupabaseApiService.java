@@ -4,6 +4,7 @@ import com.amstudio.lightbasket.models.ProductModel;
 import com.amstudio.lightbasket.models.CategoryModel;
 import com.amstudio.lightbasket.models.WishlistModel;
 import com.amstudio.lightbasket.models.NotificationModel;
+import com.amstudio.lightbasket.models.ReviewModel;
 
 import java.util.List;
 import java.util.Map;
@@ -109,6 +110,14 @@ public interface SupabaseApiService {
             @Header("Authorization") String authHeader,
             @Query("select") String select,
             @QueryMap Map<String, String> filters
+    );
+
+    @GET("rest/v1/reviews")
+    Call<List<ReviewModel>> fetchReviews(
+            @Header("apikey") String apiKey,
+            @Header("Authorization") String authHeader,
+            @Query("product_id") String productIdFilter,
+            @Query("select") String select
     );
 
     // 2. ADD (Insert)

@@ -52,9 +52,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, price, oldPrice, discount;
+        TextView name, price, oldPrice, discount, rating;
         ImageView image, wishlist, ivAddIcon;
-        View btnAdd;
+        View btnAdd, ratingContainer;
 
         ViewHolder(View view) {
             super(view);
@@ -66,6 +66,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             wishlist = view.findViewById(R.id.iv_wishlist);
             btnAdd = view.findViewById(R.id.btn_add_to_cart);
             ivAddIcon = view.findViewById(R.id.iv_add_icon);
+            rating = view.findViewById(R.id.tv_rating);
+            ratingContainer = view.findViewById(R.id.rating_container);
 
             if (!isHorizontal) {
                 ViewGroup.LayoutParams params = itemView.getLayoutParams();
@@ -86,6 +88,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ProductModel item = items.get(position);
         holder.name.setText(item.getProductName());
+
+        // Bind Rating
+        if (item.getRating() != null && !item.getRating().isEmpty() && !item.getRating().equals("0")) {
+            holder.rating.setText(item.getRating());
+            holder.ratingContainer.setVisibility(View.VISIBLE);
+        } else {
+            holder.ratingContainer.setVisibility(View.GONE);
+        }
 
         String sellingPriceStr = item.getPrice() != null ? item.getPrice() : "0";
         String mrpStr = item.getMainPrice() != null ? item.getMainPrice() : sellingPriceStr;
@@ -188,7 +198,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     }
 
     private void addToCart(ProductModel product) {
-        CartHelper.addToCart(context, product, new CartHelper.CartCallback() {
+        CartHelper.addToCart(context, product, 1, null, null, null, new CartHelper.CartCallback() {
             @Override
             public void onSuccess() {
                 cartProductIds.add(product.getProductId());

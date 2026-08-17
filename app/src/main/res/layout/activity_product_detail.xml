@@ -51,7 +51,8 @@
         android:id="@+id/shimmer_product_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:shimmer_auto_start="true">
+        app:shimmer_auto_start="true"
+        tools:visibility="gone">
         <include layout="@layout/shimmer_activity_product_detail" />
     </com.facebook.shimmer.ShimmerFrameLayout>
 
@@ -61,7 +62,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:visibility="gone">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -113,6 +115,48 @@
                     android:textColor="@color/dark_navy"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_light_green_pill"
+                    android:backgroundTint="#F5F5F5"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="2dp">
+
+                    <TextView
+                        android:id="@+id/tv_avg_rating_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.0"
+                        android:textColor="@color/dark_navy"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="2dp"
+                        android:src="@android:drawable/btn_star_big_on"
+                        app:tint="#FFD700" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="10dp"
+                        android:layout_marginHorizontal="8dp"
+                        android:background="@color/divider_color" />
+
+                    <TextView
+                        android:id="@+id/tv_reviews_count_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 reviews"
+                        android:textColor="@color/secondary_gray"
+                        android:textSize="12sp" />
+                </LinearLayout>
 
 
                 <LinearLayout
@@ -167,9 +211,9 @@
                     android:textStyle="bold" />
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -188,6 +232,54 @@
                         android:textColor="@color/success_green"
                         android:textSize="14sp"
                         android:textStyle="bold" />
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="14dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:background="@color/divider_color" />
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_bolt"
+                        app:tint="#F59E0B" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Fast Delivery in 24 Hours"
+                        android:textColor="#F59E0B"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Size Selection Section -->
+                <LinearLayout
+                    android:id="@+id/layout_size_selection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Select Size"
+                        android:textColor="@color/dark_navy"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/cg_sizes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        app:singleSelection="true"
+                        app:selectionRequired="true" />
                 </LinearLayout>
 
                 <!-- Quantity + Add to Cart Row -->
@@ -247,6 +339,89 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Manufacture & Expiry Info -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_product_dates"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#F8F9FA"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                tools:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:id="@+id/layout_mfg_date"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="MFG Date"
+                            android:textColor="@color/secondary_gray"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tv_mfg_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Aug 2026"
+                            android:textColor="@color/dark_navy"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <View
+                        android:id="@+id/date_divider"
+                        android:layout_width="1dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginHorizontal="12dp"
+                        android:background="@color/divider_color"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_exp_date"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="EXP Date"
+                            android:textColor="@color/secondary_gray"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tv_exp_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Aug 2027"
+                            android:textColor="@color/dark_navy"
+                            android:textSize="13sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Delivery Benefits Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -299,7 +474,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="On orders above ₹499"
+                            android:text="No Deliver Charge"
                             android:textColor="@color/secondary_gray"
                             android:textSize="10sp" />
                     </LinearLayout>
@@ -454,7 +629,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="20dp"
                 android:text="You May Also Like"
                 android:textColor="@color/dark_navy"
                 android:textSize="20sp"
@@ -463,7 +638,7 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_you_may_also_like"
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
+                android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 android:background="@color/white"
                 android:clipToPadding="false"
@@ -478,7 +653,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="20dp"
                 android:text="More Products"
                 android:textColor="@color/dark_navy"
                 android:textSize="20sp"
@@ -487,13 +662,110 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_more_products"
                 android:layout_width="match_parent"
-                android:layout_height="240dp"
+                android:layout_height="200dp"
                 android:layout_marginTop="8dp"
                 android:clipToPadding="false"
                 android:paddingHorizontal="8dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_product_recommendation" />
+
+            <!-- Ratings & Reviews Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ratings &amp; Reviews"
+                        android:textColor="@color/dark_navy"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_write_review"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:text="Write Review"
+                        android:textColor="@color/primary_blue"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </RelativeLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="@color/divider_color"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:padding="20dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_avg_rating_large"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0.0"
+                                android:textColor="@color/dark_navy"
+                                android:textSize="36sp"
+                                android:textStyle="bold" />
+
+                            <RatingBar
+                                android:id="@+id/avg_rating_bar"
+                                style="@style/Widget.AppCompat.RatingBar.Small"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:isIndicator="true"
+                                android:numStars="5"
+                                android:stepSize="0.1"
+                                android:theme="@style/RatingBarTheme" />
+
+                            <TextView
+                                android:id="@+id/tv_total_reviews_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Based on 0 reviews"
+                                android:textColor="@color/secondary_gray"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_reviews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:nestedScrollingEnabled="false"
+                    tools:itemCount="2"
+                    tools:listitem="@layout/item_review" />
+            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

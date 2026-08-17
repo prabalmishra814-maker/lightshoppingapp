@@ -1,0 +1,5 @@
+- `[x]` Create `ic_bolt.xml` drawable
+- `[x]` Update `SuccessActivity.java` logic
+- `[x]` Update `activity_success.xml` layout
+- `[x]` Update `activity_product_detail.xml` layout
+- `[x]` Update `activity_order_details.xml` layout

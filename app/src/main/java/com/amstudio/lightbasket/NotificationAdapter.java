@@ -12,9 +12,15 @@ import java.util.List;
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ViewHolder> {
 
     private List<NotificationModel> notifications;
+    private OnNotificationListener listener;
 
-    public NotificationAdapter(List<NotificationModel> notifications) {
+    public interface OnNotificationListener {
+        void onDelete(int position);
+    }
+
+    public NotificationAdapter(List<NotificationModel> notifications, OnNotificationListener listener) {
         this.notifications = notifications;
+        this.listener = listener;
     }
 
     @NonNull
@@ -36,6 +42,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         } else {
             holder.unreadDot.setVisibility(View.VISIBLE);
         }
+
+        holder.btnDelete.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onDelete(position);
+            }
+        });
     }
 
     @Override
@@ -46,6 +58,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvTitle, tvMessage, tvTime;
         View unreadDot;
+        View btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -53,6 +66,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             tvMessage = itemView.findViewById(R.id.tv_notif_message);
             tvTime = itemView.findViewById(R.id.tv_notif_time);
             unreadDot = itemView.findViewById(R.id.unread_dot);
+            btnDelete = itemView.findViewById(R.id.btn_delete_notif);
         }
     }
 }
