@@ -29,6 +29,7 @@
     <string name="estimated_delivery">Estimated Delivery</string>
     <string name="continue_shopping">Continue Shopping</string>
     <string name="view_order_details">View Order Details</string>
+    <string name="loading">Loading&#8230;</string>
 
     <string-array name="india_states">
         <item>Andaman and Nicobar Islands</item>

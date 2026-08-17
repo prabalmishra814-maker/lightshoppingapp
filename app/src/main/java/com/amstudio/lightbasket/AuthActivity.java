@@ -2,6 +2,7 @@ package com.amstudio.lightbasket;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -26,6 +27,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
 import androidx.credentials.CredentialManager;
 import androidx.credentials.CredentialManagerCallback;
 import androidx.credentials.CustomCredential;
@@ -65,6 +67,7 @@ public class AuthActivity extends AppCompatActivity {
     private EditText etLoginEmail, etLoginPassword;
     private EditText etRegName, etRegEmail, etRegPassword, etRegConfirm;
     private SessionManager sessionManager;
+    private AlertDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +160,7 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void handleGoogleLogin() {
+        showLoadingDialog("Connecting to Google...");
         CredentialManager credentialManager = CredentialManager.create(this);
 
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
@@ -181,20 +185,27 @@ public class AuthActivity extends AppCompatActivity {
                                     String idToken = googleIdTokenCredential.getIdToken();
                                     signInWithSupabaseGoogle(idToken);
                                 } catch (Exception e) {
+                                    hideLoadingDialog();
                                     Toast.makeText(AuthActivity.this, "Google login failed. Please try again.", Toast.LENGTH_SHORT).show();
                                 }
+                            } else {
+                                hideLoadingDialog();
                             }
+                        } else {
+                            hideLoadingDialog();
                         }
                     }
 
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
+                        hideLoadingDialog();
                         Toast.makeText(AuthActivity.this, "Google login failed. Please check your connection.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void signInWithSupabaseGoogle(String idToken) {
+        updateLoadingMessage("Finalizing login...");
         btnGoogle.setEnabled(false);
         String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
         AuthModels.IdTokenRequest request = new AuthModels.IdTokenRequest(idToken);
@@ -204,6 +215,7 @@ public class AuthActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Response<AuthModels.AuthResponse> response) {
                         btnGoogle.setEnabled(true);
+                        // Don't hide dialog here yet, syncUserToDatabase will handle it
                         if (response.isSuccessful() && response.body() != null) {
                             AuthModels.AuthResponse authResponse = response.body();
                             String name = "User";
@@ -230,6 +242,7 @@ public class AuthActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Throwable t) {
                         btnGoogle.setEnabled(true);
+                        hideLoadingDialog();
                         Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -254,6 +267,7 @@ public class AuthActivity extends AppCompatActivity {
         ).enqueue(new Callback<java.util.List<java.util.Map<String, Object>>>() {
             @Override
             public void onResponse(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Response<java.util.List<java.util.Map<String, Object>>> response) {
+                hideLoadingDialog();
                 if (response.isSuccessful()) {
                     android.util.Log.d("SupabaseSync", "User synced successfully");
                 } else {
@@ -270,6 +284,7 @@ public class AuthActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<java.util.List<java.util.Map<String, Object>>> call, @NonNull Throwable t) {
+                hideLoadingDialog();
                 android.util.Log.e("SupabaseSync", "Network Error: " + t.getMessage());
                 startActivity(new Intent(AuthActivity.this, HomeActivity.class));
                 finish();
@@ -320,6 +335,7 @@ public class AuthActivity extends AppCompatActivity {
                             createWelcomeNotification(userId, authResponse.accessToken);
                             syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                         } else {
+                            hideLoadingDialog();
                             String errorMsg = parseError(response);
                             Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         }
@@ -327,6 +343,7 @@ public class AuthActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(@NonNull Call<AuthModels.AuthResponse> call, @NonNull Throwable t) {
+                        hideLoadingDialog();
                         setLoadingState(btnLogin, false, "Login");
                         Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     }
@@ -404,11 +421,13 @@ public class AuthActivity extends AppCompatActivity {
                                 syncUserToDatabase(userId, name, profileUrl, authResponse.accessToken);
                                 Toast.makeText(AuthActivity.this, "Welcome! Account created successfully.", Toast.LENGTH_SHORT).show();
                             } else {
+                                hideLoadingDialog();
                                 // If no token, maybe email confirmation is still on in Supabase, but we'll just show login
                                 Toast.makeText(AuthActivity.this, "Account created! Please login now.", Toast.LENGTH_LONG).show();
                                 showLogin();
                             }
                         } else {
+                            hideLoadingDialog();
                             String errorMsg = parseError(response);
                             Toast.makeText(AuthActivity.this, errorMsg, Toast.LENGTH_LONG).show();
                         }
@@ -416,10 +435,44 @@ public class AuthActivity extends AppCompatActivity {
 
                     @Override
                     public void onFailure(Call<AuthModels.AuthResponse> call, Throwable t) {
+                        hideLoadingDialog();
                         setLoadingState(btnRegister, false, "Register");
                         Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void showLoadingDialog(String message) {
+        if (loadingDialog == null) {
+            View view = getLayoutInflater().inflate(R.layout.dialog_loading, null);
+            loadingDialog = new AlertDialog.Builder(this)
+                    .setView(view)
+                    .setCancelable(false)
+                    .create();
+            if (loadingDialog.getWindow() != null) {
+                loadingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            }
+        }
+        
+        TextView tvMessage = loadingDialog.findViewById(R.id.tv_loading_message);
+        if (tvMessage != null) tvMessage.setText(message);
+        
+        if (!loadingDialog.isShowing()) {
+            loadingDialog.show();
+        }
+    }
+
+    private void updateLoadingMessage(String message) {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            TextView tvMessage = loadingDialog.findViewById(R.id.tv_loading_message);
+            if (tvMessage != null) tvMessage.setText(message);
+        }
+    }
+
+    private void hideLoadingDialog() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
 
     private void setLoadingState(View button, boolean isLoading, String text) {
