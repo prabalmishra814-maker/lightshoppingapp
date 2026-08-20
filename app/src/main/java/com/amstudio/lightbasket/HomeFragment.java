@@ -145,9 +145,9 @@ public class HomeFragment extends Fragment {
                         String pincode = (String) address.get("pincode");
                         
                         if (city != null && pincode != null) {
-                            tvAddress.setText("Deliver to " + city + " " + pincode);
+                            tvAddress.setText(city + ", " + pincode);
                         } else if (pincode != null) {
-                            tvAddress.setText("Deliver to " + pincode);
+                            tvAddress.setText(pincode);
                         } else {
                             tvAddress.setText("Add your address");
                         }

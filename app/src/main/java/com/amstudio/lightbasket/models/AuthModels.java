@@ -35,6 +35,14 @@ public class AuthModels {
         }
     }
 
+    public static class RecoverRequest {
+        public String email;
+
+        public RecoverRequest(String email) {
+            this.email = email;
+        }
+    }
+
     public static class IdTokenRequest {
         public String provider = "google";
         @SerializedName("id_token")

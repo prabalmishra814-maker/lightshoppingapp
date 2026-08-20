@@ -14,16 +14,27 @@
         android:layout_height="match_parent"
         android:paddingHorizontal="12dp">
 
-        <ImageView
-            android:id="@+id/category_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_men"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_category_icon"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            app:cardCornerRadius="26dp"
+            app:cardElevation="1dp"
+            app:strokeColor="#F3F4F6"
+            app:strokeWidth="1dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:contentDescription="@null" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/category_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:padding="0dp"
+                android:src="@drawable/ic_men"
+                android:contentDescription="@null" />
+        </com.google.android.material.card.MaterialCardView>
 
         <LinearLayout
             android:id="@+id/text_container"
@@ -33,7 +44,7 @@
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/chevron"
-            app:layout_constraintStart_toEndOf="@+id/category_icon"
+            app:layout_constraintStart_toEndOf="@+id/card_category_icon"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView

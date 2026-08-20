@@ -54,7 +54,7 @@ public class AuthActivity extends AppCompatActivity {
 
     private TextView tvTitle, tvSubtitle;
     private LinearLayout loginContainer, registerContainer;
-    private TextView tvFooterLogin, tvFooterRegister, tvLoginTerms;
+    private TextView tvFooterLogin, tvFooterRegister, tvLoginTerms, tvForgotPassword;
     private CheckBox cbTerms;
     private View btnLogin, btnRegister, btnGoogle;
 
@@ -130,6 +130,7 @@ public class AuthActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btn_login);
         btnRegister = findViewById(R.id.btn_register);
         btnGoogle = findViewById(R.id.btn_google);
+        tvForgotPassword = findViewById(R.id.tv_forgot_password);
 
         // Initialize Input fields
         etLoginEmail = findViewById(R.id.et_login_email);
@@ -142,6 +143,7 @@ public class AuthActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> handleLogin());
         btnRegister.setOnClickListener(v -> handleRegister());
         btnGoogle.setOnClickListener(v -> handleGoogleLogin());
+        tvForgotPassword.setOnClickListener(v -> handleForgotPassword());
 
     }
 
@@ -346,6 +348,67 @@ public class AuthActivity extends AppCompatActivity {
                         hideLoadingDialog();
                         setLoadingState(btnLogin, false, "Login");
                         Toast.makeText(AuthActivity.this, "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void handleForgotPassword() {
+        String email = etLoginEmail.getText().toString().trim();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Reset Password");
+
+        final EditText input = new EditText(this);
+        input.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        input.setHint("Enter your email");
+        input.setText(email);
+
+        LinearLayout container = new LinearLayout(this);
+        container.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(48, 20, 48, 0);
+        input.setLayoutParams(params);
+        container.addView(input);
+
+        builder.setView(container);
+
+        builder.setPositiveButton("Send Link", (dialog, which) -> {
+            String resetEmail = input.getText().toString().trim();
+            if (!resetEmail.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(resetEmail).matches()) {
+                sendResetPasswordEmail(resetEmail);
+            } else {
+                Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+        builder.show();
+    }
+
+    private void sendResetPasswordEmail(String email) {
+        showLoadingDialog("Sending reset link...");
+        String authHeader = "Bearer " + SupabaseClient.SUPABASE_ANON_KEY;
+        AuthModels.RecoverRequest request = new AuthModels.RecoverRequest(email);
+
+        SupabaseClient.getAuthService().recover(SupabaseClient.SUPABASE_ANON_KEY, authHeader, request)
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        hideLoadingDialog();
+                        if (response.isSuccessful()) {
+                            Toast.makeText(AuthActivity.this, "Reset link sent to your email", Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(AuthActivity.this, "Failed to send reset link. Try again.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
+                        hideLoadingDialog();
+                        Toast.makeText(AuthActivity.this, "Network error. Please try again.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

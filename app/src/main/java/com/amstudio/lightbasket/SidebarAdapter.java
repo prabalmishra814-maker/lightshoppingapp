@@ -33,7 +33,6 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final View container;
         public final View selectionIndicator;
-        public final MaterialCardView iconContainer;
         public final ImageView icon;
         public final TextView name;
 
@@ -41,7 +40,6 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
             super(view);
             container = view.findViewById(R.id.sidebar_container);
             selectionIndicator = view.findViewById(R.id.selection_indicator);
-            iconContainer = view.findViewById(R.id.icon_container);
             icon = view.findViewById(R.id.sidebar_icon);
             name = view.findViewById(R.id.sidebar_name);
         }
@@ -88,13 +86,11 @@ public class SidebarAdapter extends RecyclerView.Adapter<SidebarAdapter.ViewHold
             holder.selectionIndicator.setVisibility(View.VISIBLE);
             holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.primary_blue));
             holder.name.setTypeface(null, Typeface.BOLD);
-            holder.iconContainer.setCardBackgroundColor(android.content.res.ColorStateList.valueOf(Color.WHITE));
         } else {
             holder.container.setBackgroundColor(Color.TRANSPARENT);
             holder.selectionIndicator.setVisibility(View.GONE);
             holder.name.setTextColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.secondary_gray));
             holder.name.setTypeface(null, Typeface.NORMAL);
-            holder.iconContainer.setCardBackgroundColor(android.content.res.ColorStateList.valueOf(Color.WHITE));
         }
 
         holder.itemView.setOnClickListener(v -> {

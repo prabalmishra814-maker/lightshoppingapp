@@ -45,7 +45,13 @@ public class CategoryFragment extends Fragment {
         sessionManager = new SessionManager(requireContext());
         
         setupRecyclerViews();
+        setupSwipeRefresh();
         fetchCategories();
+    }
+
+    private void setupSwipeRefresh() {
+        binding.swipeRefresh.setOnRefreshListener(this::fetchCategories);
+        binding.swipeRefresh.setColorSchemeResources(R.color.dark_navy);
     }
 
     private void setupRecyclerViews() {
@@ -71,6 +77,7 @@ public class CategoryFragment extends Fragment {
         ).enqueue(new Callback<List<CategoryModel>>() {
             @Override
             public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
+                if (binding != null) binding.swipeRefresh.setRefreshing(false);
                 if (response.isSuccessful() && response.body() != null) {
                     categories.clear();
                     categories.addAll(response.body());
@@ -85,6 +92,7 @@ public class CategoryFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<CategoryModel>> call, Throwable t) {
+                if (binding != null) binding.swipeRefresh.setRefreshing(false);
                 if (getContext() != null) Toast.makeText(getContext(), "Something went wrong. Please contact the developer.", Toast.LENGTH_SHORT).show();
             }
         });

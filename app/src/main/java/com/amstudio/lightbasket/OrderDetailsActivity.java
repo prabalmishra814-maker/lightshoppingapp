@@ -13,6 +13,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.amstudio.lightbasket.utils.StatusBarUtils;
 import com.google.android.material.button.MaterialButton;
@@ -33,6 +34,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private TextView labelConfirmed, labelShipped, labelDelivered;
     private TextView subConfirmed, subShipped, subDelivered;
     private MaterialButton btnViewOnMap, btnCancelOrder, btnReplaceProduct;
+    private SwipeRefreshLayout swipeRefresh;
     private String currentOrderId;
 
     @Override
@@ -44,6 +46,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         initViews();
         handleIntentData();
+
+        swipeRefresh.setOnRefreshListener(this::fetchOrderDetails);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnHelp).setOnClickListener(v -> {
@@ -63,6 +67,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         btnViewOnMap = findViewById(R.id.btnViewOnMap);
         btnCancelOrder = findViewById(R.id.btnCancelOrder);
         btnReplaceProduct = findViewById(R.id.btnReplaceProduct);
+        swipeRefresh = findViewById(R.id.swipe_refresh);
 
         dotConfirmed = findViewById(R.id.dot_confirmed);
         dotShipped = findViewById(R.id.dot_shipped);
@@ -136,6 +141,134 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
                 startActivity(mapIntent);
             });
+        }
+    }
+
+    private void fetchOrderDetails() {
+        if (currentOrderId == null) {
+            swipeRefresh.setRefreshing(false);
+            return;
+        }
+
+        String authHeader = "Bearer " + new com.amstudio.lightbasket.api.SessionManager(this).getToken();
+        Map<String, String> filters = new HashMap<>();
+        filters.put("id", "eq." + currentOrderId);
+        filters.put("select", "*");
+
+        com.amstudio.lightbasket.api.SupabaseClient.getApiService().fetchDataWithFilters(
+                "orders",
+                com.amstudio.lightbasket.api.SupabaseClient.SUPABASE_ANON_KEY,
+                authHeader,
+                filters
+        ).enqueue(new Callback<List<Map<String, Object>>>() {
+            @Override
+            public void onResponse(Call<List<Map<String, Object>>> call, Response<List<Map<String, Object>>> response) {
+                swipeRefresh.setRefreshing(false);
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    Map<String, Object> data = response.body().get(0);
+                    updateUI(data);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Map<String, Object>>> call, Throwable t) {
+                swipeRefresh.setRefreshing(false);
+                Toast.makeText(OrderDetailsActivity.this, "Failed to refresh data", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateUI(Map<String, Object> data) {
+        if (data == null) return;
+
+        tvOrderNumber.setText(String.valueOf(data.get("order_number")));
+        tvCustomerName.setText(String.valueOf(data.get("customer_name")));
+        tvPaymentMethod.setText(String.valueOf(data.get("payment_method")));
+        tvTotalAmount.setText("₹" + String.valueOf(data.get("final_amount")));
+
+        // Parse Address
+        Object addrObj = data.get("delivery_address");
+        if (addrObj instanceof Map) {
+            Map<String, Object> addrMap = (Map<String, Object>) addrObj;
+            tvFullAddress.setText(String.valueOf(addrMap.get("full_address")));
+            
+            Object latObj = addrMap.get("latitude");
+            Object lngObj = addrMap.get("longitude");
+            double lat = 0.0, lng = 0.0;
+            if (latObj instanceof Number) lat = ((Number) latObj).doubleValue();
+            if (lngObj instanceof Number) lng = ((Number) lngObj).doubleValue();
+
+            if (lat != 0.0 && lng != 0.0) {
+                btnViewOnMap.setVisibility(View.VISIBLE);
+                final double finalLat = lat;
+                final double finalLng = lng;
+                btnViewOnMap.setOnClickListener(v -> {
+                    String uri = "geo:" + finalLat + "," + finalLng + "?q=" + finalLat + "," + finalLng + "(Customer Location)";
+                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                    startActivity(mapIntent);
+                });
+            } else {
+                btnViewOnMap.setVisibility(View.GONE);
+            }
+        }
+
+        // Parse Products from order_items
+        Object itemsObj = data.get("order_items");
+        if (itemsObj instanceof List) {
+            List<Map<String, Object>> items = (List<Map<String, Object>>) itemsObj;
+            String targetProductName = tvProductName.getText().toString();
+            Map<String, Object> targetItem = null;
+
+            // Try to find the item that matches the current displayed product name
+            for (Map<String, Object> item : items) {
+                if (targetProductName.equals(String.valueOf(item.get("product_name")))) {
+                    targetItem = item;
+                    break;
+                }
+            }
+
+            // Fallback to first item if no match found
+            if (targetItem == null && !items.isEmpty()) {
+                targetItem = items.get(0);
+            }
+
+            if (targetItem != null) {
+                tvProductName.setText(String.valueOf(targetItem.get("product_name")));
+                String price = String.valueOf(targetItem.get("price_per_unit"));
+                
+                int qty = 1;
+                Object qtyObj = targetItem.get("quantity");
+                if (qtyObj instanceof Number) qty = ((Number) qtyObj).intValue();
+                
+                String size = targetItem.get("product_size") != null ? String.valueOf(targetItem.get("product_size")) : "";
+                String priceQtyText = "₹" + price + " | Qty: " + qty;
+                if (!size.isEmpty() && !size.equalsIgnoreCase("null") && !size.equals("0")) {
+                    priceQtyText += " | Size: " + size;
+                }
+                tvPriceQty.setText(priceQtyText);
+
+                String imageUrl = String.valueOf(targetItem.get("product_image"));
+                Glide.with(this).load(imageUrl).placeholder(R.drawable.ic_headphones).into(ivProduct);
+            }
+        }
+
+        String status = String.valueOf(data.get("order_status"));
+        updateStepper(status);
+
+        // Cancellation Logic
+        if (status != null && (status.equalsIgnoreCase("Pending") || status.equalsIgnoreCase("Confirmed"))) {
+            btnCancelOrder.setVisibility(View.VISIBLE);
+            btnCancelOrder.setOnClickListener(v -> showCancelReasonDialog());
+        } else {
+            btnCancelOrder.setVisibility(View.GONE);
+        }
+
+        // Replacement Logic
+        if (status != null && status.equalsIgnoreCase("Delivered")) {
+            btnReplaceProduct.setVisibility(View.VISIBLE);
+            btnReplaceProduct.setOnClickListener(v -> showReplacementReasonDialog());
+        } else {
+            btnReplaceProduct.setVisibility(View.GONE);
         }
     }
 

@@ -32,6 +32,13 @@ public interface SupabaseAuthService {
         @Body AuthModels.IdTokenRequest request
     );
 
+    @POST("auth/v1/recover")
+    Call<Void> recover(
+        @Header("apikey") String apiKey,
+        @Header("Authorization") String authHeader,
+        @Body AuthModels.RecoverRequest request
+    );
+
     @POST("auth/v1/token?grant_type=refresh_token")
     Call<AuthModels.AuthResponse> refreshToken(
         @Header("apikey") String apiKey,
